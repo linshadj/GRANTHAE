@@ -1,0 +1,94 @@
+<div class="space-y-6">
+    <!-- Header Actions -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-apple-dark">Coupons</h1>
+            <p class="text-apple-text-gray text-sm">Manage coupon codes and redemptions.</p>
+        </div>
+        <button
+            class="bg-apple-gold text-apple-gray px-4 py-2 rounded-lg font-bold text-sm shadow-lg shadow-apple-gold/20 hover:brightness-110 transition-all flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add Coupon
+        </button>
+    </div>
+
+    <!-- Coupons Table -->
+    <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h3 class="font-bold text-lg text-apple-dark">Active Coupons</h3>
+            <div class="relative">
+                <i data-lucide="search"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray"></i>
+                <input type="text" placeholder="Search Code..."
+                    class="pl-9 pr-4 py-2 text-xs bg-white/5 border border-white/5 rounded-lg focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-apple-dark placeholder-apple-text-gray/50">
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-white/5">
+                    <tr class="text-left text-xs font-bold text-apple-text-gray uppercase tracking-wider">
+                        <th class="px-6 py-4">Code</th>
+                        <th class="px-6 py-4">Discount Amount</th>
+                        <th class="px-6 py-4">Usage Limit</th>
+                        <th class="px-6 py-4">Expires</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <tr class="group hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4">
+                            <span
+                                class="font-mono font-bold text-apple-blue bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20">WELCOME10</span>
+                        </td>
+                        <td class="px-6 py-4 font-bold text-apple-dark">$10.00</td>
+                        <td class="px-6 py-4 text-apple-text-gray">
+                            150 / 500
+                        </td>
+                        <td class="px-6 py-4 text-apple-text-gray">Dec 31, 2026</td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400">Active</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2">
+                                <button class="text-apple-text-gray hover:text-apple-gold transition-colors">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button class="text-apple-text-gray hover:text-red-400 transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="group hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4">
+                            <span
+                                class="font-mono font-bold text-apple-text-gray bg-gray-500/10 px-2 py-1 rounded border border-gray-500/20">FREESHIP</span>
+                        </td>
+                        <td class="px-6 py-4 font-bold text-apple-dark">Free Shipping</td>
+                        <td class="px-6 py-4 text-apple-text-gray">
+                            1000 / 1000
+                        </td>
+                        <td class="px-6 py-4 text-apple-text-gray">Nov 01, 2026</td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-gray-500/10 text-gray-400">Used
+                                Up</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2">
+                                <button class="text-apple-text-gray hover:text-apple-gold transition-colors">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button class="text-apple-text-gray hover:text-red-400 transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

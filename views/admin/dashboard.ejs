@@ -1,0 +1,116 @@
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-apple-dark">Admin Overview</h1>
+            <p class="text-apple-text-gray text-sm">Platform performance and management.</p>
+        </div>
+        <div class="flex gap-2">
+            <button class="btn-outline flex items-center gap-2 text-xs">
+                <i data-lucide="download" class="w-4 h-4"></i> Export Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Admin Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-6 border-l-4 border-apple-blue">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Total Users</p>
+                    <h3 class="text-3xl font-bold text-apple-dark mt-2">2,543</h3>
+                    <p class="text-sm text-green-600 mt-1 flex items-center">
+                        <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i> +12% this month
+                    </p>
+                </div>
+                <div class="p-3 bg-blue-50/50 rounded-xl text-apple-blue">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 border-l-4 border-purple-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Active Rentals</p>
+                    <h3 class="text-3xl font-bold text-apple-dark mt-2">856</h3>
+                    <p class="text-sm text-green-600 mt-1 flex items-center">
+                        <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i> +5% this week
+                    </p>
+                </div>
+                <div class="p-3 bg-purple-50/50 rounded-xl text-purple-600">
+                    <i data-lucide="book-open-check" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 border-l-4 border-red-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Overdue Books</p>
+                    <h3 class="text-3xl font-bold text-apple-dark mt-2">42</h3>
+                    <p class="text-sm text-red-600 mt-1 flex items-center">
+                        <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i> Action needed
+                    </p>
+                </div>
+                <div class="p-3 bg-red-50/50 rounded-xl text-red-600">
+                    <i data-lucide="clock" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Table -->
+    <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h3 class="font-bold text-lg text-apple-dark">Active User Sessions</h3>
+            <div class="flex gap-2">
+                <button
+                    class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5">
+                    Filter: All
+                </button>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-white/5">
+                    <tr class="text-left text-xs font-bold text-apple-text-gray uppercase tracking-wider">
+                        <th class="px-6 py-4">User</th>
+                        <th class="px-6 py-4">Book</th>
+                        <th class="px-6 py-4">Session Start</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <% for(let i=0; i<5; i++) { %>
+                        <tr class="group hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-apple-blue/10 flex items-center justify-center text-xs font-bold text-apple-blue">
+                                        JD
+                                    </div>
+                                    <span class="font-medium text-apple-dark">John Doe</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-apple-text-gray">The Lean Startup</td>
+                            <td class="px-6 py-4 text-apple-text-gray">Today, 2:30 PM</td>
+                            <td class="px-6 py-4">
+                                <span
+                                    class="px-2 py-1 text-xs font-bold text-yellow-400 bg-yellow-500/10 rounded-lg">Active</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <button class="text-apple-text-gray hover:text-apple-gold transition-colors">
+                                        <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

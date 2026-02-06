@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= typeof title !=='undefined' ? title + ' | GRANTHAE' : 'GRANTHAE' %>
+    </title>
+    <link href="/css/style.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Marcellus&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Using Lucide for Icons -->
+</head>
+
+<body
+    class="bg-apple-gray text-apple-dark font-sans antialiased min-h-screen flex flex-col relative selection:bg-apple-dark selection:text-apple-dark">
+
+
+    <%- include('../partials/background-doodles') %>
+
+        <%- include('../partials/header') %>
+
+            <main class="flex-grow animate-fade-in">
+                <%- body %>
+            </main>
+
+            <%- include('../partials/footer') %>
+
+                <script>
+                    lucide.createIcons();
+                </script>
+</body>
+
+</html>

@@ -1,0 +1,90 @@
+<div class="space-y-8">
+    <!-- Categories -->
+    <div>
+        <h3 class="text-sm font-semibold text-apple-dark mb-4 uppercase tracking-wider">Genres</h3>
+        <div class="space-y-3">
+            <label class="flex items-center group cursor-pointer">
+                <input type="checkbox"
+                    class="w-4 h-4 rounded border-gray-300 text-apple-dark focus:ring-apple-dark transition-all">
+                <span
+                    class="ml-3 text-sm text-apple-text-gray group-hover:text-apple-dark transition-colors">Fiction</span>
+            </label>
+            <label class="flex items-center group cursor-pointer">
+                <input type="checkbox"
+                    class="w-4 h-4 rounded border-gray-300 text-apple-dark focus:ring-apple-dark transition-all">
+                <span
+                    class="ml-3 text-sm text-apple-text-gray group-hover:text-apple-dark transition-colors">Non-Fiction</span>
+            </label>
+            <label class="flex items-center group cursor-pointer">
+                <input type="checkbox"
+                    class="w-4 h-4 rounded border-gray-300 text-apple-dark focus:ring-apple-dark transition-all">
+                <span
+                    class="ml-3 text-sm text-apple-text-gray group-hover:text-apple-dark transition-colors">Technology</span>
+            </label>
+            <label class="flex items-center group cursor-pointer">
+                <input type="checkbox"
+                    class="w-4 h-4 rounded border-gray-300 text-apple-dark focus:ring-apple-dark transition-all">
+                <span
+                    class="ml-3 text-sm text-apple-text-gray group-hover:text-apple-dark transition-colors">Sci-Fi</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="h-px bg-gray-200"></div>
+
+    <!-- Rating -->
+    <div>
+        <h3 class="text-sm font-semibold text-apple-dark mb-4 uppercase tracking-wider">Rating</h3>
+        <div class="space-y-3">
+            <label class="flex items-center group cursor-pointer">
+                <input type="radio" name="rating" class="w-4 h-4 border-gray-300 text-apple-dark focus:ring-apple-dark">
+                <div class="ml-3 flex items-center">
+                    <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                    <span class="ml-1 text-sm text-apple-text-gray group-hover:text-apple-dark">4★ & above</span>
+                </div>
+            </label>
+            <label class="flex items-center group cursor-pointer">
+                <input type="radio" name="rating" class="w-4 h-4 border-gray-300 text-apple-dark focus:ring-apple-dark">
+                <div class="ml-3 flex items-center">
+                    <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                    <span class="ml-1 text-sm text-apple-text-gray group-hover:text-apple-dark">3★ & above</span>
+                </div>
+            </label>
+        </div>
+    </div>
+
+    <!-- Price Range -->
+    <div>
+        <h3 class="text-sm font-semibold text-apple-dark mb-4 uppercase tracking-wider">Price / Day</h3>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between text-sm text-apple-text-gray">
+                <span>$0</span>
+                <span>$100</span>
+            </div>
+            <input type="range"
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-apple-dark">
+        </div>
+        <!-- Sort By -->
+        <div class="h-px bg-gray-200 my-8"></div>
+        <div>
+            <h3 class="text-sm font-semibold text-apple-dark mb-4 uppercase tracking-wider">Sort By</h3>
+            <div class="space-y-2">
+                <a href="?sort=popular"
+                    class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors <%= (!query.sort || query.sort === 'popular') ? 'bg-apple-dark text-white' : 'text-apple-text-gray hover:bg-gray-50' %>">
+                    Most Popular
+                </a>
+                <a href="?sort=newest"
+                    class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors <%= query.sort === 'newest' ? 'bg-apple-dark text-white' : 'text-apple-text-gray hover:bg-gray-50' %>">
+                    Newest Arrivals
+                </a>
+                <a href="?sort=price_asc"
+                    class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors <%= query.sort === 'price_asc' ? 'bg-apple-dark text-white' : 'text-apple-text-gray hover:bg-gray-50' %>">
+                    Price: Low to High
+                </a>
+                <a href="?sort=price_desc"
+                    class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors <%= query.sort === 'price_desc' ? 'bg-apple-dark text-white' : 'text-apple-text-gray hover:bg-gray-50' %>">
+                    Price: High to Low
+                </a>
+            </div>
+        </div>

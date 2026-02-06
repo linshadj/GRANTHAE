@@ -1,0 +1,44 @@
+{
+  "name": "granthae-lc",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/linshadj/GRANTHAE#readme",
+  "bugs": {
+    "url": "https://github.com/linshadj/GRANTHAE/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/linshadj/GRANTHAE.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "tailwindcss -i ./public/css/input.css -o ./public/css/style.css --watch",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.2",
+    "mongoose": "^9.1.5",
+    "nodemailer": "^7.0.13",
+    "otp-generator": "^4.0.1",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "url": "^0.11.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.18",
+    "autoprefixer": "^10.4.23",
+    "nodemon": "^3.1.11",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18"
+  }
+}

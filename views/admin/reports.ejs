@@ -1,0 +1,171 @@
+<div class="space-y-8">
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-apple-card border border-white/5 p-6 rounded-2xl">
+            <div class="flex justify-between">
+                <div>
+                    <p class="text-xs font-bold text-apple-text-gray uppercase tracking-widest">Revenue</p>
+                    <h3 class="text-2xl font-bold text-apple-dark mt-1">$12,450</h3>
+                </div>
+                <i data-lucide="dollar-sign" class="w-5 h-5 text-apple-gold"></i>
+            </div>
+            <div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                <div class="h-full bg-apple-gold w-3/4"></div>
+            </div>
+        </div>
+        <div class="bg-apple-card border border-white/5 p-6 rounded-2xl">
+            <div class="flex justify-between">
+                <div>
+                    <p class="text-xs font-bold text-apple-text-gray uppercase tracking-widest">Rentals</p>
+                    <h3 class="text-2xl font-bold text-apple-dark mt-1">1,204</h3>
+                </div>
+                <i data-lucide="book-open" class="w-5 h-5 text-apple-blue"></i>
+            </div>
+            <div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                <div class="h-full bg-apple-blue w-1/2"></div>
+            </div>
+        </div>
+        <div class="bg-apple-card border border-white/5 p-6 rounded-2xl">
+            <div class="flex justify-between">
+                <div>
+                    <p class="text-xs font-bold text-apple-text-gray uppercase tracking-widest">New Users</p>
+                    <h3 class="text-2xl font-bold text-apple-dark mt-1">340</h3>
+                </div>
+                <i data-lucide="users" class="w-5 h-5 text-purple-400"></i>
+            </div>
+            <div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                <div class="h-full bg-purple-400 w-2/3"></div>
+            </div>
+        </div>
+        <div class="bg-apple-card border border-white/5 p-6 rounded-2xl">
+            <div class="flex justify-between">
+                <div>
+                    <p class="text-xs font-bold text-apple-text-gray uppercase tracking-widest">Satisfaction</p>
+                    <h3 class="text-2xl font-bold text-apple-dark mt-1">98%</h3>
+                </div>
+                <i data-lucide="heart" class="w-5 h-5 text-red-400"></i>
+            </div>
+            <div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                <div class="h-full bg-red-400 w-[98%]"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generated Reports List -->
+    <div class="bg-apple-card border border-white/5 rounded-2xl overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex justify-between items-center">
+            <div class="flex flex-col sm:flex-row gap-4 items-center">
+                <h3 class="text-lg font-bold text-apple-dark font-serif">System Reports</h3>
+            </div>
+        </div>
+
+        <!-- Filter / Generate Section -->
+        <div class="p-6 border-b border-white/5 space-y-4">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Date Range (Expanded) -->
+                <div class="lg:col-span-5 w-full">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Date
+                        Range</label>
+                    <div class="flex items-center gap-2">
+                        <input type="date"
+                            class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:ring-2 focus:ring-apple-gold/20 outline-none">
+                        <span class="text-gray-400">-</span>
+                        <input type="date"
+                            class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:ring-2 focus:ring-apple-gold/20 outline-none">
+                    </div>
+                </div>
+
+                <!-- Report Type -->
+                <div class="lg:col-span-3 w-full">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Report
+                        Type</label>
+                    <select
+                        class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:ring-2 focus:ring-apple-gold/20 outline-none appearance-none">
+                        <option class="text-black">Sales Revenue</option>
+                        <option class="text-black">Rental History</option>
+                        <option class="text-black">User Registrations</option>
+                        <option class="text-black">Inventory Levels</option>
+                    </select>
+                </div>
+
+                <!-- Format -->
+                <div class="lg:col-span-2 w-full">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Format</label>
+                    <select
+                        class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:ring-2 focus:ring-apple-gold/20 outline-none appearance-none">
+                        <option class="text-black">PDF Document</option>
+                        <option class="text-black">Excel Spreadsheet</option>
+                        <option class="text-black">CSV Raw Data</option>
+                    </select>
+                </div>
+
+                <!-- Generate Button -->
+                <div class="lg:col-span-2 flex items-end w-full">
+                    <button
+                        class="w-full px-4 py-2 bg-apple-gold text-black text-sm font-bold rounded-lg hover:brightness-110 transition-all shadow-lg flex items-center justify-center gap-2 h-[38px] whitespace-nowrap">
+                        <i data-lucide="bar-chart-2" class="w-4 h-4"></i> Generate
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-white/5 text-xs text-apple-text-gray uppercase tracking-wider">
+                    <tr>
+                        <th class="px-6 py-4">Report Name</th>
+                        <th class="px-6 py-4">Date Generated</th>
+                        <th class="px-6 py-4">Type</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Download</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <tr class="group hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                                </div>
+                                <span class="font-medium text-apple-dark">Monthly Revenue Statement</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-apple-text-gray">Dec 01, 2026</td>
+                        <td class="px-6 py-4 text-sm text-apple-text-gray">Financial</td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="px-2 py-1 text-xs font-bold text-green-400 bg-green-500/10 rounded-full">Ready</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button class="text-apple-text-gray hover:text-apple-gold transition-colors">
+                                <i data-lucide="download" class="w-5 h-5"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="group hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                                    <i data-lucide="users" class="w-4 h-4"></i>
+                                </div>
+                                <span class="font-medium text-apple-dark">User Activity Log</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-apple-text-gray">Nov 28, 2026</td>
+                        <td class="px-6 py-4 text-sm text-apple-text-gray">Audit</td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="px-2 py-1 text-xs font-bold text-green-400 bg-green-500/10 rounded-full">Ready</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button class="text-apple-text-gray hover:text-apple-gold transition-colors">
+                                <i data-lucide="download" class="w-5 h-5"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

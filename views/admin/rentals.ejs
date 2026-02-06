@@ -1,0 +1,55 @@
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-apple-dark">Rental Management</h1>
+    </div>
+
+    <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h3 class="font-bold text-lg text-apple-dark">All Rentals</h3>
+            <div class="flex gap-2">
+                <button
+                    class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5">
+                    Filter: Active
+                </button>
+                <div class="relative">
+                    <i data-lucide="search"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray"></i>
+                    <input type="text" placeholder="Search Rentals..."
+                        class="pl-9 pr-4 py-2 text-xs bg-white/5 border border-white/5 rounded-lg focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-apple-dark placeholder-apple-text-gray/50">
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-white/5">
+                    <tr class="text-left text-xs font-bold text-apple-text-gray uppercase tracking-wider">
+                        <th class="px-6 py-4">Book</th>
+                        <th class="px-6 py-4">Renter</th>
+                        <th class="px-6 py-4">Owner</th>
+                        <th class="px-6 py-4">Duration</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <tr class="group hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4 font-medium text-apple-dark">The Psychology of Money</td>
+                        <td class="px-6 py-4 text-apple-text-gray">John Doe</td>
+                        <td class="px-6 py-4 text-apple-text-gray">Sarah S.</td>
+                        <td class="px-6 py-4 text-apple-text-gray">7 Days</td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400">Active</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button class="text-apple-text-gray hover:text-apple-gold transition-colors">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

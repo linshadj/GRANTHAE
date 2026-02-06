@@ -1,0 +1,164 @@
+<form action="/dashboard" method="GET" class="space-y-6">
+  <div>
+    <label for="email" class="block text-sm font-medium text-apple-dark">Email address</label>
+    <div class="mt-1 relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <i data-lucide="mail" class="h-5 w-5 text-gray-400"></i>
+      </div>
+      <input
+        type="email"
+        name="email"
+        id="email"
+        class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-apple-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/50 focus:border-apple-blue transition-shadow sm:text-sm"
+        placeholder="you@example.com"
+      />
+    </div>
+    <p id="emailError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
+  </div>
+
+  <div>
+    <label for="password" class="block text-sm font-medium text-apple-dark">Password</label>
+    <div class="mt-1 relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <i data-lucide="lock" class="h-5 w-5 text-gray-400"></i>
+      </div>
+      <input
+        type="password"
+        name="password"
+        id="password"
+        class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-apple-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/50 focus:border-apple-blue transition-shadow sm:text-sm"
+        placeholder="••••••••"
+      />
+    </div>
+    <div class="flex items-center justify-end mt-1">
+      <a
+        href="/forgot-password"
+        class="relative z-20 text-xs font-medium text-apple-blue hover:text-apple-dark"
+        >Forgot password?</a
+      >
+    </div>
+    <p id="passwordError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
+  </div>
+
+  <p id="backendError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
+
+  <button
+    id="submitButton"
+    type="submit"
+    class="w-full btn-primary flex justify-center py-3 shadow-lg shadow-apple-blue/20"
+  >
+    Sign In
+  </button>
+
+  <div class="my-6 flex items-center justify-center gap-4">
+    <div class="h-px bg-gray-300 flex-1"></div>
+    <span class="text-xs text-apple-text-gray uppercase tracking-widest">Or continue with</span>
+    <div class="h-px bg-gray-300 flex-1"></div>
+  </div>
+
+  <div class="grid gap-3">
+    <a
+      href="/auth/google"
+      class="relative z-20 flex items-center justify-center py-2.5 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors"
+    >
+      <img
+        src="https://www.svgrepo.com/show/475656/google-color.svg"
+        class="h-5 w-5"
+        alt="Google"
+      />
+    </a>
+  </div>
+
+  <p class="mt-6 text-center text-sm text-apple-text-gray">
+    Don't have an account?
+    <a href="/sign-up" class="relative z-20 font-medium text-apple-blue hover:text-apple-dark"
+      >Sign up</a
+    >
+  </p>
+</form>
+
+<script>
+  const form = document.querySelector("form");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const backendError = document.getElementById("backendError");
+  const submitButton = document.getElementById("submitButton");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    submitButton.disabled = true;
+    submitButton.classList.add("opacity-50", "cursor-not-allowed");
+    submitButton.textContent = "Signing in...";
+
+    let isValid = true;
+
+    // Email Validation
+    if (email.value.trim() === "") {
+      resetSubmitButton();
+      isValid = false;
+      emailError.classList.remove("hidden");
+      emailError.textContent = "Email is required.";
+    } else if (!validateEmail(email.value.trim())) {
+      resetSubmitButton();
+      isValid = false;
+      emailError.classList.remove("hidden");
+      emailError.textContent = "Please enter a valid email address.";
+    } else {
+      emailError.classList.add("hidden");
+    }
+
+    // Password Validation
+    if (password.value.trim() === "") {
+      resetSubmitButton();
+      isValid = false;
+      passwordError.classList.remove("hidden");
+      passwordError.textContent = "Password is required.";
+    } else {
+      passwordError.classList.add("hidden");
+    }
+
+    if (isValid) {
+      try {
+        const res = await fetch("/sign-in", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email.value.trim(),
+            password: password.value.trim(),
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          window.location.href = data.redirectUrl;
+        } else {
+          resetSubmitButton();
+          backendError.classList.remove("hidden");
+          backendError.textContent = data.message;
+        }
+      } catch (error) {
+        console.log("Error in signIn fetch:", error);
+        resetSubmitButton();
+        backendError.classList.remove("hidden");
+        backendError.textContent = error;
+      }
+    }
+  });
+
+  function validateEmail(email) {
+    const emailRegex = /^[^/\s@]+@[^/\s@]+\.[^/\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  // enable button function
+  function resetSubmitButton() {
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = false;
+    submitButton.classList.remove("opacity-50", "cursor-not-allowed");
+    submitButton.textContent = "Create Account";
+  }
+</script>

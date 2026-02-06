@@ -1,0 +1,96 @@
+<div class="space-y-6">
+    <!-- Header Actions -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-apple-dark">Orders</h1>
+            <p class="text-apple-text-gray text-sm">Manage customer orders and shipments.</p>
+        </div>
+        <div class="flex gap-2">
+            <button
+                class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5">
+                Export CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h3 class="font-bold text-lg text-apple-dark">Recent Orders</h3>
+            <div class="flex gap-2">
+                <div class="relative">
+                    <i data-lucide="search"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray"></i>
+                    <input type="text" placeholder="Search Orders..."
+                        class="pl-9 pr-4 py-2 text-xs bg-white/5 border border-white/5 rounded-lg focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-apple-dark placeholder-apple-text-gray/50">
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-white/5">
+                    <tr class="text-left text-xs font-bold text-apple-text-gray uppercase tracking-wider">
+                        <th class="px-6 py-4">Order ID</th>
+                        <th class="px-6 py-4">Customer</th>
+                        <th class="px-6 py-4">Date</th>
+                        <th class="px-6 py-4">Items</th>
+                        <th class="px-6 py-4">Total</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <tr class="group hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4 font-mono text-apple-text-gray text-xs">#ORD-7728</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-apple-blue/20 flex items-center justify-center text-xs text-apple-blue font-bold">
+                                    JD</div>
+                                <span class="text-apple-dark font-medium">John Doe</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-apple-text-gray">Oct 24, 2026</td>
+                        <td class="px-6 py-4 text-apple-text-gray">2 Items</td>
+                        <td class="px-6 py-4 font-bold text-apple-dark">$45.00</td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-yellow-500/10 text-yellow-500">Pending</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="/admin/orders/7728"
+                                class="text-apple-blue hover:text-apple-dark text-xs font-bold transition-colors">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    <tr class="group hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4 font-mono text-apple-text-gray text-xs">#ORD-7729</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-xs text-purple-500 font-bold">
+                                    AS</div>
+                                <span class="text-apple-dark font-medium">Alice Smith</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-apple-text-gray">Oct 23, 2026</td>
+                        <td class="px-6 py-4 text-apple-text-gray">1 Item</td>
+                        <td class="px-6 py-4 font-bold text-apple-dark">$15.50</td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400">Shipped</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="/admin/orders/7729"
+                                class="text-apple-blue hover:text-apple-dark text-xs font-bold transition-colors">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

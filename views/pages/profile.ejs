@@ -1,0 +1,188 @@
+<div class="max-w-3xl mx-auto space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-apple-dark">My Profile</h1>
+            <p class="text-apple-text-gray/80 text-sm">Manage your personal information and public profile.</p>
+        </div>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="glass-card p-8 relative overflow-hidden">
+        <!-- Edit Button (Link to separate page) -->
+        <div class="flex flex-col md:flex-row gap-8 items-start">
+            <!-- Avatar -->
+            <div class="flex-shrink-0 text-center space-y-4">
+                <div class="relative">
+                    <div
+                        class="w-32 h-32 rounded-full bg-apple-blue/20 flex items-center justify-center text-4xl text-apple-blue font-bold mx-auto border-4 border-white/5">
+                        L
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-grow w-full space-y-6">
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-3">
+                    <a href="/profile/edit"
+                        class="relative z-20 text-sm font-medium text-apple-blue hover:text-apple-dark transition-colors flex items-center gap-2">
+                        <i data-lucide="edit-2" class="w-4 h-4"></i> Edit Profile
+                    </a>
+                </div>
+                <!-- VIEW MODE ONLY -->
+                <div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <span
+                                class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">First
+                                Name</span>
+                            <p class="text-apple-dark font-medium text-lg">Linshad</p>
+                        </div>
+                        <div>
+                            <span
+                                class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">Last
+                                Name</span>
+                            <p class="text-apple-dark font-medium text-lg">User</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <span
+                                class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">Email
+                                Address</span>
+                            <p class="text-apple-dark font-medium text-lg">linshad@example.com</p>
+                        </div>
+                        <div>
+                            <span
+                                class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">Username</span>
+                            <p class="text-apple-dark font-medium text-lg">linshad_user</p>
+                        </div>
+                    </div>
+                    <div>
+                        <span
+                            class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">Bio</span>
+                        <p class="text-apple-text-gray italic">No bio added yet.</p>
+                    </div>
+                </div>
+
+                <!-- Addresses Section -->
+                <div class="pt-6 border-t border-white/10 relative z-20">
+                    <h3 class="text-sm font-bold text-apple-text-gray uppercase tracking-wider mb-4">Saved Addresses
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Address Card 1 -->
+                        <div onclick="openViewAddressModal('Home', '123 Library Avenue, Knowledge District, New York, NY 10001', '+1 (555) 123-4567')"
+                            class="bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer hover:border-apple-gold/50 transition-colors group relative z-20">
+                            <div class="flex justify-between items-start mb-2">
+                                <span
+                                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-apple-gold/20 text-apple-gold uppercase tracking-wider">Home</span>
+                                <i data-lucide="maximize-2"
+                                    class="w-4 h-4 text-apple-text-gray opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            </div>
+                            <p class="text-apple-dark text-sm leading-relaxed">
+                                123 Library Avenue,<br>
+                                Knowledge District,<br>
+                                New York, NY 10001
+                            </p>
+                            <p class="text-xs text-apple-text-gray mt-2">+1 (555) 123-4567</p>
+                        </div>
+
+                        <!-- Address Card 2 -->
+                        <div onclick="openViewAddressModal('Work', '456 Corporate Blvd, Suite 500, San Francisco, CA 94105', '+1 (555) 987-6543')"
+                            class="bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer hover:border-apple-gold/50 transition-colors group relative z-20">
+                            <div class="flex justify-between items-start mb-2">
+                                <span
+                                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-apple-text-gray/20 text-apple-text-gray uppercase tracking-wider">Work</span>
+                                <i data-lucide="maximize-2"
+                                    class="w-4 h-4 text-apple-text-gray opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            </div>
+                            <p class="text-apple-dark text-sm leading-relaxed">
+                                456 Corporate Blvd,<br>
+                                Suite 500,<br>
+                                San Francisco, CA 94105
+                            </p>
+                            <p class="text-xs text-apple-text-gray mt-2">+1 (555) 987-6543</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Address Modal -->
+<div id="view-address-modal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0" id="view-modal-backdrop">
+    </div>
+
+    <!-- Modal Content -->
+    <div class="absolute inset-x-4 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 max-w-md w-full bg-[#fbfbfd] sm:rounded-2xl rounded-t-2xl shadow-2xl transform transition-all translate-y-full sm:translate-y-10 opacity-0"
+        id="view-modal-panel">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg font-bold text-apple-dark font-serif">Address Details</h3>
+            <button type="button" onclick="closeViewAddressModal()" class="text-gray-400 hover:text-gray-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="p-8 text-center space-y-4">
+            <div id="view-address-badge"
+                class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2"></div>
+            <div class="p-4 bg-white border border-gray-200 rounded-xl">
+                <p id="view-address-text" class="text-apple-dark font-medium leading-relaxed"></p>
+            </div>
+            <p id="view-address-phone" class="text-apple-text-gray text-sm"></p>
+        </div>
+
+        <div class="p-6 border-t border-gray-200 bg-gray-50 sm:rounded-b-2xl">
+            <button type="button" onclick="closeViewAddressModal()" class="w-full btn-primary">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const viewModal = document.getElementById('view-address-modal');
+    const viewBackdrop = document.getElementById('view-modal-backdrop');
+    const viewPanel = document.getElementById('view-modal-panel');
+    const viewBadge = document.getElementById('view-address-badge');
+    const viewText = document.getElementById('view-address-text');
+    const viewPhone = document.getElementById('view-address-phone');
+
+    function openViewAddressModal(type, address, phone) {
+        // Set content
+        viewText.textContent = address;
+        viewPhone.textContent = phone;
+        viewBadge.textContent = type;
+
+        // Style badge based on type
+        if (type === 'Home') {
+            viewBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 bg-apple-gold/20 text-apple-gold';
+        } else {
+            viewBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 bg-apple-text-gray/20 text-apple-text-gray';
+        }
+
+        if (!viewModal) return;
+        viewModal.classList.remove('hidden');
+        setTimeout(() => {
+            viewBackdrop.classList.remove('opacity-0');
+            viewPanel.classList.remove('translate-y-full', 'opacity-0', 'sm:translate-y-10');
+        }, 10);
+    }
+
+    function closeViewAddressModal() {
+        if (!viewModal) return;
+        viewBackdrop.classList.add('opacity-0');
+        viewPanel.classList.add('translate-y-full', 'opacity-0', 'sm:translate-y-10');
+        setTimeout(() => {
+            viewModal.classList.add('hidden');
+        }, 300);
+    }
+
+    if (viewBackdrop) {
+        viewBackdrop.addEventListener('click', closeViewAddressModal);
+    }
+</script>

@@ -1,0 +1,260 @@
+<div class="text-center mb-8">
+  <h1 class="text-3xl font-bold font-serif text-apple-dark mb-2">Check Your Email</h1>
+  <p class="text-apple-text-gray">
+    We sent a 6-digit code to your email. Enter it below to verify your identity.
+  </p>
+</div>
+
+<form class="space-y-6" action="/set-new-password" method="POST">
+  <div>
+    <label class="block text-sm font-medium text-apple-text-gray mb-3 text-center"
+      >Verification Code</label
+    >
+    <div class="flex justify-center gap-2">
+      <input
+        type="tel"
+        maxlength="1"
+        pattern="[0-9]*"
+        inputmode="numeric"
+        class="w-12 h-14 text-center text-2xl font-bold bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-apple-gold/50 focus:border-apple-gold outline-none transition-all text-apple-dark relative z-20"
+        autofocus
+      />
+      <input
+        type="tel"
+        maxlength="1"
+        pattern="[0-9]*"
+        inputmode="numeric"
+        class="w-12 h-14 text-center text-2xl font-bold bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-apple-gold/50 focus:border-apple-gold outline-none transition-all text-apple-dark relative z-20"
+      />
+      <input
+        type="tel"
+        maxlength="1"
+        pattern="[0-9]*"
+        inputmode="numeric"
+        class="w-12 h-14 text-center text-2xl font-bold bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-apple-gold/50 focus:border-apple-gold outline-none transition-all text-apple-dark relative z-20"
+      />
+      <input
+        type="tel"
+        maxlength="1"
+        pattern="[0-9]*"
+        inputmode="numeric"
+        class="w-12 h-14 text-center text-2xl font-bold bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-apple-gold/50 focus:border-apple-gold outline-none transition-all text-apple-dark relative z-20"
+      />
+      <input
+        type="tel"
+        maxlength="1"
+        pattern="[0-9]*"
+        inputmode="numeric"
+        class="w-12 h-14 text-center text-2xl font-bold bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-apple-gold/50 focus:border-apple-gold outline-none transition-all text-apple-dark relative z-20"
+      />
+      <input
+        type="tel"
+        maxlength="1"
+        pattern="[0-9]*"
+        inputmode="numeric"
+        class="w-12 h-14 text-center text-2xl font-bold bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-apple-gold/50 focus:border-apple-gold outline-none transition-all text-apple-dark relative z-20"
+      />
+    </div>
+  </div>
+  <p id="otpError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
+
+  <div class="text-center">
+    <p id="timerText" class="text-sm text-apple-text-gray mb-4">
+      Code expires in <span id="timer" class="font-bold text-apple-dark">04:59</span>
+    </p>
+    <button
+      type="submit"
+      id="submitButton"
+      class="w-full btn-primary py-3.5 shadow-lg shadow-apple-gold/20"
+    >
+      Verify & Proceed
+    </button>
+  </div>
+</form>
+
+<p class="mt-8 text-center text-sm text-apple-text-gray">
+  Didn't receive the code?
+  <button
+    type="button"
+    id="resendBtn"
+    class="relative z-20 font-bold text-apple-dark hover:text-apple-gold cursor-pointer hover:underline decoration-apple-gold/10"
+  >
+    Resend Code
+  </button>
+</p>
+
+<script>
+  // Simple script to auto-focus next input
+  const inputs = document.querySelectorAll('input[type="tel"]');
+  const form = document.querySelector("form");
+  const submitButton = document.getElementById("submitButton");
+  const otpError = document.getElementById("otpError");
+
+  // resend otp timer
+  let timerEl = document.getElementById("timer");
+  const timerText = document.getElementById("timerText");
+  const resendBtn = document.getElementById("resendBtn");
+
+  const TOTAL_TIME = 60 * 5;
+  let timeLeft = TOTAL_TIME;
+  let timerInterval;
+  const originalText = resendBtn.textContent;
+
+  startTimer("Code expires in");
+
+  function startTimer(prefix = "Code expires in") {
+    clearInterval(timerInterval);
+    otpError.classList.add("hidden");
+    otpError.textContent = "";
+    timerText.classList.remove("text-red-500");
+
+    timeLeft = TOTAL_TIME;
+
+    renderTimerText(prefix);
+    updateUI();
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateUI();
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        timerText.classList.add("text-red-500");
+        timerText.textContent = "Code expired. Please resend.";
+        enableResend();
+      }
+    }, 1000);
+  }
+
+  function renderTimerText(prefix) {
+    timerText.innerHTML = `
+    ${prefix}
+    <span id="timer" class="font-bold text-apple-dark">00:00</span>
+  `;
+    timerEl = document.getElementById("timer"); // rebind!
+  }
+
+  function updateUI() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+
+    timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  }
+
+  function enableResend() {
+    resendBtn.disabled = false;
+
+    resendBtn.classList.remove("text-gray-500", "cursor-not-allowed");
+    resendBtn.classList.add("text-apple-dark", "hover:text-apple-gold", "cursor-pointer");
+  }
+
+  resendBtn.addEventListener("click", async () => {
+    resendBtn.disabled = true;
+
+    resendBtn.classList.remove("text-apple-dark", "hover:text-apple-gold", "cursor-pointer");
+    resendBtn.classList.add("text-gray-500", "cursor-not-allowed");
+
+    startTimer("Resend OTP in");
+
+    try {
+      const res = await fetch("/resend-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      otpError.classList.remove("hidden");
+      if (data.success) {
+        otpError.textContent = data.message;
+        resendBtn.textContent = "Resend OTP";
+        otpError.style.color = "#4ade80"; // Green for success
+      } else {
+        otpError.classList.remove("hidden");
+        otpError.textContent = data.message;
+        otpError.style.color = "#f87171"; // Error Red
+        resendBtn.textContent = originalText;
+        resendBtn.disabled = false;
+      }
+    } catch (err) {
+      console.error("Resend Error:", err);
+      otpError.classList.remove("hidden");
+      otpError.style.color = "#f87171";
+      otpError.textContent = "Network error. Try again.";
+      resendBtn.textContent = originalText;
+      resendBtn.disabled = false;
+    }
+  });
+
+  resetSubmitButton();
+
+  let otp = "";
+
+  inputs.forEach((input, index) => {
+    input.addEventListener("input", (e) => {
+      input.value = input.value.replace(/[^0-9]/g, "");
+      otp = Array.from(inputs, (input) => input.value).join("");
+      if (input.value.length === 1 && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+      }
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && e.target.value.length === 0 && index > 0) {
+        inputs[index - 1].focus();
+      }
+    });
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    submitButton.classList.add("opacity-50", "cursor-not-allowed");
+    submitButton.textContent = "Verifying...";
+
+    let isValid = true;
+    if (otp.length < 6) {
+      resetSubmitButton();
+      isValid = false;
+      otpError.classList.remove("hidden");
+      otpError.textContent = "Please enter the complete 6-digit code.";
+    } else {
+      otpError.classList.add("hidden");
+    }
+
+    if (isValid) {
+      try {
+        const res = await fetch("/otp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            otp: otp,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = data.redirectUrl;
+        } else {
+          resetSubmitButton();
+          otpError.classList.remove("hidden");
+          otpError.textContent = data.message;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  });
+
+  // enable button function
+  function resetSubmitButton() {
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = false;
+    submitButton.classList.remove("opacity-50", "cursor-not-allowed");
+    submitButton.textContent = "Verify & Proceed";
+  }
+</script>

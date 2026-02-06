@@ -1,0 +1,103 @@
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-apple-dark">User Details</h1>
+            <p class="text-apple-text-gray/80 text-sm">Managing user: <span class="font-medium text-apple-dark">John
+                    Doe</span></p>
+        </div>
+        <div class="flex gap-3">
+            <button
+                class="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-medium transition-colors border border-red-200">
+                Block User
+            </button>
+            <button
+                class="px-4 py-2 bg-white border border-gray-200 text-apple-dark hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
+                Reset Password
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Info -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-4">
+                <div class="glass-card p-4 text-center">
+                    <div class="text-2xl font-bold text-apple-dark">12</div>
+                    <div class="text-xs text-apple-text-gray uppercase tracking-wider font-medium">Rentals</div>
+                </div>
+                <div class="glass-card p-4 text-center">
+                    <div class="text-2xl font-bold text-apple-dark">$450</div>
+                    <div class="text-xs text-apple-text-gray uppercase tracking-wider font-medium">Spent</div>
+                </div>
+                <div class="glass-card p-4 text-center">
+                    <div class="text-2xl font-bold text-green-500">Active</div>
+                    <div class="text-xs text-apple-text-gray uppercase tracking-wider font-medium">Status</div>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 space-y-6">
+                <h3 class="font-semibold text-apple-dark border-b border-gray-100 pb-2">Personal Information</h3>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <span class="block text-xs uppercase text-apple-text-gray font-bold mb-1">Full Name</span>
+                        <p class="text-apple-dark">John Doe</p>
+                    </div>
+                    <div>
+                        <span class="block text-xs uppercase text-apple-text-gray font-bold mb-1">Email</span>
+                        <p class="text-apple-dark">john.doe@example.com</p>
+                    </div>
+                    <div>
+                        <span class="block text-xs uppercase text-apple-text-gray font-bold mb-1">Phone</span>
+                        <p class="text-apple-dark">+1 (555) 123-4567</p>
+                    </div>
+                    <div>
+                        <span class="block text-xs uppercase text-apple-text-gray font-bold mb-1">Joined Date</span>
+                        <p class="text-apple-dark">Jan 15, 2023</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="glass-card overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <h3 class="font-semibold text-apple-dark">Recent Activity</h3>
+                </div>
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-apple-text-gray uppercase bg-gray-50/50">
+                        <tr>
+                            <th class="px-6 py-3">Action</th>
+                            <th class="px-6 py-3">Date</th>
+                            <th class="px-6 py-3">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr>
+                            <td class="px-6 py-4 font-medium text-apple-dark">Rented Book</td>
+                            <td class="px-6 py-4 text-apple-text-gray">2 hours ago</td>
+                            <td class="px-6 py-4">Steve Jobs (Walter Isaacson)</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 font-medium text-apple-dark">Login from New Device</td>
+                            <td class="px-6 py-4 text-apple-text-gray">Yesterday</td>
+                            <td class="px-6 py-4">MacBook Pro - San Francisco, CA</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <div class="glass-card p-6 flex flex-col items-center text-center">
+                <div
+                    class="w-24 h-24 rounded-full bg-apple-blue/10 flex items-center justify-center text-apple-blue font-bold text-2xl mb-4">
+                    JD
+                </div>
+                <h3 class="text-lg font-bold text-apple-dark">John Doe</h3>
+                <p class="text-apple-text-gray text-sm">Customer</p>
+            </div>
+        </div>
+    </div>
+</div>

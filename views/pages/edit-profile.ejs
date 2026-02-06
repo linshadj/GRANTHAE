@@ -1,0 +1,240 @@
+<div class="max-w-2xl mx-auto space-y-8">
+    <div class="flex items-center gap-2 text-sm text-apple-text-gray mb-1">
+        <a href="/profile" class="hover:text-apple-gold transition-colors">My Profile</a>
+        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        <span>Edit Profile</span>
+    </div>
+
+    <div class="glass-card p-8">
+        <h1 class="relative z-20 text-2xl font-bold text-apple-dark mb-6">Edit Profile</h1>
+
+        <form action="/profile" class="space-y-6">
+            <!-- Avatar Section -->
+            <div class="flex items-center gap-6 pb-6 border-b border-white/10">
+                <div class="relative group cursor-pointer">
+                    <div
+                        class="w-24 h-24 rounded-full bg-apple-blue/20 flex items-center justify-center text-3xl text-apple-blue font-bold border-4 border-white/5">
+                        L
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-apple-dark">Profile Photo</h3>
+                    <p class="text-xs text-apple-text-gray mb-3">Accepted file types: png, jpg.</p>
+                    <button type="button"
+                        class="text-xs font-bold text-apple-blue hover:text-apple-dark transition-colors border border-apple-blue/30 px-3 py-1.5 rounded-lg hover:bg-apple-blue/10">
+                        Upload New
+                    </button>
+                </div>
+            </div>
+
+            <!-- Inputs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">First
+                        Name</label>
+                    <input type="text" value="Linshad"
+                        class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">Last
+                        Name</label>
+                    <input type="text" value="User"
+                        class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">Email
+                        Address</label>
+                    <input type="email" value="linshad@example.com"
+                        class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all">
+                </div>
+                <div>
+                    <label
+                        class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">Username</label>
+                    <input type="text" value="linshad_user"
+                        class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">Bio</label>
+                <textarea rows="4" placeholder="Tell us a little about yourself..."
+                    class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all"></textarea>
+            </div>
+
+            <!-- Address Management -->
+            <div class="pt-6 border-t border-white/10 relative z-20">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-apple-dark">Saved Addresses</h3>
+                    <button type="button" onclick="openAddressModal()"
+                        class="text-xs font-bold text-apple-blue hover:text-apple-dark transition-colors border border-apple-blue/30 px-3 py-1.5 rounded-lg hover:bg-apple-blue/10">
+                        + Add New
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Address Item 1 -->
+                    <div
+                        class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-start justify-between group relative z-20">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span
+                                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-apple-gold/20 text-apple-gold uppercase tracking-wider">Home</span>
+                            </div>
+                            <p class="text-sm text-apple-dark">123 Library Avenue, New York, NY 10001</p>
+                        </div>
+                        <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button type="button"
+                                class="p-1.5 text-apple-text-gray hover:text-apple-blue transition-colors">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button type="button"
+                                class="p-1.5 text-apple-text-gray hover:text-red-400 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Address Item 2 -->
+                    <div
+                        class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-start justify-between group relative z-20">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span
+                                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-apple-text-gray/20 text-apple-text-gray uppercase tracking-wider">Work</span>
+                            </div>
+                            <p class="text-sm text-apple-dark">456 Corporate Blvd, San Francisco, CA 94105</p>
+                        </div>
+                        <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button type="button"
+                                class="p-1.5 text-apple-text-gray hover:text-apple-blue transition-colors">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button type="button"
+                                class="p-1.5 text-apple-text-gray hover:text-red-400 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
+                <a href="/profile"
+                    class="px-6 py-2.5 text-sm font-bold text-apple-text-gray hover:text-apple-dark transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="btn-primary">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Address Modal -->
+<div id="address-modal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0" id="modal-backdrop"></div>
+
+    <!-- Modal Content -->
+    <div class="absolute inset-x-4 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 max-w-lg w-full bg-[#fbfbfd] sm:rounded-2xl rounded-t-2xl shadow-2xl transform transition-all translate-y-full sm:translate-y-10 opacity-0"
+        id="modal-panel">
+        <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg font-bold text-apple-dark font-serif" id="modal-title">Add New Address</h3>
+            <button type="button" onclick="closeAddressModal()" class="text-gray-400 hover:text-gray-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Address Label</label>
+                <div class="flex gap-3">
+                    <button type="button"
+                        class="flex-1 py-2 border border-blue-500 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium">Home</button>
+                    <button type="button"
+                        class="flex-1 py-2 border border-gray-200 hover:border-gray-300 text-gray-600 rounded-lg text-sm font-medium">Work</button>
+                    <button type="button"
+                        class="flex-1 py-2 border border-gray-200 hover:border-gray-300 text-gray-600 rounded-lg text-sm font-medium">Other</button>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Street
+                    Address</label>
+                <input type="text" placeholder="123 Main St"
+                    class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-apple-dark focus:ring-2 focus:ring-apple-gold/50 focus:border-apple-gold outline-none">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">City</label>
+                    <input type="text" placeholder="New York"
+                        class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-apple-dark focus:ring-2 focus:ring-apple-gold/50 focus:border-apple-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">State</label>
+                    <input type="text" placeholder="NY"
+                        class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-apple-dark focus:ring-2 focus:ring-apple-gold/50 focus:border-apple-gold outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Zip Code</label>
+                    <input type="text" placeholder="10001"
+                        class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-apple-dark focus:ring-2 focus:ring-apple-gold/50 focus:border-apple-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Country</label>
+                    <input type="text" placeholder="United States"
+                        class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-apple-dark focus:ring-2 focus:ring-apple-gold/50 focus:border-apple-gold outline-none">
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 sm:rounded-b-2xl">
+            <button type="button" onclick="closeAddressModal()"
+                class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700">Cancel</button>
+            <button type="button" class="btn-primary">
+                Save Address
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('address-modal');
+    const backdrop = document.getElementById('modal-backdrop');
+    const panel = document.getElementById('modal-panel');
+
+    function openAddressModal() {
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            backdrop.classList.remove('opacity-0');
+            panel.classList.remove('translate-y-full', 'opacity-0', 'sm:translate-y-10');
+        }, 10);
+    }
+
+    function closeAddressModal() {
+        if (!modal) return;
+        backdrop.classList.add('opacity-0');
+        panel.classList.add('translate-y-full', 'opacity-0', 'sm:translate-y-10');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    if (backdrop) {
+        backdrop.addEventListener('click', closeAddressModal);
+    }
+</script>

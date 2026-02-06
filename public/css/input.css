@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-apple-gray text-apple-dark antialiased;
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(45, 138, 126, 0.05) 0%, transparent 20%),
+      radial-gradient(circle at 90% 80%, rgba(236, 179, 115, 0.03) 0%, transparent 20%);
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-apple-card/60 backdrop-blur-xl border-b border-white/5 shadow-lg;
+  }
+
+  .glass-card {
+    @apply bg-apple-card/40 backdrop-blur-md rounded-2xl border border-white/5 shadow-lg transition-all duration-500 hover:shadow-apple-blue/20 hover:border-apple-blue/30 hover:-translate-y-1 relative overflow-hidden;
+  }
+
+  .glass-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none;
+  }
+
+  .glass-card:hover::before {
+    @apply opacity-100;
+  }
+
+  .btn-primary {
+    @apply px-6 py-2.5 bg-gradient-to-tr from-[#e6cfa7] to-[#d4b08c] text-[#3a4b41] rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-[#e6cfa7]/30 hover:brightness-110 hover:-translate-y-0.5 active:scale-95 text-sm border border-white/10 relative overflow-hidden;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2.5 bg-white/5 text-white rounded-full font-medium transition-all duration-300 hover:bg-white/10 hover:border-white/10 border border-white/5 active:scale-95 text-sm backdrop-blur-sm;
+  }
+
+  .btn-outline {
+    @apply px-6 py-2.5 border border-white/10 text-white rounded-full font-medium transition-all duration-300 hover:border-apple-blue hover:text-apple-blue active:scale-95 text-sm;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400;
+  }
+
+  .input-dark {
+    @apply bg-apple-card/50 border border-white/10 text-white placeholder-gray-500 focus:border-apple-blue focus:ring-1 focus:ring-apple-blue rounded-lg px-4 py-2 transition-all duration-300;
+  }
+
+  .font-luxury {
+    font-family: 'Marcellus', serif;
+  }
+}

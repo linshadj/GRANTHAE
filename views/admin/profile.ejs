@@ -1,0 +1,104 @@
+<div class="max-w-4xl mx-auto space-y-8">
+    <!-- Profile Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-apple-dark">Admin Profile</h1>
+            <p class="text-apple-text-gray text-sm">Manage your account settings and security.</p>
+        </div>
+    </div>
+
+    <form class="space-y-8">
+        <!-- Personal Info Card -->
+        <div class="bg-apple-card border border-white/5 rounded-2xl p-8 shadow-sm">
+            <div class="flex flex-col md:flex-row gap-8 items-start">
+                <!-- Avatar Upload -->
+                <div class="flex-shrink-0">
+                    <div class="relative group cursor-pointer">
+                        <div
+                            class="w-24 h-24 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center text-2xl font-bold text-white border-4 border-white/10 shadow-lg">
+                            AD
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Fields -->
+                <div class="flex-grow w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <h3 class="font-bold text-lg text-apple-dark mb-1">Personal Information</h3>
+                        <p class="text-xs text-apple-text-gray mb-4">Update your public display information.</p>
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-apple-text-gray uppercase tracking-wider mb-2">First
+                            Name</label>
+                        <input type="text" value="Admin"
+                            class="w-full px-4 py-2.5 bg-apple-gray border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-apple-text-gray uppercase tracking-wider mb-2">Last
+                            Name</label>
+                        <input type="text" value="User"
+                            class="w-full px-4 py-2.5 bg-apple-gray border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label
+                            class="block text-xs font-semibold text-apple-text-gray uppercase tracking-wider mb-2">Email
+                            Address</label>
+                        <input type="email" value="admin@granthae.com"
+                            class="w-full px-4 py-2.5 bg-apple-gray border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Card -->
+        <div class="bg-apple-card border border-white/5 rounded-2xl p-8 shadow-sm">
+            <h3 class="font-bold text-lg text-apple-dark mb-1">Security</h3>
+            <p class="text-xs text-apple-text-gray mb-6">Manage your password and authentication.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-apple-text-gray uppercase tracking-wider mb-2">Current
+                        Password</label>
+                    <input type="password" placeholder="••••••••"
+                        class="w-full px-4 py-2.5 bg-apple-gray border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all">
+                </div>
+                <div class="hidden md:block">
+                    <!-- Spacing -->
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-apple-text-gray uppercase tracking-wider mb-2">New
+                        Password</label>
+                    <input type="password" placeholder="••••••••"
+                        class="w-full px-4 py-2.5 bg-apple-gray border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all">
+                </div>
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-apple-text-gray uppercase tracking-wider mb-2">Confirm
+                        Password</label>
+                    <input type="password" placeholder="••••••••"
+                        class="w-full px-4 py-2.5 bg-apple-gray border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all">
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="flex justify-end gap-3 pb-8">
+            <button type="button"
+                class="px-6 py-2.5 text-sm font-semibold text-apple-text-gray hover:text-apple-dark transition-colors">
+                Cancel
+            </button>
+            <button type="button"
+                class="px-8 py-2.5 bg-apple-gold text-apple-gray font-bold rounded-xl shadow-lg shadow-apple-gold/20 hover:brightness-110 hover:shadow-apple-gold/30 transition-all transform hover:-translate-y-0.5">
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
