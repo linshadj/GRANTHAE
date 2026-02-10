@@ -168,3 +168,19 @@ export const homePage = async (req, res) => {
   console.log(user);
   res.render("pages/home", { user });
 };
+
+export const logout = (req, res) => {
+  try {
+    req.session.destroy((error) => {
+      if(error) {
+        console.log(error)
+        return res.redirect("/profile?status=error&message=Failed to logout")
+      }
+      res.clearCookie("connect.sid")
+      return res.redirect("/sign-in?status=success&message=Successfully logged out")
+    })
+  } catch (error) {
+    console.log("Error in logout: ", error)
+    return res.status(500).json({success: false, message: "Failed to logout"})
+  }
+}
