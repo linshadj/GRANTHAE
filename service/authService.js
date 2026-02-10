@@ -55,22 +55,51 @@ export const signupVerify = async (userData) => {
 };
 
 export const otpValidator = async (email, otp) => {
-  const otpExists = await otpDb.findOne({ email });
+  const otpExists = await otpDb.findOne({ email }).sort({createdAt: -1});
   if (!otpExists) {
-    throw new Error("Otp does not exist");
+    throw new Error("OTP does not exist");
   }
   const isOtpMatching = otpExists.otp == otp;
   if (!isOtpMatching) {
-    throw new Error("Incorrect otp");
+    throw new Error("Incorrect OTP");
   }
 
   return true;
 };
 
 export const resendOtpService = async (firstName, email) => {
-    await otpCreator(firstName, email)
-    return {message: 'New OTP sent successfully'}
-} 
+  await otpCreator(firstName, email);
+  return { message: "New OTP sent successfully" };
+};
+
+export const forgotPassverify = async (email) => {
+  const user = await userDb.findOne({ email });
+  if (!user) {
+    throw new Error("Email has not been registered to a account yet.");
+  }
+
+  if (!user.password) {
+    throw new Error("This account is registered using google, Please login using google.");
+  }
+
+  await otpCreator(user.firstName, email);
+
+  return user.firstName;
+};
+
+export const updatePassword = async (email, newPassword) => {
+  const password = await bcrypt.hash(newPassword, 10);
+
+  const updatedUser = await userDb.findOneAndUpdate(
+    { email: email },
+    { password: password },
+    { new: true },
+  );
+  if (!updatedUser) {
+    throw new Error("Update failed. Cannot find user");
+  }
+  return true;
+};
 
 export const createNewUser = async (body) => {
   const hashedPass = await hashPass(body.password);
@@ -82,5 +111,3 @@ export const createNewUser = async (body) => {
   });
   return newUser._id;
 };
-
-

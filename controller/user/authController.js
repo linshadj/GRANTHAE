@@ -1,10 +1,12 @@
 import userDb from "../../models/userDb.js";
 import {
   createNewUser,
+  forgotPassverify,
   otpValidator,
   resendOtpService,
   signInVerify,
   signupVerify,
+  updatePassword,
 } from "../../service/authService.js";
 
 export const signIn = async (req, res) => {
@@ -52,22 +54,32 @@ export const otpPage = (req, res) => {
   res.render("pages/otp", { title: "OTP Verification", layout: "layouts/auth" });
 };
 
-export const verifyOtpData = async (req, res) => {
+export const otpHandler = async (req, res) => {
   try {
-    const tempUser = req.session.tempUser;
     const otp = req.body.otp;
-    if (!tempUser) {
-      return res.status(400).json({ success: false, message: "session expired" });
+    const { tempUser, forgotPassEmail } = req.session;
+    const email = tempUser?.email || forgotPassEmail;
+    if (!email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Session expired. Please login again" });
     }
     if (!otp) {
-      return res.status(400).json({ success: false, message: "otp not found" });
+      return res.status(400).json({ success: false, message: "OTP not found" });
     }
-    const isOtpValid = await otpValidator(tempUser.email, otp);
-    if (isOtpValid) {
+
+    await otpValidator(email, otp);
+
+    req.session.otpRequested = false;
+
+    if (tempUser) {
       const newUser = await createNewUser(tempUser);
       req.session.tempUser = null;
       req.session.user = newUser;
       return res.status(200).json({ success: true, redirectUrl: "/home" });
+    } else if (forgotPassEmail) {
+      req.session.canResetPass = true;
+      return res.status(200).json({ success: true, redirectUrl: "/reset-password" });
     }
   } catch (error) {
     console.log(error);
@@ -77,8 +89,8 @@ export const verifyOtpData = async (req, res) => {
 
 export const resendOtp = async (req, res) => {
   try {
-    const email = req.session.tempUser?.email;
-    const firstName = req.session.tempUser?.firstName;
+    const email = req.session.tempUser?.email || req.session.forgotPassEmail;
+    const firstName = req.session.tempUser?.firstName || req.session.firstName;
     if (!email) {
       return res
         .status(400)
@@ -97,6 +109,58 @@ export const resendOtp = async (req, res) => {
 
 export const forgotPassword = (req, res) => {
   res.render("pages/forgot-password", { title: "Forgot Password", layout: "layouts/auth" });
+};
+
+export const forgotPassData = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    req.session.tempUser = null;
+    req.session.forgotPassEmail = email;
+
+    const firstName = await forgotPassverify(email);
+
+    req.session.firstName = firstName;
+    req.session.otpRequested = true;
+
+    return res.status(200).json({ success: true, redirectUrl: "/otp" });
+  } catch (error) {
+    console.log("error in forgotPassData: ", error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const setNewPass = (req, res) => {
+  res.render("pages/reset-password", { title: "Set New Password", layout: "layouts/auth" });
+};
+
+export const setNewPassData = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    const email = req.session.forgotPassEmail;
+
+    if (!email || !newPassword) {
+      return res.status(403).json({
+        success: false,
+        message: "Session expired. Please redo again.",
+      });
+    }
+
+    await updatePassword(email, newPassword);
+
+    req.session.forgotPassEmail = null;
+    req.session.canResetPass = false;
+    req.session.otpRequested = false;
+
+    return res.status(200).json({ success: true , redirectUrl: "/password-changed"});
+  } catch (error) {
+    console.log('Error in resetPassData: ', error)
+    return res.status(500).json({success: false, message: error.message})
+  }
+};
+
+export const passwordChanged = (req, res) => {
+  res.render("pages/password-changed", { title: "Password Changed", layout: "layouts/auth" });
 }
 
 export const homePage = async (req, res) => {

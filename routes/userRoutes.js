@@ -2,12 +2,16 @@ import {
   signUp,
   signupData,
   otpPage,
-  verifyOtpData,
+  otpHandler,
   homePage,
   signIn,
   signInData,
   resendOtp,
   forgotPassword,
+  forgotPassData,
+  setNewPass,
+  setNewPassData,
+  passwordChanged,
 } from "../controller/user/authController.js";
 import express from "express";
 import {
@@ -15,6 +19,7 @@ import {
   googleAuthCallbackMiddleware,
   googleAuthSuccess,
 } from "../controller/user/googleAuthController.js";
+import { otpVerify, resetPassAuth } from "../middlewares/authMiddlewares.js";
 
 const router = express.Router();
 
@@ -33,12 +38,18 @@ router.post("/sign-up", signupData);
 router.get("/auth/google", googleAuth);
 router.get("/auth/google/callback", googleAuthCallbackMiddleware, googleAuthSuccess);
 
-router.get("/otp", otpPage);
-router.post("/otp", verifyOtpData);
+router.get("/otp", otpVerify, otpPage);
+router.post("/otp", otpVerify, otpHandler);
 
 router.post("/resend-otp", resendOtp);
 
-router.get("/forgot-password", forgotPassword);
+router.get("/forgot-password", forgotPassword)
+router.post("/forgot-password", forgotPassData);
+
+router.get("/reset-password", resetPassAuth, setNewPass)
+router.patch("/reset-password", resetPassAuth, setNewPassData)
+
+router.get("/password-changed", passwordChanged)
 
 router.get("/profile", (req, res) => {
   res.render("pages/profile", { title: "Profile", layout: "layouts/user-panel" });

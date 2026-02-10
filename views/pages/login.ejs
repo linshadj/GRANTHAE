@@ -1,4 +1,4 @@
-<form action="/dashboard" method="GET" class="space-y-6">
+<form action="/dashboard" method="GET" class="space-y-6" novalidate>
   <div>
     <label for="email" class="block text-sm font-medium text-apple-dark">Email address</label>
     <div class="mt-1 relative">
@@ -81,6 +81,8 @@
   const form = document.querySelector("form");
   const email = document.getElementById("email");
   const password = document.getElementById("password");
+  const emailError = document.getElementById("emailError")
+  const passwordError = document.getElementById("passwordError")
   const backendError = document.getElementById("backendError");
   const submitButton = document.getElementById("submitButton");
 

@@ -7,6 +7,6 @@ export const otpCreator = async (firstName, email) => {
     lowerCaseAlphabets: false,
     specialChars: false,
   });
-  console.log(firstName, "otpGen");
+  console.log(firstName, "otp Generated");
   await otpDb.create({ firstName, email, otp });
 };

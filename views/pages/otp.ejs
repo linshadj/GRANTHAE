@@ -5,7 +5,7 @@
   </p>
 </div>
 
-<form class="space-y-6" action="/set-new-password" method="POST">
+<form class="space-y-6" action="/reset-password" method="POST">
   <div>
     <label class="block text-sm font-medium text-apple-text-gray mb-3 text-center"
       >Verification Code</label
@@ -172,19 +172,17 @@
         resendBtn.textContent = "Resend OTP";
         otpError.style.color = "#4ade80"; // Green for success
       } else {
+        resetSubmitButton();
         otpError.classList.remove("hidden");
         otpError.textContent = data.message;
         otpError.style.color = "#f87171"; // Error Red
-        resendBtn.textContent = originalText;
-        resendBtn.disabled = false;
       }
     } catch (err) {
+      resetSubmitButton();
       console.error("Resend Error:", err);
       otpError.classList.remove("hidden");
       otpError.style.color = "#f87171";
       otpError.textContent = "Network error. Try again.";
-      resendBtn.textContent = originalText;
-      resendBtn.disabled = false;
     }
   });
 
@@ -243,6 +241,7 @@
           resetSubmitButton();
           otpError.classList.remove("hidden");
           otpError.textContent = data.message;
+          otpError.style.color = "#f87171";
         }
       } catch (error) {
         console.log(error);

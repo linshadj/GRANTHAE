@@ -155,12 +155,12 @@
   const confirmPasswordError = document.getElementById("confirmPasswordError");
 
   const backendError = document.getElementById("backendError");
+  const submitButton = form.querySelector('button[type="submit"]');
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     // Disable button
-    const submitButton = form.querySelector('button[type="submit"]');
     submitButton.disabled = true;
     submitButton.classList.add("opacity-50", "cursor-not-allowed");
     submitButton.textContent = "Submitting...";
