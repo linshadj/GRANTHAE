@@ -152,35 +152,34 @@ export const setNewPassData = async (req, res) => {
     req.session.canResetPass = false;
     req.session.otpRequested = false;
 
-    return res.status(200).json({ success: true , redirectUrl: "/password-changed"});
+    return res.status(200).json({ success: true, redirectUrl: "/password-changed" });
   } catch (error) {
-    console.log('Error in resetPassData: ', error)
-    return res.status(500).json({success: false, message: error.message})
+    console.log("Error in resetPassData: ", error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
 export const passwordChanged = (req, res) => {
   res.render("pages/password-changed", { title: "Password Changed", layout: "layouts/auth" });
-}
+};
 
 export const homePage = async (req, res) => {
   const user = await userDb.findById(req.session.user);
-  console.log(user);
   res.render("pages/home", { user });
 };
 
 export const logout = (req, res) => {
   try {
     req.session.destroy((error) => {
-      if(error) {
-        console.log(error)
-        return res.redirect("/profile?status=error&message=Failed to logout")
+      if (error) {
+        console.log(error);
+        return res.redirect("/profile?status=error&message=Failed to logout");
       }
-      res.clearCookie("connect.sid")
-      return res.redirect("/sign-in?status=success&message=Successfully logged out")
-    })
+      res.clearCookie("connect.sid");
+      return res.redirect("/sign-in?status=success&message=Successfully logged out");
+    });
   } catch (error) {
-    console.log("Error in logout: ", error)
-    return res.status(500).json({success: false, message: "Failed to logout"})
+    console.log("Error in logout: ", error);
+    return res.status(500).json({ success: false, message: "Failed to logout" });
   }
-}
+};

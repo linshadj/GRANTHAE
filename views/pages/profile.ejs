@@ -13,17 +13,24 @@
             <!-- Avatar -->
             <div class="flex-shrink-0 text-center space-y-4">
                 <div class="relative">
-                    <div
-                        class="w-32 h-32 rounded-full bg-apple-blue/20 flex items-center justify-center text-4xl text-apple-blue font-bold mx-auto border-4 border-white/5">
-                        L
-                    </div>
+                    <% if(user.avatar) { %>
+            <div class="w-24 h-24 bg-[#1C2A3A] rounded-full relative overflow-hidden group shadow-lg">
+                <img id="avatarPreview" src="<%= user.avatar %>" class="w-full h-full object-cover">
+            </div>
+            <% } else { %>
+            <div
+              class="w-24 h-24 rounded-full bg-apple-blue/20 flex items-center justify-center text-3xl text-apple-blue font-bold border-4 border-white/5"
+            >
+              <%= user.firstName.charAt(0).toUpperCase() + user.lastName.charAt(1).toUpperCase() %>
+            </div>
+            <% } %>
                 </div>
             </div>
 
             <!-- Content Area -->
             <div class="flex-grow w-full space-y-6">
                 <!-- Action Buttons -->
-                <div class="flex justify-end gap-3">
+                <div class="flex justify-end gap-3 relative z-30">
                     <a href="/profile/edit"
                         class="text-sm font-medium text-apple-blue hover:text-apple-dark transition-colors flex items-center gap-2">
                         <i data-lucide="edit-2" class="w-4 h-4"></i> Edit Profile
@@ -36,24 +43,24 @@
                             <span
                                 class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">First
                                 Name</span>
-                            <p class="text-apple-dark font-medium text-lg">Linshad</p>
+                            <p class="text-apple-dark font-medium text-lg"><%= user.firstName %></p>
                         </div>
                         <div>
                             <span
                                 class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">Last
                                 Name</span>
-                            <p class="text-apple-dark font-medium text-lg">User</p>
+                            <p class="text-apple-dark font-medium text-lg"><%= user.lastName %></p>
                         </div>
                     </div>
                     <div class="mb-6">
                         <span class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">Email
                             Address</span>
-                        <p class="text-apple-dark font-medium text-lg">linshad@example.com</p>
+                        <p class="text-apple-dark font-medium text-lg"><%= user.email %></p>
                     </div>
                     <div>
                         <span
                             class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">Bio</span>
-                        <p class="text-apple-text-gray italic">No bio added yet.</p>
+                        <p class="text-apple-text-gray italic"><%= user.bio || "No bio added yet." %></p>
                     </div>
                 </div>
 
@@ -61,18 +68,24 @@
                 <div class="pt-6 border-t border-white/10 relative z-20">
                     <h3 class="text-sm font-bold text-apple-text-gray uppercase tracking-wider mb-4">Saved Addresses
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="address-grid">
                         <!-- Address Card 1 -->
-                        <div onclick="openViewAddressModal('Home', '123 Library Avenue, Knowledge District, New York, NY 10001', '+1 (555) 123-4567')"
-                            class="bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer hover:border-apple-gold/50 transition-colors group relative z-20">
+                        <div onclick="openViewAddressModal('Home', '123 Library Avenue, Knowledge District, New York, NY 10001', '+1 (555) 123-4567', true)"
+                            class="bg-white/5 border border-apple-gold/30 rounded-xl p-4 cursor-pointer hover:border-apple-gold/50 transition-colors group relative z-20">
                             <div class="flex justify-between items-start mb-2">
-                                <span
-                                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-apple-gold/20 text-apple-gold uppercase tracking-wider">Home</span>
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-apple-gold/20 text-apple-gold uppercase tracking-wider">Home</span>
+                                    <span
+                                        class="text-[10px] font-bold text-apple-gold uppercase tracking-wider flex items-center gap-1">
+                                        <i data-lucide="check-circle" class="w-3 h-3"></i> Default
+                                    </span>
+                                </div>
                                 <i data-lucide="maximize-2"
                                     class="w-4 h-4 text-apple-text-gray opacity-0 group-hover:opacity-100 transition-opacity"></i>
                             </div>
                             <p class="text-apple-dark text-sm leading-relaxed">
-                                123 Library Avenue,<br>
+                                nbvkhj,<br>
                                 Knowledge District,<br>
                                 New York, NY 10001
                             </p>
@@ -80,7 +93,7 @@
                         </div>
 
                         <!-- Address Card 2 -->
-                        <div onclick="openViewAddressModal('Work', '456 Corporate Blvd, Suite 500, San Francisco, CA 94105', '+1 (555) 987-6543')"
+                        <div onclick="openViewAddressModal('Work', '456 Corporate Blvd, Suite 500, San Francisco, CA 94105', '+1 (555) 987-6543', false)"
                             class="bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer hover:border-apple-gold/50 transition-colors group relative z-20">
                             <div class="flex justify-between items-start mb-2">
                                 <span
@@ -96,6 +109,17 @@
                             <p class="text-xs text-apple-text-gray mt-2">+1 (555) 987-6543</p>
                         </div>
                     </div>
+
+                    <!-- Empty State (Hidden initially) -->
+                    <div id="no-addresses-message"
+                        class="hidden p-12 text-center border border-dashed border-white/10 rounded-2xl bg-white/5 mt-4">
+                        <div
+                            class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+                            <i data-lucide="map-pin-off" class="w-8 h-8 text-apple-text-gray/50"></i>
+                        </div>
+                        <h4 class="text-apple-dark font-bold mb-1">No saved addresses</h4>
+                        <p class="text-apple-text-gray text-sm">You haven't added any addresses to your profile yet.</p>
+                    </div>
                 </div>
 
             </div>
@@ -103,39 +127,131 @@
     </div>
 </div>
 
+<script>
+    function updateEmptyState() {
+        const grid = document.getElementById('address-grid');
+        const emptyMsg = document.getElementById('no-addresses-message');
+        if (grid && emptyMsg) {
+            // Count children excluding the empty message itself if it were inside
+            const hasAddresses = grid.querySelectorAll('div[onclick^="openViewAddressModal"]').length > 0;
+            emptyMsg.classList.toggle('hidden', hasAddresses);
+            grid.classList.toggle('hidden', !hasAddresses);
+        }
+    }
+    document.addEventListener('DOMContentLoaded', updateEmptyState);
+</script>
+
 <!-- View Address Modal -->
-<div id="view-address-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog"
+<div id="view-address-modal" class="fixed inset-0 z-[998] hidden" aria-labelledby="modal-title" role="dialog"
     aria-modal="true">
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity opacity-0" id="view-modal-backdrop"></div>
+    <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity opacity-0" id="view-modal-backdrop"></div>
 
     <!-- Modal Panel Wrapper -->
+    <div class="flex min-h-full items-center justify-center p-4 text-center">
+        <!-- Modal Content -->
+        <div class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 sm:scale-95 border border-white/10"
+            id="view-modal-panel">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
+                <h3 class="text-lg font-bold text-apple-dark font-serif">Address Details</h3>
+                <button type="button" onclick="closeViewAddressModal()"
+                    class="text-apple-text-gray hover:text-apple-dark transition-colors outline-none">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="p-8 text-center space-y-4">
+                <div id="view-address-badge-container" class="flex justify-center gap-2 mb-2">
+                    <div id="view-address-badge"
+                        class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                    </div>
+                    <div id="view-default-badge"
+                        class="hidden px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-apple-gold/20 text-apple-gold border border-apple-gold/30 items-center gap-1">
+                        <i data-lucide="check-circle" class="w-3 h-3"></i> Default
+                    </div>
+                </div>
+                <div class="p-6 bg-white/5 border border-white/10 rounded-xl">
+                    <p id="view-address-text" class="text-apple-dark font-medium leading-relaxed"></p>
+                </div>
+                <p id="view-address-phone" class="text-apple-text-gray text-sm font-medium"></p>
+            </div>
+
+            <div class="p-6 border-t border-white/10 bg-white/5 flex gap-3">
+                <button id="set-default-btn" type="button" onclick="handleSetDefault()"
+                    class="relative z-20 flex-1 px-4 py-2 bg-apple-blue/10 text-apple-blue hover:bg-apple-blue hover:text-white rounded-lg text-sm transition-all font-medium border border-apple-blue/20">
+                    Set Default
+                </button>
+                <button type="button" onclick="handleDeleteAddress()"
+                    class="relative z-20 px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg text-sm transition-all font-medium border border-red-500/20">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+                <button type="button" onclick="closeViewAddressModal()"
+                    class="relative z-20 px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Set Default Confirmation Modal -->
+<div id="default-confirm-modal" class="fixed inset-0 z-[999] hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity opacity-0" id="default-modal-backdrop">
+    </div>
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="flex min-h-full items-center justify-center p-4 text-center">
             <!-- Modal Content -->
-            <div class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                id="view-modal-panel">
-                <div class="p-6 border-b border-white/10 flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-apple-dark font-serif">Address Details</h3>
-                    <button type="button" onclick="closeViewAddressModal()"
-                        class="text-gray-400 hover:text-gray-600 outline-none">
-                        <i data-lucide="x" class="w-5 h-5"></i>
+            <div class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 scale-95 border border-white/10"
+                id="default-modal-panel">
+                <div class="p-8 text-center space-y-4">
+                    <div class="w-16 h-16 bg-apple-blue/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="check-circle" class="w-8 h-8 text-apple-blue"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-apple-dark font-serif">Set as Default?</h3>
+                    <p class="text-apple-text-gray text-sm">Make this your primary address for all future rentals and
+                        listings.</p>
+                </div>
+                <div class="p-6 border-t border-white/10 bg-white/5 flex gap-3">
+                    <button type="button" onclick="closeDefaultModal()"
+                        class="flex-1 px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="confirmSetDefault()"
+                        class="flex-1 px-4 py-2 bg-apple-blue text-white hover:bg-apple-blue/90 rounded-lg text-sm transition-all font-medium shadow-lg shadow-apple-blue/20">
+                        Set Default
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Delete Confirmation Modal -->
+<div id="delete-confirm-modal" class="fixed inset-0 z-[999] hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity opacity-0" id="delete-modal-backdrop">
+    </div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <!-- Modal Content -->
+            <div class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 scale-95 border border-white/10"
+                id="delete-modal-panel">
                 <div class="p-8 text-center space-y-4">
-                    <div id="view-address-badge"
-                        class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+                    <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="trash-2" class="w-8 h-8 text-red-500"></i>
                     </div>
-                    <div class="p-4 bg-white border border-gray-200 rounded-xl">
-                        <p id="view-address-text" class="text-apple-dark font-medium leading-relaxed"></p>
-                    </div>
-                    <p id="view-address-phone" class="text-apple-text-gray text-sm"></p>
+                    <h3 class="text-xl font-bold text-apple-dark font-serif">Delete Address?</h3>
+                    <p class="text-apple-text-gray text-sm">Are you sure you want to remove this address? This action
+                        cannot be undone.</p>
                 </div>
-
-                <div class="p-6 border-t border-white/10 bg-white/5">
-                    <button type="button" onclick="closeViewAddressModal()" class="w-full btn-primary">
-                        Close
+                <div class="p-6 border-t border-white/10 bg-white/5 flex gap-3">
+                    <button type="button" onclick="closeDeleteModal()"
+                        class="flex-1 px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="confirmDelete()"
+                        class="flex-1 px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg text-sm transition-all font-medium shadow-lg shadow-red-500/20">
+                        Delete
                     </button>
                 </div>
             </div>
@@ -148,28 +264,53 @@
     const viewBackdrop = document.getElementById('view-modal-backdrop');
     const viewPanel = document.getElementById('view-modal-panel');
     const viewBadge = document.getElementById('view-address-badge');
+    const viewDefaultBadge = document.getElementById('view-default-badge');
     const viewText = document.getElementById('view-address-text');
     const viewPhone = document.getElementById('view-address-phone');
+    const setDefaultBtn = document.getElementById('set-default-btn');
 
-    function openViewAddressModal(type, address, phone) {
+    // Delete Modal Elements
+    const deleteModal = document.getElementById('delete-confirm-modal');
+    const deleteBackdrop = document.getElementById('delete-modal-backdrop');
+    const deletePanel = document.getElementById('delete-modal-panel');
+
+    // Default Modal Elements
+    const defaultModal = document.getElementById('default-confirm-modal');
+    const defaultBackdrop = document.getElementById('default-modal-backdrop');
+    const defaultPanel = document.getElementById('default-modal-panel');
+
+    function openViewAddressModal(type, address, phone, isDefault) {
         // Set content
         viewText.textContent = address;
-        viewPhone.textContent = phone;
+        viewPhone.textContent = `Phone: ${phone}`;
         viewBadge.textContent = type;
+
+        // Toggle Default Badge
+        if (isDefault) {
+            viewDefaultBadge.classList.remove('hidden');
+            viewDefaultBadge.classList.add('flex');
+            setDefaultBtn.classList.add('hidden');
+        } else {
+            viewDefaultBadge.classList.add('hidden');
+            viewDefaultBadge.classList.remove('flex');
+            setDefaultBtn.classList.remove('hidden');
+        }
 
         // Style badge based on type
         if (type === 'Home') {
-            viewBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 bg-apple-gold/20 text-apple-gold';
+            viewBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-apple-gold/20 text-apple-gold border border-apple-gold/30';
         } else {
-            viewBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 bg-apple-text-gray/20 text-apple-text-gray';
+            viewBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-apple-text-gray/20 text-apple-text-gray border border-white/10';
         }
 
         if (!viewModal) return;
+        // Move to body to escape blur and stacking context
+        document.body.appendChild(viewModal);
+        toggleModalState(true);
         viewModal.classList.remove('hidden');
-        // Trigger generic fade in
         setTimeout(() => {
             viewBackdrop.classList.remove('opacity-0');
-            viewPanel.classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            viewPanel.classList.remove('opacity-0', 'translate-y-4', 'sm:scale-95');
             viewPanel.classList.add('opacity-100', 'translate-y-0', 'sm:scale-100');
         }, 10);
     }
@@ -178,14 +319,96 @@
         if (!viewModal) return;
         viewBackdrop.classList.add('opacity-0');
         viewPanel.classList.remove('opacity-100', 'translate-y-0', 'sm:scale-100');
-        viewPanel.classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+        viewPanel.classList.add('opacity-0', 'translate-y-4', 'sm:scale-95');
 
         setTimeout(() => {
             viewModal.classList.add('hidden');
+            toggleModalState(false);
         }, 300);
+    }
+
+    // Modal Action Handlers
+    function handleSetDefault() {
+        // Close view modal first
+        closeViewAddressModal();
+        // Wait then open default confirm
+        setTimeout(() => openDefaultModal(), 300);
+    }
+
+    function openDefaultModal() {
+        if (!defaultModal) return;
+        // Move to body to escape blur and stacking context
+        document.body.appendChild(defaultModal);
+        toggleModalState(true);
+        defaultModal.classList.remove('hidden');
+        setTimeout(() => {
+            defaultBackdrop.classList.remove('opacity-0');
+            defaultPanel.classList.remove('opacity-0', 'translate-y-4', 'scale-95');
+            defaultPanel.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+        }, 10);
+    }
+
+    function closeDefaultModal() {
+        if (!defaultModal) return;
+        defaultBackdrop.classList.add('opacity-0');
+        defaultPanel.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+        defaultPanel.classList.add('opacity-0', 'translate-y-4', 'scale-95');
+        setTimeout(() => {
+            defaultModal.classList.add('hidden');
+            toggleModalState(false);
+        }, 300);
+    }
+
+    function confirmSetDefault() {
+        // Mock set default logic
+        alert('Address set as default!');
+        closeDefaultModal();
+    }
+
+    function handleDeleteAddress() {
+        // Close view modal first
+        closeViewAddressModal();
+        // Wait for it to clear then open delete confirm
+        setTimeout(() => openDeleteModal(), 300);
+    }
+
+    function openDeleteModal() {
+        if (!deleteModal) return;
+        // Move to body to escape blur and stacking context
+        document.body.appendChild(deleteModal);
+        toggleModalState(true);
+        deleteModal.classList.remove('hidden');
+        setTimeout(() => {
+            deleteBackdrop.classList.remove('opacity-0');
+            deletePanel.classList.remove('opacity-0', 'translate-y-4', 'scale-95');
+            deletePanel.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+        }, 10);
+    }
+
+    function closeDeleteModal() {
+        if (!deleteModal) return;
+        deleteBackdrop.classList.add('opacity-0');
+        deletePanel.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+        deletePanel.classList.add('opacity-0', 'translate-y-4', 'scale-95');
+        setTimeout(() => {
+            deleteModal.classList.add('hidden');
+            toggleModalState(false);
+        }, 300);
+    }
+
+    function confirmDelete() {
+        // Mock delete logic
+        alert('Address deleted successfully!');
+        closeDeleteModal();
     }
 
     if (viewBackdrop) {
         viewBackdrop.addEventListener('click', closeViewAddressModal);
+    }
+    if (deleteBackdrop) {
+        deleteBackdrop.addEventListener('click', closeDeleteModal);
+    }
+    if (defaultBackdrop) {
+        defaultBackdrop.addEventListener('click', closeDefaultModal);
     }
 </script>

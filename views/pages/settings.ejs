@@ -50,7 +50,7 @@
                         OTP verification required to change email
                     </p>
                 </div>
-                <button
+                <button onclick="openEmailModal()"
                     class="px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">
                     Change Email
                 </button>
@@ -62,11 +62,11 @@
     <div class="glass-card p-6 space-y-6">
         <h2 class="text-lg font-semibold text-apple-dark border-b border-white/10 pb-2">Security</h2>
         <div class="space-y-4">
-            <a href="/profile/change-password"
+            <button onclick="openPasswordModal()"
                 class="w-full text-left px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-between group">
                 <span class="text-apple-text-gray group-hover:text-apple-dark transition-colors">Change Password</span>
                 <i data-lucide="chevron-right" class="w-4 h-4 text-apple-text-gray"></i>
-            </a>
+            </button>
             <button
                 class="w-full text-left px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-between group">
                 <span class="text-apple-text-gray group-hover:text-apple-dark transition-colors">Two-Factor
@@ -91,3 +91,246 @@
         </div>
     </div>
 </div>
+
+<!-- Password Modal -->
+<div id="password-modal" class="fixed inset-0 z-[998] hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity opacity-0" id="password-backdrop"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <div class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 scale-95 border border-white/10"
+                id="password-panel">
+                <div class="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
+                    <h3 class="text-lg font-bold text-apple-dark font-serif">Change Password</h3>
+                    <button type="button" onclick="closePasswordModal()"
+                        class="text-apple-text-gray hover:text-apple-dark transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <form onsubmit="handlePasswordSubmit(event)">
+                    <div class="p-8 space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">Current
+                                Password</label>
+                            <input type="password" required
+                                class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-apple-dark focus:border-apple-blue outline-none transition-all placeholder:text-apple-text-gray/40"
+                                placeholder="••••••••">
+                        </div>
+                        <div class="space-y-4 pt-2">
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">New
+                                    Password</label>
+                                <input type="password" required
+                                    class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-apple-dark focus:border-apple-blue outline-none transition-all placeholder:text-apple-text-gray/40"
+                                    placeholder="••••••••">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">Confirm
+                                    New
+                                    Password</label>
+                                <input type="password" required
+                                    class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-apple-dark focus:border-apple-blue outline-none transition-all placeholder:text-apple-text-gray/40"
+                                    placeholder="••••••••">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 border-t border-white/10 bg-white/5 flex gap-3">
+                        <button type="button" onclick="closePasswordModal()"
+                            class="flex-1 px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">Cancel</button>
+                        <button type="submit" class="flex-1 btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Email Modal -->
+<div id="email-modal" class="fixed inset-0 z-[998] hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity opacity-0" id="email-backdrop"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <div class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 scale-95 border border-white/10"
+                id="email-panel">
+                <div class="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
+                    <h3 id="email-modal-title" class="text-lg font-bold text-apple-dark font-serif">Change Email Address
+                    </h3>
+                    <button type="button" onclick="closeEmailModal()"
+                        class="text-apple-text-gray hover:text-apple-dark transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Step 1: Input -->
+                <div id="email-step-input">
+                    <div class="p-8 space-y-4">
+                        <p class="text-sm text-apple-text-gray">Enter your new email address. We'll send a verification
+                            code
+                            to confirm it's you.</p>
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">New Email
+                                Address</label>
+                            <input type="email" id="new-email-field" required
+                                class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-apple-dark focus:border-apple-blue outline-none transition-all placeholder:text-apple-text-gray/40"
+                                placeholder="name@example.com">
+                        </div>
+                    </div>
+                    <div class="p-6 border-t border-white/10 bg-white/5 flex gap-3">
+                        <button type="button" onclick="closeEmailModal()"
+                            class="flex-1 px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">Cancel</button>
+                        <button type="button" onclick="goToOtpStep()" class="flex-1 btn-primary">Send Code</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: OTP -->
+                <div id="email-step-otp" class="hidden">
+                    <div class="p-8 space-y-6">
+                        <div class="text-center space-y-2">
+                            <div
+                                class="w-16 h-16 bg-apple-blue/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="mail-check" class="w-8 h-8 text-apple-blue"></i>
+                            </div>
+                            <p class="text-sm text-apple-text-gray leading-relaxed">We've sent a 6-digit code to
+                                <br><span id="display-new-email" class="font-bold text-apple-dark"></span></p>
+                        </div>
+
+                        <div class="flex justify-center gap-2 max-w-[300px] mx-auto">
+                            <input type="text" maxlength="1"
+                                class="otp-input w-10 h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg text-apple-dark focus:border-apple-blue outline-none transition-all">
+                            <input type="text" maxlength="1"
+                                class="otp-input w-10 h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg text-apple-dark focus:border-apple-blue outline-none transition-all">
+                            <input type="text" maxlength="1"
+                                class="otp-input w-10 h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg text-apple-dark focus:border-apple-blue outline-none transition-all">
+                            <input type="text" maxlength="1"
+                                class="otp-input w-10 h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg text-apple-dark focus:border-apple-blue outline-none transition-all">
+                            <input type="text" maxlength="1"
+                                class="otp-input w-10 h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg text-apple-dark focus:border-apple-blue outline-none transition-all">
+                            <input type="text" maxlength="1"
+                                class="otp-input w-10 h-12 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-lg text-apple-dark focus:border-apple-blue outline-none transition-all">
+                        </div>
+
+                        <div class="text-center">
+                            <button type="button"
+                                class="text-xs font-bold text-apple-blue hover:text-apple-dark uppercase tracking-wider transition-colors">Resend
+                                Code</button>
+                        </div>
+                    </div>
+
+                    <div class="p-6 border-t border-white/10 bg-white/5 flex gap-3">
+                        <button type="button" onclick="goToEmailInputStep()"
+                            class="flex-1 px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">Back</button>
+                        <button type="button" onclick="verifyEmailOtp()" class="flex-1 btn-primary">Verify &
+                            Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Password Modal Logic
+    const passwordModal = document.getElementById('password-modal');
+    const passwordBackdrop = document.getElementById('password-backdrop');
+    const passwordPanel = document.getElementById('password-panel');
+
+    function openPasswordModal() {
+        if (!passwordModal) return;
+        // Move to body to escape blur and stacking context
+        document.body.appendChild(passwordModal);
+        toggleModalState(true);
+        passwordModal.classList.remove('hidden');
+        setTimeout(() => {
+            passwordBackdrop.classList.remove('opacity-0');
+            passwordPanel.classList.remove('opacity-0', 'translate-y-4', 'scale-95');
+            passwordPanel.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+        }, 10);
+    }
+
+    function closePasswordModal() {
+        if (!passwordModal) return;
+        passwordBackdrop.classList.add('opacity-0');
+        passwordPanel.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+        passwordPanel.classList.add('opacity-0', 'translate-y-4', 'scale-95');
+        setTimeout(() => {
+            passwordModal.classList.add('hidden');
+            toggleModalState(false);
+        }, 300);
+    }
+
+    function handlePasswordSubmit(e) {
+        e.preventDefault();
+        alert('Password updated successfully!');
+        closePasswordModal();
+    }
+
+    // Email Modal Flow Logic
+    const emailModal = document.getElementById('email-modal');
+    const emailBackdrop = document.getElementById('email-backdrop');
+    const emailPanel = document.getElementById('email-panel');
+    const emailStepInput = document.getElementById('email-step-input');
+    const emailStepOtp = document.getElementById('email-step-otp');
+    const newEmailField = document.getElementById('new-email-field');
+    const displayNewEmail = document.getElementById('display-new-email');
+
+    function openEmailModal() {
+        if (!emailModal) return;
+        // Move to body to escape blur and stacking context
+        document.body.appendChild(emailModal);
+        toggleModalState(true);
+        emailModal.classList.remove('hidden');
+        setTimeout(() => {
+            emailBackdrop.classList.remove('opacity-0');
+            emailPanel.classList.remove('opacity-0', 'translate-y-4', 'scale-95');
+            emailPanel.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+        }, 10);
+    }
+
+    function closeEmailModal() {
+        if (!emailModal) return;
+        emailBackdrop.classList.add('opacity-0');
+        emailPanel.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+        emailPanel.classList.add('opacity-0', 'translate-y-4', 'scale-95');
+        setTimeout(() => {
+            emailModal.classList.add('hidden');
+            toggleModalState(false);
+        }, 300);
+    }
+
+    function goToOtpStep() {
+        if (!newEmailField.value || !newEmailField.checkValidity()) {
+            newEmailField.reportValidity();
+            return;
+        }
+        displayNewEmail.textContent = newEmailField.value;
+        emailStepInput.classList.add('hidden');
+        emailStepOtp.classList.remove('hidden');
+    }
+
+    function goToEmailInputStep() {
+        emailStepOtp.classList.add('hidden');
+        emailStepInput.classList.remove('hidden');
+    }
+
+    function verifyEmailOtp() {
+        alert('Email verified and updated to: ' + newEmailField.value);
+        closeEmailModal();
+    }
+
+    // OTP Input auto-focus
+    const otpInputs = document.querySelectorAll('.otp-input');
+    otpInputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            if (e.target.value.length === 1 && index < otpInputs.length - 1) {
+                otpInputs[index + 1].focus();
+            }
+        });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                otpInputs[index - 1].focus();
+            }
+        });
+    });
+
+    if (passwordBackdrop) passwordBackdrop.addEventListener('click', closePasswordModal);
+    if (emailBackdrop) emailBackdrop.addEventListener('click', closeEmailModal);
+</script>

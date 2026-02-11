@@ -21,6 +21,8 @@ import {
   googleAuthSuccess,
 } from "../controller/user/googleAuthController.js";
 import { ifAuth, isAuth, otpVerify, resetPassAuth } from "../middlewares/authMiddlewares.js";
+import { editProfile, viewEditProfile, viewProfile } from "../controller/user/profileController.js";
+import { upload } from "../middlewares/multerUpload.js";
 
 const router = express.Router();
 
@@ -52,12 +54,9 @@ router.patch("/reset-password", resetPassAuth, setNewPassData)
 
 router.get("/password-changed", passwordChanged)
 
-router.get("/profile", isAuth, (req, res) => {
-  res.render("pages/profile", { title: "Profile", layout: "layouts/user-panel" });
-});
-router.get("/profile/edit", isAuth, (req, res) => {
-  res.render("pages/edit-profile", { title: "Edit Profile", layout: "layouts/user-panel" });
-});
+router.get("/profile", isAuth, viewProfile);
+router.get("/profile/edit", isAuth, viewEditProfile);
+router.patch("/profile/edit", isAuth, upload.single("avatar"), editProfile);
 
 router.get("/logout", isAuth, logout)
 

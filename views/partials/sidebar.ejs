@@ -1,11 +1,7 @@
-<div
-  id="sidebar-overlay"
-  class="fixed inset-0 bg-black/50 z-30 hidden md:hidden glass-blur transition-opacity opacity-0"
-></div>
-<aside
-  id="admin-sidebar"
-  class="w-64 bg-apple-card border-r border-white/10 h-screen fixed left-0 top-0 overflow-y-auto transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 ease-in-out"
->
+<div id="sidebar-overlay"
+  class="fixed inset-0 bg-black/50 z-30 hidden md:hidden glass-blur transition-opacity opacity-0"></div>
+<aside id="admin-sidebar"
+  class="w-64 bg-apple-card border-r border-white/10 h-screen fixed left-0 top-0 overflow-y-auto transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 ease-in-out">
   <div class="h-16 flex items-center px-6 border-b border-white/10">
     <a href="/" class="flex items-center gap-2 group">
       <div class="w-8 h-8 rounded-full bg-apple-blue/20 flex items-center justify-center">
@@ -23,19 +19,15 @@
       </h3>
       <ul class="space-y-1">
         <li>
-          <a
-            href="/dashboard"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/dashboard' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>"
-          >
+          <a href="/dashboard"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/dashboard' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
             <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
             Dashboard
           </a>
         </li>
         <li>
-          <a
-            href="/shop"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/shop' || path === '/search' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>"
-          >
+          <a href="/shop"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/shop' || path === '/search' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
             <i data-lucide="search" class="w-5 h-5"></i>
             Browse
           </a>
@@ -50,28 +42,22 @@
       </h3>
       <ul class="space-y-1">
         <li>
-          <a
-            href="/my-rentals"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/my-rentals' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>"
-          >
+          <a href="/my-rentals"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/my-rentals' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
             <i data-lucide="book-up" class="w-5 h-5"></i>
             Rented Books
           </a>
         </li>
         <li>
-          <a
-            href="/my-listings"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/my-listings' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>"
-          >
+          <a href="/my-listings"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/my-listings' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
             <i data-lucide="library" class="w-5 h-5"></i>
             My Listings
           </a>
         </li>
         <li>
-          <a
-            href="/list-book"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/list-book' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>"
-          >
+          <a href="/list-book"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/list-book' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
             <i data-lucide="plus-circle" class="w-5 h-5"></i>
             List a Book
           </a>
@@ -86,40 +72,32 @@
       </h3>
       <ul class="space-y-1">
         <li>
-          <a
-            href="/wallet"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/wallet' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>"
-          >
+          <a href="/wallet"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/wallet' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
             <i data-lucide="wallet" class="w-5 h-5"></i>
             My Wallet
           </a>
         </li>
         <li>
-          <a
-            href="/profile"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/profile' || path === '/profile/edit' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>"
-          >
+          <a href="/profile"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/profile' || path === '/profile/edit' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
             <i data-lucide="user" class="w-5 h-5"></i>
             Profile
           </a>
         </li>
         <li>
-          <a
-            href="/settings"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/settings' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>"
-          >
+          <a href="/settings"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/settings' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
             <i data-lucide="settings" class="w-5 h-5"></i>
             Settings
           </a>
         </li>
         <li>
-          <a
-            href="/logout"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-          >
-            <i data-lucide="log-out" class="w-5 h-5"></i>
-            Logout
-          </a>
+          <button onclick="openLogoutModal()"
+            class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-red-600 hover:bg-red-500/10 hover:text-red-500 hover:scale-[1.02] hover:shadow-lg hover:shadow-red-500/5 transition-all duration-300 group">
+            <i data-lucide="log-out" class="w-5 h-5 group-hover:rotate-12 transition-transform"></i>
+            <span class="font-medium">Logout</span>
+          </button>
         </li>
       </ul>
     </div>

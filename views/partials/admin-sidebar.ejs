@@ -130,10 +130,10 @@
                 <span class="text-[10px] text-gray-500 group-hover:text-gray-400">Super Admin</span>
             </div>
         </a>
-        <a href="/admin/logout"
-            class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 text-xs font-medium transition-colors">
-            <i data-lucide="log-out" class="w-3 h-3"></i>
-            Sign Out
-        </a>
+        <button onclick="openLogoutModal()"
+            class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:scale-[1.02] transition-all duration-300 text-xs font-bold group shadow-lg shadow-red-500/5">
+            <i data-lucide="log-out" class="w-3 h-3 group-hover:rotate-12 transition-transform"></i>
+            <span>Sign Out</span>
+        </button>
     </div>
 </aside>

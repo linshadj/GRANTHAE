@@ -18,7 +18,7 @@
 
     <%- include('../partials/background-doodles') %>
 
-        <div class="flex min-h-screen">
+        <div class="flex min-h-screen transition-all duration-300" id="content-wrapper">
             <%- include('../partials/sidebar') %>
 
                 <main class="flex-1 md:ml-64 p-8 animate-fade-in">
@@ -39,7 +39,6 @@
         </div>
 
         <script>
-            lucide.createIcons();
 
             const adminMenuBtn = document.getElementById('admin-menu-btn');
             const adminSidebar = document.getElementById('admin-sidebar');
@@ -64,6 +63,89 @@
                     });
                 }
             }
+        </script>
+
+        <!-- Logout Confirmation Modal (Moved from sidebar to layout to prevent stacking issues) -->
+        <div id="logout-confirm-modal" class="fixed inset-0 z-[9999] hidden" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity opacity-0"
+                id="logout-modal-backdrop"></div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center">
+                    <div class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 scale-95 border border-white/10"
+                        id="logout-modal-panel">
+                        <div class="p-8 text-center space-y-4">
+                            <div
+                                class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="alert-circle" class="w-8 h-8 text-red-500"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-apple-dark font-serif">Confirm Logout</h3>
+                            <p class="text-apple-text-gray text-sm">Are you sure you want to log out? You will need to
+                                sign in again to access your account.</p>
+                        </div>
+                        <div class="p-6 border-t border-white/10 bg-white/5 flex gap-3">
+                            <button type="button" onclick="closeLogoutModal()"
+                                class="flex-1 px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">
+                                Stay
+                            </button>
+                            <a href="/logout"
+                                class="flex-1 px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg text-sm transition-all font-medium text-center shadow-lg shadow-red-500/20 active:scale-95">
+                                Log Out
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const logoutModal = document.getElementById('logout-confirm-modal');
+            const logoutBackdrop = document.getElementById('logout-modal-backdrop');
+            const logoutPanel = document.getElementById('logout-modal-panel');
+            const contentWrapper = document.getElementById('content-wrapper');
+
+            function toggleModalState(isOpen) {
+                if (isOpen) {
+                    document.body.classList.add('overflow-hidden');
+                    if (contentWrapper) {
+                        contentWrapper.classList.add('blur-md', 'pointer-events-none', 'scale-[0.98]', 'opacity-50');
+                    }
+                } else {
+                    document.body.classList.remove('overflow-hidden');
+                    if (contentWrapper) {
+                        contentWrapper.classList.remove('blur-md', 'pointer-events-none', 'scale-[0.98]', 'opacity-50');
+                    }
+                }
+            }
+
+            function openLogoutModal() {
+                if (!logoutModal) return;
+                toggleModalState(true);
+                logoutModal.classList.remove('hidden');
+                setTimeout(() => {
+                    logoutBackdrop.classList.remove('opacity-0');
+                    logoutPanel.classList.remove('opacity-0', 'translate-y-8', 'scale-95');
+                    logoutPanel.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+                }, 10);
+            }
+
+            function closeLogoutModal() {
+                if (!logoutModal) return;
+                logoutBackdrop.classList.add('opacity-0');
+                logoutPanel.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+                logoutPanel.classList.add('opacity-0', 'translate-y-8', 'scale-95');
+
+                setTimeout(() => {
+                    logoutModal.classList.add('hidden');
+                    toggleModalState(false);
+                }, 300);
+            }
+
+            if (logoutBackdrop) {
+                logoutBackdrop.addEventListener('click', closeLogoutModal);
+            }
+
+            // Ensure all icons are created after everything is in the DOM
+            lucide.createIcons();
         </script>
 </body>
 
