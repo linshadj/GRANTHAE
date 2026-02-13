@@ -63,7 +63,6 @@ export const otpValidator = async (email, otp) => {
   if (!isOtpMatching) {
     throw new Error("Incorrect OTP");
   }
-
   return true;
 };
 

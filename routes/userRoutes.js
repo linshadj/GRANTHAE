@@ -23,6 +23,7 @@ import {
 import { ifAuth, isAuth, otpVerify, resetPassAuth } from "../middlewares/authMiddlewares.js";
 import { editProfile, viewEditProfile, viewProfile } from "../controller/user/profileController.js";
 import { upload } from "../middlewares/multerUpload.js";
+import { changeEmail, viewSettings } from "../controller/user/settingsController.js";
 
 const router = express.Router();
 
@@ -32,32 +33,53 @@ router.get("/", (req, res) => {
 
 router.get("/home", homePage);
 
-router.get("/sign-in", ifAuth, signIn);
-router.post("/sign-in", ifAuth, signInData);
+// Sign In
+router.route("/sign-in")
+  .get(ifAuth, signIn)
+  .post(ifAuth, signInData);
 
-router.get("/sign-up", ifAuth, signUp);
-router.post("/sign-up", ifAuth, signupData);
+// Sign Up
+router.route("/sign-up")
+  .get(ifAuth, signUp)
+  .post(ifAuth, signupData);
 
+// Google Auth
 router.get("/auth/google", googleAuth);
 router.get("/auth/google/callback", googleAuthCallbackMiddleware, googleAuthSuccess);
 
-router.get("/otp", otpVerify, otpPage);
-router.post("/otp", otpVerify, otpHandler);
+// OTP
+router.route("/otp")
+  .get(otpVerify, otpPage)
+  .post(otpVerify, otpHandler);
 
 router.post("/resend-otp", resendOtp);
 
-router.get("/forgot-password", isAuth, forgotPassword)
-router.post("/forgot-password", isAuth, forgotPassData);
+// Forgot Password
+router.route("/forgot-password")
+  .get(isAuth, forgotPassword)
+  .post(isAuth, forgotPassData);
 
-router.get("/reset-password", resetPassAuth, setNewPass)
-router.patch("/reset-password", resetPassAuth, setNewPassData)
+// Reset Password
+router.route("/reset-password")
+  .get(resetPassAuth, setNewPass)
+  .patch(resetPassAuth, setNewPassData);
 
-router.get("/password-changed", passwordChanged)
+router.get("/password-changed", passwordChanged);
 
+// Profile
 router.get("/profile", isAuth, viewProfile);
-router.get("/profile/edit", isAuth, viewEditProfile);
-router.patch("/profile/edit", isAuth, upload.single("avatar"), editProfile);
 
-router.get("/logout", isAuth, logout)
+router.route("/profile/edit")
+  .get(isAuth, viewEditProfile)
+  .patch(isAuth, upload.single("avatar"), editProfile);
+
+// Settings
+router.get("/settings", isAuth, viewSettings);
+router.post("/change-email", isAuth, changeEmail)
+
+// Logout
+router.get("/logout", isAuth, logout);
+
+
 
 export default router;

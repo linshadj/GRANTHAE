@@ -37,6 +37,7 @@ export const signupData = async (req, res) => {
     const body = { firstName, lastName, email, password };
     const validateUser = await signupVerify(body);
     req.session.tempUser = body;
+    req.session.otpRequested = true
 
     return res.status(200).json({
       success: true,

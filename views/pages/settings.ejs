@@ -44,14 +44,10 @@
             <div class="flex items-center justify-between">
                 <div class="flex-1">
                     <p class="text-apple-dark font-medium text-sm mb-1">Email Address</p>
-                    <p class="text-apple-text-gray text-sm">linshad@example.com</p>
-                    <p class="text-apple-text-gray/70 text-xs mt-1 italic">
-                        <i data-lucide="shield-check" class="w-3 h-3 inline"></i>
-                        OTP verification required to change email
-                    </p>
+                    <p class="text-apple-text-gray text-sm"><%= user.email %></p>
                 </div>
                 <button onclick="openEmailModal()"
-                    class="px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">
+                    class="z-20 relative px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">
                     Change Email
                 </button>
             </div>
@@ -150,17 +146,18 @@
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4 text-center">
             <div class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 scale-95 border border-white/10"
-                id="email-panel">
-                <div class="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
-                    <h3 id="email-modal-title" class="text-lg font-bold text-apple-dark font-serif">Change Email Address
-                    </h3>
-                    <button type="button" onclick="closeEmailModal()"
-                        class="text-apple-text-gray hover:text-apple-dark transition-colors">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-
-                <!-- Step 1: Input -->
+            id="email-panel">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
+                <h3 id="email-modal-title" class="text-lg font-bold text-apple-dark font-serif">Change Email Address
+                </h3>
+                <button type="button" onclick="closeEmailModal()"
+                class="text-apple-text-gray hover:text-apple-dark transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        
+        <!-- Step 1: Input -->
+            <form id="emailForm" action="/change-email" method="POST" novalidate>
                 <div id="email-step-input">
                     <div class="p-8 space-y-4">
                         <p class="text-sm text-apple-text-gray">Enter your new email address. We'll send a verification
@@ -169,19 +166,22 @@
                         <div class="space-y-2">
                             <label class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">New Email
                                 Address</label>
-                            <input type="email" id="new-email-field" required
+                            <input id="newEmail" type="email" required
                                 class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-apple-dark focus:border-apple-blue outline-none transition-all placeholder:text-apple-text-gray/40"
                                 placeholder="name@example.com">
                         </div>
+                        <p id="emailError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
                     </div>
                     <div class="p-6 border-t border-white/10 bg-white/5 flex gap-3">
                         <button type="button" onclick="closeEmailModal()"
-                            class="flex-1 px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">Cancel</button>
-                        <button type="button" onclick="goToOtpStep()" class="flex-1 btn-primary">Send Code</button>
+                        class="flex-1 px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">Cancel</button>
+                        <button id="emailSubmit" type="submit" class="flex-1 btn-primary">Send Code</button>
                     </div>
                 </div>
+            </form>
 
                 <!-- Step 2: OTP -->
+                 <form id="otpForm" action="/verify-email" method="POST"></form>
                 <div id="email-step-otp" class="hidden">
                     <div class="p-8 space-y-6">
                         <div class="text-center space-y-2">
@@ -218,16 +218,96 @@
                     <div class="p-6 border-t border-white/10 bg-white/5 flex gap-3">
                         <button type="button" onclick="goToEmailInputStep()"
                             class="flex-1 px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10">Back</button>
-                        <button type="button" onclick="verifyEmailOtp()" class="flex-1 btn-primary">Verify &
+                        <button type="submit" onclick="verifyEmailOtp()" class="flex-1 btn-primary">Verify &
                             Save</button>
                     </div>
                 </div>
+                <form id="otpForm" action="/verify-otp" method="POST"></form>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+
+    const newEmail = document.getElementById('newEmail')
+    const emailError = document.getElementById('emailError')
+    const emailForm = document.getElementById('emailForm')
+    const emailSubmit = document.getElementById('emailSubmit')
+
+    emailForm.addEventListener('submit', async (e) => {
+
+        e.preventDefault()
+
+        // Disable button
+        emailSubmit.disabled = true;
+        emailSubmit.classList.add("opacity-50", "cursor-not-allowed");
+        emailSubmit.textContent = "Sending...";
+
+        let isValid = true;
+
+        // Email Validation
+        if (newEmail.value.trim() === "") {
+        resetSubmitButton(emailSubmit);
+        isValid = false;
+        emailError.classList.remove("hidden");
+        emailError.textContent = "Email is required.";
+        } else if (!validateEmail(newEmail.value.trim())) {
+        resetSubmitButton(emailSubmit);
+        isValid = false;
+        emailError.classList.remove("hidden");
+        emailError.textContent = "Please enter a valid email address.";
+        } else {
+        emailError.classList.add("hidden");
+        }
+
+        if (isValid) {
+            try {
+                const res = await fetch("/change-email", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    newEmail: newEmail.value.trim(),
+                }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    goToOtpStep()
+                } else {
+                resetSubmitButton(emailSubmit);
+                emailError.classList.remove("hidden");
+                emailError.textContent = data.message;
+                }
+            } catch (error) {
+                console.log("Error in changeEmail fetch:", error);
+                resetSubmitButton(emailSubmit);
+                emailError.classList.remove("hidden");
+                emailError.textContent = error.message;
+            }
+        }
+
+    })
+
+
+
+    function validateEmail(email) {
+    const emailRegex = /^[^/\s@]+@[^/\s@]+\.[^/\s@]+$/;
+    return emailRegex.test(email);
+    }
+
+    // enable button function
+    function resetSubmitButton(submitButton) {
+        submitButton.disabled = false;
+        submitButton.classList.remove("opacity-50", "cursor-not-allowed");
+        submitButton.textContent = "Sending..." ? "Send Code": "";
+    }
+
+
+
+
+
     // Password Modal Logic
     const passwordModal = document.getElementById('password-modal');
     const passwordBackdrop = document.getElementById('password-backdrop');
@@ -269,7 +349,7 @@
     const emailPanel = document.getElementById('email-panel');
     const emailStepInput = document.getElementById('email-step-input');
     const emailStepOtp = document.getElementById('email-step-otp');
-    const newEmailField = document.getElementById('new-email-field');
+    const newEmailField = document.getElementById('newEmail');
     const displayNewEmail = document.getElementById('display-new-email');
 
     function openEmailModal() {

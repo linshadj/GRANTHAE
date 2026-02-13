@@ -18,7 +18,7 @@ export const viewProfile = async (req, res) => {
       layout: "layouts/user-panel",
     });
   } catch (err) {
-    console.log("err in getProfile", err.message);
+    console.log("err in viewProfile", err.message);
   }
 };
 
@@ -45,7 +45,6 @@ export const viewEditProfile = async (req, res) => {
 export const editProfile = async (req, res) => {
   try {
     const userId = req.session.user;
-    console.log(req.body);
     const { firstName, lastName, bio } = req.body;
     const updateData = { firstName, lastName, bio };
     if (req.file) {

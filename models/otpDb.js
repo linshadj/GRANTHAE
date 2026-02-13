@@ -201,6 +201,7 @@ const sendVerificationMail = async (firstName, email, otp) => {
     );
 
     console.log("otp stored and verfication email is sent");
+    console.log(otp)
   } catch (err) {
     console.log("error in sendVerificationMail on otpDb");
   }
