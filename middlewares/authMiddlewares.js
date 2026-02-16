@@ -22,8 +22,7 @@ export const isAuth = async (req, res, next) => {
       return next();
     }
   }
-  res.redirect(`/sign-in?status=error&message=${encodeURIComponent("Please login")}`);
-  next();
+  return res.redirect(`/sign-in?status=error&message=${encodeURIComponent("Please login")}`);
 };
 
 export const ifAuth = (req, res, next) => {

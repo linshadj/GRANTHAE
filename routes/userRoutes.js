@@ -21,7 +21,7 @@ import {
   googleAuthSuccess,
 } from "../controller/user/googleAuthController.js";
 import { ifAuth, isAuth, otpVerify, resetPassAuth } from "../middlewares/authMiddlewares.js";
-import { editProfile, viewEditProfile, viewProfile } from "../controller/user/profileController.js";
+import { addNewAddress, deleteAddress, editAddress, editProfile, setDefaultAddress, viewEditProfile, viewProfile } from "../controller/user/profileController.js";
 import { upload } from "../middlewares/multerUpload.js";
 import { changeEmail, viewSettings } from "../controller/user/settingsController.js";
 
@@ -56,8 +56,8 @@ router.post("/resend-otp", resendOtp);
 
 // Forgot Password
 router.route("/forgot-password")
-  .get(isAuth, forgotPassword)
-  .post(isAuth, forgotPassData);
+  .get(ifAuth, forgotPassword)
+  .post(ifAuth, forgotPassData);
 
 // Reset Password
 router.route("/reset-password")
@@ -73,9 +73,17 @@ router.route("/profile/edit")
   .get(isAuth, viewEditProfile)
   .patch(isAuth, upload.single("avatar"), editProfile);
 
+router.post("/profile/edit/add-new-address", isAuth, addNewAddress);
+
+router.patch("/profile/set-default-address", isAuth, setDefaultAddress);
+
+router.patch("/profile/edit/address/:id", isAuth, editAddress);
+
+router.delete("/profile/delete-address", isAuth, deleteAddress);
+  
 // Settings
 router.get("/settings", isAuth, viewSettings);
-router.post("/change-email", isAuth, changeEmail)
+router.post("/settings/change-email", isAuth, changeEmail)
 
 // Logout
 router.get("/logout", isAuth, logout);

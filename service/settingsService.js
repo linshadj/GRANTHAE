@@ -16,10 +16,7 @@ export const verifyEmail = async (user, newEmail) => {
 };
 
 export const updateEmail = async (newEmail, userId) => {
-    try {
-        return await userDb.findByIdAndUpdate(userId, { $set: newEmail }, { new: true });
-    } catch (err) {
-        throw new Error("error in changeEmailService: ", err.message);
-    }
+    await userDb.findByIdAndUpdate(userId, { email: newEmail });
+    return true;
 }
 

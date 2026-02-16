@@ -14,16 +14,12 @@ export const changeEmail = async (req, res) => {
     try {
 
         const user = await userDb.findById(req.session.user)
-
         const { newEmail } = req.body;
-        console.log("contr ", newEmail)
-
-    
         await verifyEmail(user, newEmail);
-
+        req.session.newEmail = newEmail;
         req.session.otpRequested = true;
     
-        return res.status(200).json({ success: true});
+        return res.status(200).json({ success: true, message: "Verification code sent to new email."});
       } catch (error) {
         console.log("error in updateEmail: ", error.message);
         return res.status(500).json({ success: false, message: error.message });

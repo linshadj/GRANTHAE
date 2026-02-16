@@ -58,12 +58,12 @@ export const otpPage = (req, res) => {
 export const otpHandler = async (req, res) => {
   try {
     const otp = req.body.otp;
-    const { tempUser, forgotPassEmail } = req.session;
-    const email = tempUser?.email || forgotPassEmail;
+    const { tempUser, forgotPassEmail, newEmail } = req.session;
+    const email = tempUser?.email || forgotPassEmail || newEmail;
     if (!email) {
       return res
         .status(400)
-        .json({ success: false, message: "Session expired. Please login again" });
+        .json({ success: false, message: "Session expired. Please try again" });
     }
     if (!otp) {
       return res.status(400).json({ success: false, message: "OTP not found" });
@@ -81,6 +81,13 @@ export const otpHandler = async (req, res) => {
     } else if (forgotPassEmail) {
       req.session.canResetPass = true;
       return res.status(200).json({ success: true, redirectUrl: "/reset-password" });
+    } else if (newEmail) {
+      await updateEmail(req.session.newEmail, req.session.user);
+      req.session.newEmail = null;
+      return res.status(200).json({
+        success: true,
+        redirectUrl: "/settings?status=success&message= email updated",
+      });
     }
   } catch (error) {
     console.log(error);

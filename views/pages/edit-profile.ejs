@@ -37,6 +37,7 @@
                         Upload New
                     </button>
                 </div>
+                <p id="avatarError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
             </div>
 
             <!-- Inputs -->
@@ -44,14 +45,14 @@
                 <div>
                     <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">First
                         Name</label>
-                    <input id="firstName" type="text" value="<%= user.firstName %>"
+                    <input name="firstName" id="firstName" type="text" value="<%= user.firstName %>"
                         class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all" />
                     <p id="firstNameError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">Last
                         Name</label>
-                    <input id="lastName" type="text" value="<%= user.lastName %>"
+                    <input name="lastName" id="lastName" type="text" value="<%= user.lastName %>"
                         class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all" />
                     <p id="lastNameError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
                 </div>
@@ -59,7 +60,8 @@
 
             <div>
                 <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">Bio</label>
-                <textarea id="bio" rows="4" placeholder="<%= user.bio || 'Tell us a little about yourself...' %>"
+                <textarea name="bio" id="bio" rows="4"
+                    placeholder="<%= user.bio || 'Tell us a little about yourself...' %>"
                     class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none transition-all"></textarea>
             </div>
 
@@ -74,82 +76,73 @@
                 </div>
 
                 <div class="space-y-4" id="address-list">
-                    <!-- Address Item 1 -->
-                    <div
-                        class="bg-white/5 border border-apple-gold/30 rounded-xl p-4 flex items-start justify-between group relative z-20">
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span
-                                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-apple-gold/20 text-apple-gold uppercase tracking-wider">Home</span>
-                                <span
-                                    class="text-[10px] font-bold text-apple-gold uppercase tracking-wider flex items-center gap-1">
-                                    <i data-lucide="check-circle" class="w-3 h-3"></i> Default
-                                </span>
+                    <!-- Address Items -->
+                    <% addresses.forEach(address=> { %>
+                        <div
+                            class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-start justify-between group relative z-20">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span
+                                        class="px-2 py-0.5 rounded text-[10px] font-bold <%= address.isDefault ? 'font-bold bg-apple-gold/20 text-apple-gold' : 'bg-apple-text-gray/20 text-apple-text-gray' %> uppercase tracking-wider">
+                                        <%= address.label %>
+                                    </span>
+                                    <% if(address.isDefault) { %>
+                                        <span
+                                            class="text-[10px] font-bold text-apple-gold uppercase tracking-wider flex items-center gap-1">
+                                            <i data-lucide="check-circle" class="w-3 h-3"></i> Default
+                                        </span>
+                                        <% } %>
+                                </div>
+                                <p class="text-sm text-apple-dark">
+                                    <%= address.streetAddress %>, <%= address.city %>, <%= address.state %>
+                                                <%= address.pinCode %>
+                                </p>
+                                <p class="text-xs text-apple-text-gray mt-1">
+                                    <%= address.phoneNumber %>
+                                </p>
                             </div>
-                            <p class="text-sm text-apple-dark">123 Library Avenue, New York, NY 10001</p>
-                        </div>
-                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button type="button" onclick="
-                  openAddressModal('edit', {
-                    label: 'Home',
-                    streetAddress: '123 Library Avenue',
-                    city: 'New York',
-                    state: 'NY',
-                    pin: '10001',
-                    country: 'United States',
-                  })
-                " class="p-1.5 text-apple-text-gray hover:text-apple-blue transition-colors" title="Edit Address">
-                                <i data-lucide="edit-2" class="w-4 h-4"></i>
-                            </button>
-                            <button type="button" onclick="openDeleteAddressModal('Home')"
-                                class="p-1.5 text-apple-text-gray hover:text-red-400 transition-colors"
-                                title="Delete Address">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Address Item 2 -->
-                    <div
-                        class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-start justify-between group relative z-20">
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span
-                                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-apple-text-gray/20 text-apple-text-gray uppercase tracking-wider">Work</span>
+                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <% if (!address.isDefault) { %>
+                                    <button type="button" onclick="openDefaultModal('<%= address._id %>')"
+                                        class="p-1.5 text-apple-text-gray hover:text-apple-gold transition-colors"
+                                        title="Set as Default">
+                                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                    </button>
+                                    <% } %>
+                                <button type="button" onclick="
+                                openAddressModal('edit', {
+                                    label: '<%= address.label %>',
+                                    streetAddress: '<%= address.streetAddress %>',
+                                    city: '<%= address.city %>',
+                                    state: '<%= address.state %>',
+                                    pin: '<%= address.pinCode %>',
+                                    country: '<%= address.country %>',
+                                    phoneNumber: '<%= address.phoneNumber %>',
+                                }, 
+                                '<%= address._id %>')
+                                " class="p-1.5 text-apple-text-gray hover:text-apple-blue transition-colors"
+                                    title="Edit Address">
+                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button"
+                                    onclick="<%= address.isDefault 
+                                        ? 'openCannotDeleteModal()' 
+                                        : `openDeleteAddressModal('${address._id}', '${address.label}')` %>"
+                                    class="p-1.5 text-apple-text-gray hover:text-red-400 transition-colors"
+                                    title="Delete Address">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
                             </div>
-                            <p class="text-sm text-apple-dark">456 Corporate Blvd, San Francisco, CA 94105</p>
                         </div>
-                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button type="button" onclick="openDefaultModal()"
-                                class="p-1.5 text-apple-text-gray hover:text-apple-gold transition-colors"
-                                title="Set as Default">
-                                <i data-lucide="check-circle" class="w-4 h-4"></i>
-                            </button>
-                            <button type="button" onclick="
-                  openAddressModal('edit', {
-                    label: 'Work',
-                    streetAddress: '456 Corporate Blvd',
-                    city: 'San Francisco',
-                    state: 'CA',
-                    pin: '94105',
-                    country: 'United States',
-                  })
-                " class="p-1.5 text-apple-text-gray hover:text-apple-blue transition-colors" title="Edit Address">
-                                <i data-lucide="edit-2" class="w-4 h-4"></i>
-                            </button>
-                            <button type="button" onclick="openDeleteAddressModal('Work')"
-                                class="p-1.5 text-apple-text-gray hover:text-red-400 transition-colors"
-                                title="Delete Address">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
+                        <% }) %>
 
-                    <!-- Empty State (Hidden initially) -->
-                    <div id="no-addresses-message"
-                        class="hidden p-8 text-center border border-dashed border-white/10 rounded-xl">
-                        <p class="text-apple-text-gray italic">No saved addresses</p>
-                    </div>
+                            <!-- Empty State (Hidden initially) -->
+                            <% if (addresses.length===0) { %>
+                                <div id="no-addresses-message"
+                                    class="hidden p-8 text-center border border-dashed border-white/10 rounded-xl">
+                                    <p class="text-apple-text-gray italic">No saved addresses</p>
+                                </div>
+                                <% } %>
                 </div>
             </div>
 
@@ -198,6 +191,91 @@
         </div>
     </div>
 </div>
+
+<!-- Address Limit Modal -->
+<div id="address-limit-modal" class="fixed inset-0 z-[999] hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity opacity-0"
+        id="limit-modal-backdrop"></div>
+
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <div class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 scale-95 border border-white/10"
+                id="limit-modal-panel">
+
+                <div class="p-8 text-center space-y-4">
+                    <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="alert-triangle" class="w-8 h-8 text-red-500"></i>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-apple-dark font-serif">
+                        Address Limit Reached
+                    </h3>
+
+                    <p class="text-apple-text-gray text-sm">
+                        You can only have up to <span class="font-bold text-red-500">5 saved addresses</span>.
+                        Please delete an existing address before adding a new one.
+                    </p>
+                </div>
+
+                <div class="p-6 border-t border-white/10 bg-white/5 flex justify-center">
+                    <button type="button" onclick="closeLimitModal()"
+                        class="px-6 py-2 bg-apple-blue text-white hover:bg-apple-blue/90 rounded-lg text-sm transition-all font-medium shadow-lg">
+                        Okay
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cannot Remove Default Modal -->
+<div id="cannot-delete-modal" class="fixed inset-0 z-[999] hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity opacity-0"
+        id="cannot-delete-backdrop">
+    </div>
+
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center">
+
+            <div class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 scale-95 border border-white/10"
+                id="cannot-delete-panel">
+
+                <div class="p-8 text-center space-y-4">
+
+                    <!-- Icon -->
+                    <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="alert-triangle" class="w-8 h-8 text-red-500"></i>
+                    </div>
+
+                    <!-- Title -->
+                    <h3 class="text-xl font-bold text-apple-dark font-serif">
+                        Cannot Remove Default Address
+                    </h3>
+
+                    <!-- Description -->
+                    <p class="text-apple-text-gray text-sm">
+                        This address is currently set as your 
+                        <span class="font-bold text-red-500">default address</span>.
+                        <br>
+                        Please set another address as default before removing this one.
+                    </p>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="p-6 border-t border-white/10 bg-white/5 flex justify-center">
+                    <button type="button" onclick="closeCannotDeleteModal()"
+                        class="px-6 py-2 bg-apple-blue text-white hover:bg-apple-blue/90 rounded-lg text-sm transition-all font-medium shadow-lg">
+                        Okay
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Delete Address Confirmation Modal -->
 <div id="address-delete-modal" class="fixed inset-0 z-[999] hidden" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity opacity-0" id="delete-modal-backdrop">
@@ -243,6 +321,7 @@
             <!-- Modal Content -->
             <div class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 sm:scale-95 border border-white/10"
                 id="modal-panel">
+                <form action="/profile/edit/add-new-address" method="post" id="add-new-address-form">
                 <div class="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
                     <h3 class="text-lg font-bold text-apple-dark font-serif" id="modal-title">
                         Add New Address
@@ -258,30 +337,33 @@
                         <label
                             class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">Address
                             Label</label>
-                        <input type="text" id="address-label" placeholder="e.g. Home, Work, Apartment"
+                        <input name="label" type="text" id="address-label" placeholder="e.g. Home, Work, Apartment"
                             class="relative z-20 w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold outline-none transition-all placeholder:text-apple-text-gray/40" />
                     </div>
+                    <p id="labelError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
 
                     <div>
-                        <label
-                            class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">streetAddress
+                        <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">street
                             Address</label>
-                        <input type="text" id="address-streetAddress" placeholder="123 Main St"
+                        <input name="streetAddress" type="text" maxlength="20" id="address-streetAddress"
                             class="relative z-20 w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold outline-none transition-all placeholder:text-apple-text-gray/40" />
                     </div>
+                    <p id="streetAddressError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label
                                 class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">City</label>
-                            <input type="text" id="address-city" placeholder="New York"
+                            <input name="city" type="text" maxlength="50" id="address-city"
                                 class="relative z-20 w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold outline-none transition-all placeholder:text-apple-text-gray/40" />
+                                <p id="cityError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
                         </div>
                         <div>
                             <label
                                 class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">State</label>
-                            <input type="text" id="address-state" placeholder="NY"
+                            <input name="state" type="text" maxlength="50" id="address-state"
                                 class="relative z-20 w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold outline-none transition-all placeholder:text-apple-text-gray/40" />
+                                <p id="stateError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
                         </div>
                     </div>
 
@@ -290,16 +372,27 @@
                             <label
                                 class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">Pin
                                 Code</label>
-                            <input type="text" id="address-pin" placeholder="10001"
+                            <input name="pinCode" type="tel" id="address-pin"
                                 class="relative z-20 w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold outline-none transition-all placeholder:text-apple-text-gray/40" />
+                                <p id="pinCodeError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
                         </div>
                         <div>
                             <label
-                                class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">Country</label>
-                            <input type="text" id="address-country" placeholder="United States"
+                                class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">Phone
+                                Number</label>
+                            <input name="phoneNumber" type="tel" id="address-phone"
                                 class="relative z-20 w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold outline-none transition-all placeholder:text-apple-text-gray/40" />
+                                <p id="phoneNumberError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
                         </div>
                     </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-2">Country</label>
+                        <input name="country" type="text" maxlength="50" id="address-country"
+                            class="relative z-20 w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-apple-dark focus:border-apple-gold outline-none transition-all placeholder:text-apple-text-gray/40" />
+                    </div>
+                    <p id="countryError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
+                    <p id="addressFormError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
                 </div>
 
                 <div class="p-6 border-t border-white/10 flex justify-end gap-3 bg-white/5">
@@ -307,10 +400,11 @@
                         class="relative z-20 px-5 py-2.5 text-sm font-bold text-apple-text-gray hover:text-apple-dark transition-colors">
                         Cancel
                     </button>
-                    <button type="button" class="relative z-20 btn-primary" id="save-address-btn">
+                    <button type="submit" class="relative z-20 btn-primary" id="save-address-btn">
                         Save Address
                     </button>
                 </div>
+                </form>
             </div>
         </div>
     </div>
@@ -327,6 +421,7 @@
 
     const avatarInput = document.getElementById('avatarInput');
     const avatarPreview = document.getElementById('avatarPreview');
+    const avatarError = document.getElementById('avatarError');
 
 
     const firstNameError = document.getElementById("firstNameError");
@@ -344,9 +439,20 @@
     const deletePanel = document.getElementById("delete-modal-panel");
     const deleteLabelSpan = document.getElementById("delete-address-label");
 
+    const cannotDeleteModal = document.getElementById('cannot-delete-modal');
+    const cannotDeleteBackdrop = document.getElementById('cannot-delete-backdrop');
+    const cannotDeletePanel = document.getElementById('cannot-delete-panel');
+
     const modal = document.getElementById("address-modal");
     const backdrop = document.getElementById("modal-backdrop");
     const panel = document.getElementById("modal-panel");
+
+
+    let selectedAddressId = null;
+    let isSelectedAddressDefault = false;
+
+    let addressMode = "add"; 
+    let editingAddressId = null;
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -360,12 +466,12 @@
 
         // First Name Validation
         if (firstName.value.trim() === "") {
-            resetSubmitButton();
+            resetSubmitButton(submitButton);
             isValid = false;
             firstNameError.classList.remove("hidden");
             firstNameError.textContent = "First name is required.";
         } else if (!validateName(firstName.value.trim())) {
-            resetSubmitButton();
+            resetSubmitButton(submitButton);
             isValid = false;
             firstNameError.classList.remove("hidden");
             firstNameError.textContent = "First name should contain only letters.";
@@ -375,7 +481,7 @@
 
         // Last Name Validation
         if (!validateLastName(lastName.value.trim())) {
-            resetSubmitButton();
+            resetSubmitButton(submitButton);
             isValid = false;
             lastNameError.classList.remove("hidden");
             lastNameError.textContent = "Last name should contain only letters.";
@@ -395,13 +501,13 @@
                 if (data.success) {
                     window.location.href = data.redirectUrl;
                 } else {
-                    resetSubmitButton();
+                    resetSubmitButton(submitButton);
                     backendError.classList.remove("hidden");
                     backendError.textContent = data.message;
                 }
             } catch (error) {
                 console.log("Error in editProfile fetch:", error);
-                resetSubmitButton();
+                resetSubmitButton(submitButton);
                 backendError.classList.remove("hidden");
                 backendError.textContent = error;
             }
@@ -428,16 +534,39 @@
     }
 
     // enable submit button function
-    function resetSubmitButton() {
-        const submitButton = form.querySelector('button[type="submit"]');
+    function resetSubmitButton(submitButton) {
         submitButton.disabled = false;
         submitButton.classList.remove("opacity-50", "cursor-not-allowed");
         submitButton.textContent = "Save Changes";
     }
 
-    function openDefaultModal() {
+    function resetErrorFields() {
+        const errorFields = [
+            "labelError",
+            "streetAddressError",
+            "cityError",
+            "stateError",
+            "pinCodeError",
+            "phoneNumberError",
+            "countryError",
+            "addressFormError"
+        ];
+
+        errorFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add("hidden");
+                el.textContent = "";
+            }
+        });
+    }
+
+    function openDefaultModal(addressId) {
+
+        selectedAddressId = addressId;
+
         if (!defaultModal) return;
-        // Move to body to escape blur and stacking context
+        
         document.body.appendChild(defaultModal);
         toggleModalState(true);
         defaultModal.classList.remove("hidden");
@@ -448,7 +577,34 @@
         }, 10);
     }
 
-    function closeDefaultModal() {
+
+    async function confirmSetDefault() {
+         if (!selectedAddressId) return;
+
+        try {
+            const res = await fetch("/profile/set-default-address", {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    addressId: selectedAddressId,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                window.location.reload();
+            }
+        } catch (err) {
+            console.error("Error setting default:", err);
+        }
+
+        closeDefaultModal();
+        }
+
+        function closeDefaultModal() {
         if (!defaultModal) return;
         defaultBackdrop.classList.add("opacity-0");
         defaultPanel.classList.remove("opacity-100", "translate-y-0", "scale-100");
@@ -459,14 +615,47 @@
         }, 300);
     }
 
-    function confirmSetDefault() {
-        alert("Address set as default!");
-        closeDefaultModal();
+
+    const limitModal = document.getElementById("address-limit-modal");
+    const limitBackdrop = document.getElementById("limit-modal-backdrop");
+    const limitPanel = document.getElementById("limit-modal-panel");
+
+    function openLimitModal() {
+        if (!limitModal) return;
+
+        document.body.appendChild(limitModal);
+        toggleModalState(true);
+
+        limitModal.classList.remove("hidden");
+
+        setTimeout(() => {
+            limitBackdrop.classList.remove("opacity-0");
+            limitPanel.classList.remove("opacity-0", "translate-y-4", "scale-95");
+            limitPanel.classList.add("opacity-100", "translate-y-0", "scale-100");
+        }, 10);
     }
 
-    function openDeleteAddressModal(label) {
+    function closeLimitModal() {
+        if (!limitModal) return;
+
+        limitBackdrop.classList.add("opacity-0");
+        limitPanel.classList.remove("opacity-100", "translate-y-0", "scale-100");
+        limitPanel.classList.add("opacity-0", "translate-y-4", "scale-95");
+
+        setTimeout(() => {
+            limitModal.classList.add("hidden");
+            toggleModalState(false);
+        }, 300);
+    }
+
+    if (limitBackdrop) limitBackdrop.addEventListener("click", closeLimitModal);
+
+
+    function openDeleteAddressModal(id, label) {
+
         if (!deleteModal) return;
         if (deleteLabelSpan) deleteLabelSpan.textContent = label;
+        selectedAddressId = id;
         document.body.appendChild(deleteModal);
         toggleModalState(true);
         deleteModal.classList.remove("hidden");
@@ -488,12 +677,75 @@
         }, 300);
     }
 
-    function confirmDeleteAddress() {
-        alert("Address removed!");
+
+       function openCannotDeleteModal() {
+        if (!cannotDeleteModal) return;
+
+        document.body.appendChild(cannotDeleteModal);
+        toggleModalState(true);
+        cannotDeleteModal.classList.remove('hidden');
+
+        setTimeout(() => {
+            cannotDeleteBackdrop.classList.remove('opacity-0');
+            cannotDeletePanel.classList.remove('opacity-0', 'translate-y-4', 'scale-95');
+            cannotDeletePanel.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+        }, 10);
+    }
+
+    function closeCannotDeleteModal() {
+        cannotDeleteBackdrop.classList.add('opacity-0');
+        cannotDeletePanel.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+        cannotDeletePanel.classList.add('opacity-0', 'translate-y-4', 'scale-95');
+
+        setTimeout(() => {
+            cannotDeleteModal.classList.add('hidden');
+            toggleModalState(false);
+        }, 300);
+    }
+
+    async function confirmDeleteAddress() {
+        if (!selectedAddressId) return;
+
+        try {
+            const res = await fetch("/profile/delete-address", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    addressId: selectedAddressId,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                window.location.reload(); // simple & safe
+            } else {
+                alert(data.message || "Failed to delete address.");
+            }
+
+        } catch (err) {
+            console.error("Delete error:", err);
+            alert("Something went wrong.");
+        }
+
         closeDeleteModal();
     }
 
-    function openAddressModal(mode = "add", data = null) {
+
+    function openAddressModal(mode = "add", data = null, id = null) {
+
+        addressMode = mode;
+        editingAddressId = id;
+
+        const addressItems = document.querySelectorAll("#address-list .group.relative.z-20");
+
+        if (mode === "add" && addressItems.length >= 5) {
+            openLimitModal();   
+            return;
+        }
+
         if (!modal) return;
 
         const title = document.getElementById("modal-title");
@@ -505,6 +757,7 @@
         document.getElementById("address-city").value = "";
         document.getElementById("address-state").value = "";
         document.getElementById("address-pin").value = "";
+        document.getElementById("address-phone").value = "";
         document.getElementById("address-country").value = "";
 
         if (mode === "edit" && data) {
@@ -515,8 +768,11 @@
             document.getElementById("address-city").value = data.city || "";
             document.getElementById("address-state").value = data.state || "";
             document.getElementById("address-pin").value = data.pin || "";
+            document.getElementById("address-phone").value = data.phoneNumber || "";
             document.getElementById("address-country").value = data.country || "";
         } else {
+            addressMode = "add";
+            editingAddressId = null;
             title.textContent = "Add New Address";
             btn.textContent = "Save Address";
         }
@@ -533,6 +789,7 @@
     }
 
     function closeAddressModal() {
+        resetErrorFields()
         if (!modal) return;
         backdrop.classList.add("opacity-0");
         panel.classList.remove("opacity-100", "translate-y-0", "sm:scale-100");
@@ -541,6 +798,172 @@
             modal.classList.add("hidden");
             toggleModalState(false);
         }, 300);
+    }
+
+
+    // ADD NEW ADDRESS
+
+    const addNewAddressform = document.getElementById("add-new-address-form");
+
+    addNewAddressform.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const addressLabel = document.getElementById("address-label");
+        const addressStreetAddress = document.getElementById("address-streetAddress");
+        const addressCity = document.getElementById("address-city");
+        const addressState = document.getElementById("address-state");
+        const addressPin = document.getElementById("address-pin");
+        const addressPhone = document.getElementById("address-phone");
+        const addressCountry = document.getElementById("address-country");
+        const submitButton = document.getElementById("save-address-btn");
+
+        const labelError = document.getElementById("labelError");
+        const streetAddressError = document.getElementById("streetAddressError");
+        const cityError = document.getElementById("cityError");
+        const stateError = document.getElementById("stateError");
+        const pinCodeError = document.getElementById("pinCodeError");
+        const phoneNumberError = document.getElementById("phoneNumberError");
+        const countryError = document.getElementById("countryError");
+        const addressFormError = document.getElementById("addressFormError");
+
+        submitButton.disabled = true;
+        submitButton.classList.add("opacity-50", "cursor-not-allowed");
+        submitButton.textContent = "Saving...";
+
+        let isValid = true; 
+
+        if (addressLabel.value.trim() === "") {
+            resetSubmitButton(submitButton);
+            isValid = false;
+            labelError.classList.remove("hidden");
+            labelError.textContent = "Address label is required.";
+        } else {
+            labelError.classList.add("hidden");
+        }
+
+        if (addressStreetAddress.value.trim() === "") {
+            resetSubmitButton(submitButton);
+            isValid = false;
+            streetAddressError.classList.remove("hidden");
+            streetAddressError.textContent = "Street address is required.";
+        } else {
+            streetAddressError.classList.add("hidden");
+        }
+
+        if (addressCity.value.trim() === "") {
+            resetSubmitButton(submitButton);
+            isValid = false;
+            cityError.classList.remove("hidden");
+            cityError.textContent = "City is required.";
+        } else {
+            cityError.classList.add("hidden");
+        }
+
+        if (addressState.value.trim() === "") {
+            resetSubmitButton(submitButton);
+            isValid = false;
+            stateError.classList.remove("hidden");
+            stateError.textContent = "State is required.";
+        } else {
+            stateError.classList.add("hidden");
+        }
+
+        if (addressPin.value.trim() === "") {
+            resetSubmitButton(submitButton);
+            isValid = false;
+            pinCodeError.classList.remove("hidden");
+            pinCodeError.textContent = "PIN is required.";
+        } else if (!validatePin(addressPin.value.trim())) {
+            resetSubmitButton(submitButton);
+            isValid = false;
+            pinCodeError.classList.remove("hidden");
+            pinCodeError.textContent = "PIN must be 6 digits.";
+        } else {
+            pinCodeError.classList.add("hidden");
+        }
+
+        if (addressPhone.value.trim() === "") {
+            resetSubmitButton(submitButton);
+            isValid = false;
+            phoneNumberError.classList.remove("hidden");
+            phoneNumberError.textContent = "Phone number is required.";
+        } else if (!validatePhone(addressPhone.value.trim())) {
+            resetSubmitButton(submitButton);
+            isValid = false;
+            phoneNumberError.classList.remove("hidden");
+            phoneNumberError.textContent = "Phone number must be 10 digits.";
+        } else {
+            phoneNumberError.classList.add("hidden");
+        }
+
+        if (addressCountry.value.trim() === "") {
+            resetSubmitButton(submitButton);
+            isValid = false;
+            countryError.classList.remove("hidden");
+            countryError.textContent = "Country is required.";
+        } else {
+            countryError.classList.add("hidden");
+        }
+
+
+        if (isValid) {
+
+            let url = "";
+            let method = "";
+
+            if (addressMode === "add") {
+                url = "/profile/edit/add-new-address";
+                method = "POST";
+            } else if (addressMode === "edit") {
+                url = `/profile/edit/address/${editingAddressId}`;
+                method = "PATCH";
+            }
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        label: addressLabel.value.trim().toUpperCase(),
+                        streetAddress: addressStreetAddress.value.trim(),
+                        city: addressCity.value.trim(),
+                        state: addressState.value.trim(),
+                        pinCode: addressPin.value.trim(),
+                        phoneNumber: addressPhone.value.trim(),
+                        country: addressCountry.value.trim(),
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    resetSubmitButton(submitButton);
+                    addressFormError.classList.remove("hidden");
+                    addressFormError.textContent = data.message;
+                }
+
+            } catch (error) {
+                resetSubmitButton(submitButton);
+                addressFormError.classList.remove("hidden");
+                addressFormError.textContent = "Something went wrong.";
+            }
+        }
+
+    });
+
+    // Validate phoneNUmber
+    function validatePhone(phone) {
+        const phoneRegex = /^\d{10}$/;
+        return phoneRegex.test(phone);
+    }
+
+    //  Validate Pin
+    function validatePin(pin) {
+        const pinRegex = /^\d{6}$/;
+        return pinRegex.test(pin);
     }
 
     if (defaultBackdrop) defaultBackdrop.addEventListener("click", closeDefaultModal);
