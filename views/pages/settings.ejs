@@ -7,7 +7,7 @@
   </div>
 
   <!-- Notifications -->
-  <div class="glass-card p-6 space-y-6">
+  <!-- <div class="glass-card p-6 space-y-6">
     <h2 class="text-lg font-semibold text-apple-dark border-b border-white/10 pb-2">
       Notifications
     </h2>
@@ -39,7 +39,7 @@
         </label>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Account Information -->
   <div class="glass-card p-6 space-y-6">
@@ -68,7 +68,7 @@
     <div class="space-y-4">
       <button
         onclick="openPasswordModal()"
-        class="w-full text-left px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-between group"
+        class="z-20 relative w-full text-left px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-between group"
       >
         <span class="text-apple-text-gray group-hover:text-apple-dark transition-colors"
           >Change Password</span
@@ -127,42 +127,65 @@
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
-        <form onsubmit="handlePasswordSubmit(event)">
+        <form id="passwordForm" action="/settings/change-password" method="POST" novalidate>
           <div class="p-8 space-y-4">
             <div class="space-y-2">
               <label class="text-xs font-bold text-apple-text-gray uppercase tracking-wider"
                 >Current Password</label
               >
               <input
+                id="currentPassword"
                 type="password"
                 required
                 class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-apple-dark focus:border-apple-blue outline-none transition-all placeholder:text-apple-text-gray/40"
                 placeholder="••••••••"
               />
             </div>
+            <p
+              id="currentPasswordError"
+              class="hidden text-xs mt-1"
+              style="color: rgb(225, 0, 0)"
+            ></p>
             <div class="space-y-4 pt-2">
               <div class="space-y-2">
                 <label class="text-xs font-bold text-apple-text-gray uppercase tracking-wider"
                   >New Password</label
                 >
                 <input
+                  id="newPassword"
                   type="password"
                   required
                   class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-apple-dark focus:border-apple-blue outline-none transition-all placeholder:text-apple-text-gray/40"
                   placeholder="••••••••"
                 />
               </div>
+              <p
+                id="newPasswordError"
+                class="hidden text-xs mt-1"
+                style="color: rgb(225, 0, 0)"
+              ></p>
               <div class="space-y-2">
                 <label class="text-xs font-bold text-apple-text-gray uppercase tracking-wider"
                   >Confirm New Password</label
                 >
                 <input
+                  id="confirmNewPassword"
                   type="password"
                   required
                   class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-apple-dark focus:border-apple-blue outline-none transition-all placeholder:text-apple-text-gray/40"
                   placeholder="••••••••"
                 />
               </div>
+              <p
+                id="confirmNewPasswordError"
+                class="hidden text-xs mt-1"
+                style="color: rgb(225, 0, 0)"
+              ></p>
+              <p
+                id="backendPasswordError"
+                class="hidden text-xs mt-1"
+                style="color: rgb(225, 0, 0)"
+              ></p>
             </div>
           </div>
           <div class="p-6 border-t border-white/10 bg-white/5 flex gap-3">
@@ -173,7 +196,7 @@
             >
               Cancel
             </button>
-            <button type="submit" class="flex-1 btn-primary">Update Password</button>
+            <button id="passwordSubmit" type="submit" class="flex-1 btn-primary">Update Password</button>
           </div>
         </form>
       </div>
@@ -241,8 +264,8 @@
         </form>
 
         <!-- Step 2: OTP -->
-        <form id="otpForm" action="/verify-email" method="POST">
-          <div id="email-step-otp" class="hidden">
+        <div id="email-step-otp" class="hidden">
+          <form id="otpForm" action="/verify-email" method="POST">
             <div class="p-8 space-y-6">
               <div class="text-center space-y-2">
                 <div
@@ -325,17 +348,10 @@
               >
                 Back
               </button>
-              <button
-                id="submitOtp"
-                type="submit"
-                onclick="verifyEmailOtp()"
-                class="flex-1 btn-primary"
-              >
-                Verify & Save
-              </button>
+              <button id="submitOtp" type="submit" class="flex-1 btn-primary">Verify & Save</button>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -346,6 +362,47 @@
   const emailError = document.getElementById("emailError");
   const emailForm = document.getElementById("emailForm");
   const emailSubmit = document.getElementById("emailSubmit");
+
+  const otpInputs = document.querySelectorAll('input[type="tel"]');
+  const otpForm = document.getElementById("otpForm");
+  const otpSubmit = document.getElementById("submitOtp");
+  const otpError = document.getElementById("otpError");
+
+  const resendBtn = document.getElementById("resendBtn");
+
+  const passwordForm = document.getElementById("passwordForm");
+  const passwordSubmit = document.getElementById("passwordSubmit");
+  const currentPassword = document.getElementById("currentPassword");
+  const newPassword = document.getElementById("newPassword");
+  const confirmNewPassword = document.getElementById("confirmNewPassword");
+  const currentPasswordError = document.getElementById("currentPasswordError");
+  const newPasswordError = document.getElementById("newPasswordError");
+  const confirmNewPasswordError = document.getElementById("confirmNewPasswordError");
+  const backendPasswordError = document.getElementById("backendPasswordError");
+
+  const emailSubmitText = "Send Code"
+    const otpSubmitText = "Verify & Save"
+    const passwordSubmitText = "Update Password"
+
+  // OTP Input auto-focus
+
+  let otp = "";
+
+  otpInputs.forEach((input, index) => {
+    input.addEventListener("input", (e) => {
+      input.value = input.value.replace(/[^0-9]/g, "");
+      otp = Array.from(otpInputs, (input) => input.value).join("");
+      if (input.value.length === 1 && index < otpInputs.length - 1) {
+        otpInputs[index + 1].focus();
+      }
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && e.target.value.length === 0 && index > 0) {
+        otpInputs[index - 1].focus();
+      }
+    });
+  });
 
   emailForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -359,12 +416,12 @@
 
     // Email Validation
     if (newEmail.value.trim() === "") {
-      resetSubmitButton(emailSubmit);
+      resetSubmitButton(emailSubmit, emailSubmitText);
       isValid = false;
       emailError.classList.remove("hidden");
       emailError.textContent = "Email is required.";
     } else if (!validateEmail(newEmail.value.trim())) {
-      resetSubmitButton(emailSubmit);
+      resetSubmitButton(emailSubmit, emailSubmitText);
       isValid = false;
       emailError.classList.remove("hidden");
       emailError.textContent = "Please enter a valid email address.";
@@ -375,7 +432,7 @@
     if (isValid) {
       try {
         const res = await fetch("/settings/change-email", {
-          method: "POST",
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
@@ -386,15 +443,15 @@
         const data = await res.json();
         if (data.success) {
           goToOtpStep();
-          resetSubmitButton(emailSubmit);
+          resetSubmitButton(emailSubmit, emailSubmitText);
         } else {
-          resetSubmitButton(emailSubmit);
+          resetSubmitButton(emailSubmit, emailSubmitText);
           emailError.classList.remove("hidden");
           emailError.textContent = data.message;
         }
       } catch (error) {
         console.log("Error in changeEmail fetch:", error);
-        resetSubmitButton(emailSubmit);
+        resetSubmitButton(emailSubmit, emailSubmitText);
         emailError.classList.remove("hidden");
         emailError.textContent = error.message;
       }
@@ -406,17 +463,91 @@
     return emailRegex.test(email);
   }
 
-  const otpInputs = document.querySelectorAll('input[type="tel"]');
-  const otpForm = document.getElementById("otpForm");
-  const otpSubmit = document.getElementById("submitOtp");
-  const otpError = document.getElementById("otpError");
+  otpForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    console.log(otp);
+    // Disable button
+    otpSubmit.disabled = true;
+    otpSubmit.classList.add("opacity-50", "cursor-not-allowed");
+    otpSubmit.textContent = "Verifying...";
 
-  const resendBtn = document.getElementById("resendBtn");
+    let isValid = true;
 
-  let countdownInterval;
-  let countdownTime = 300; // 5 minutes = 300 seconds
+    // Email Validation
+    if (newEmail.value.trim() === "") {
+      resetSubmitButton(otpSubmit, otpSubmitText);
+      isValid = false;
+      otpError.classList.remove("hidden");
+      otpError.textContent = "Email is required.";
+    } else if (!validateEmail(newEmail.value.trim())) {
+      resetSubmitButton(otpSubmit, otpSubmitText);
+      isValid = false;
+      otpError.classList.remove("hidden");
+      otpError.textContent = "Please enter a valid email address.";
+    } else {
+      otpError.classList.add("hidden");
+    }
+
+    if (isValid) {
+      try {
+        const res = await fetch("/otp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            otp: otp,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = data.redirectUrl;
+        } else {
+          resetSubmitButton(otpSubmit, otpSubmitText);
+          otpError.classList.remove("hidden");
+          otpError.textContent = data.message;
+          otpError.style.color = "#f87171";
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  });
+
+  let countdownInterval = null;
+  let countdownTime = 5 * 60; // 5 min
+
+  resendBtn.addEventListener("click", async () => {
+    if (resendBtn.disabled) return;
+
+    try {
+      const res = await fetch("/resend-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        startCountdown(); // restart timer
+      } else {
+        otpError.classList.remove("hidden");
+        otpError.textContent = data.message;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
 
   function startCountdown() {
+    // Clear existing timer if running
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+    }
+
     resendBtn.disabled = true;
     resendBtn.classList.add("opacity-50", "cursor-not-allowed");
 
@@ -438,11 +569,12 @@
       }
     }, 1000);
   }
+
   // enable button function
-  function resetSubmitButton(submitButton) {
+  function resetSubmitButton(submitButton, text) {
     submitButton.disabled = false;
     submitButton.classList.remove("opacity-50", "cursor-not-allowed");
-    submitButton.textContent = "Sending..." ? "Send Code" : "Verify & Save";
+    submitButton.textContent = text;
   }
 
   // Password Modal Logic
@@ -472,12 +604,6 @@
       passwordModal.classList.add("hidden");
       toggleModalState(false);
     }, 200);
-  }
-
-  function handlePasswordSubmit(e) {
-    e.preventDefault();
-    alert("Password updated successfully!");
-    closePasswordModal();
   }
 
   // Email Modal Flow Logic
@@ -528,24 +654,90 @@
     emailStepInput.classList.remove("hidden");
   }
 
-  function verifyEmailOtp() {
-    alert("Email verified and updated to: " + newEmailField.value);
-    closeEmailModal();
+  passwordForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // Disable button
+    passwordSubmit.disabled = true;
+    passwordSubmit.classList.add("opacity-50", "cursor-not-allowed");
+    passwordSubmit.textContent = "Updating...";
+
+    let isValid = true;
+
+    if (currentPassword.value.trim() === "") {
+      resetSubmitButton(passwordSubmit, passwordSubmitText);
+      isValid = false;
+      currentPasswordError.classList.remove("hidden");
+      currentPasswordError.textContent = "Current password is required.";
+    } else {
+      currentPasswordError.classList.add("hidden");
+    }
+
+    // Password Validation
+    if (newPassword.value.trim() === "") {
+      resetSubmitButton(passwordSubmit, passwordSubmitText);
+      isValid = false;
+      newPasswordError.classList.remove("hidden");
+      newPasswordError.textContent = "New password is required.";
+    } else if (!validatePassword(newPassword.value.trim())) {
+      resetSubmitButton(passwordSubmit, passwordSubmitText);
+      isValid = false;
+      newPasswordError.classList.remove("hidden");
+      newPasswordError.textContent =
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.";
+    } else {
+      newPasswordError.classList.add("hidden");
+    }
+
+    // Confirm Password Validation
+    if (confirmNewPassword.value.trim() === "") {
+      resetSubmitButton(passwordSubmit, passwordSubmitText);
+      isValid = false;
+      confirmNewPasswordError.classList.remove("hidden");
+      confirmNewPasswordError.textContent = "Please confirm your password.";
+    } else if (newPassword.value.trim() !== confirmNewPassword.value.trim()) {
+      resetSubmitButton(passwordSubmit, passwordSubmitText);
+      isValid = false;
+      confirmNewPasswordError.classList.remove("hidden");
+      confirmNewPasswordError.textContent = "Passwords do not match.";
+    } else {
+      confirmNewPasswordError.classList.add("hidden");
+    }
+
+    if (isValid) {
+      try {
+        const res = await fetch("/settings/change-password", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            currentPassword: currentPassword.value.trim(),
+            newPassword: newPassword.value.trim(),
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = data.redirectUrl;
+        } else {
+          resetSubmitButton(passwordSubmit, passwordSubmitText);
+          backendPasswordError.classList.remove("hidden");
+          backendPasswordError.textContent = data.message;
+        }
+      } catch (error) {
+        console.log("Error in signup fetch:", error);
+        resetSubmitButton(passwordSubmit, passwordSubmitText);
+        backendPasswordError.classList.remove("hidden");
+        backendPasswordError.textContent = error;
+      }
+    }
+  });
+
+  function validatePassword(password) {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
   }
 
-  // OTP Input auto-focus
-  otpInputs.forEach((input, index) => {
-    input.addEventListener("input", (e) => {
-      if (e.target.value.length === 1 && index < otpInputs.length - 1) {
-        otpInputs[index + 1].focus();
-      }
-    });
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Backspace" && !e.target.value && index > 0) {
-        otpInputs[index - 1].focus();
-      }
-    });
-  });
 
   if (passwordBackdrop) passwordBackdrop.addEventListener("click", closePasswordModal);
   if (emailBackdrop) emailBackdrop.addEventListener("click", closeEmailModal);

@@ -1,5 +1,5 @@
 import userDb from "../../models/userDb.js"
-import { verifyEmail } from "../../service/settingsService.js"
+import { changePasswordService, verifyEmail } from "../../service/settingsService.js"
 
 export const viewSettings = async (req, res) => {
     try {
@@ -24,4 +24,18 @@ export const changeEmail = async (req, res) => {
         console.log("error in updateEmail: ", error.message);
         return res.status(500).json({ success: false, message: error.message });
       }
+}
+
+export const changePassword = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { currentPassword, newPassword } = req.body;
+        
+        await changePasswordService(userId, currentPassword, newPassword);
+
+        return res.status(200).json({ success: true, message: "Password updated successfully.", redirectUrl: "/settings?status=success&message=Password updated successfully." });
+    } catch (error) {
+        console.log("Error in changePassword: ", error.message);
+        return res.status(500).json({ success: false, message: error.message });
+    }
 }

@@ -23,7 +23,7 @@ import {
 import { ifAuth, isAuth, otpVerify, resetPassAuth } from "../middlewares/authMiddlewares.js";
 import { addNewAddress, deleteAddress, editAddress, editProfile, setDefaultAddress, viewEditProfile, viewProfile } from "../controller/user/profileController.js";
 import { upload } from "../middlewares/multerUpload.js";
-import { changeEmail, viewSettings } from "../controller/user/settingsController.js";
+import { changeEmail, changePassword, viewSettings } from "../controller/user/settingsController.js";
 
 const router = express.Router();
 
@@ -83,7 +83,8 @@ router.delete("/profile/delete-address", isAuth, deleteAddress);
   
 // Settings
 router.get("/settings", isAuth, viewSettings);
-router.post("/settings/change-email", isAuth, changeEmail)
+router.patch("/settings/change-email", isAuth, changeEmail)
+router.patch("/settings/change-password", isAuth, changePassword);
 
 // Logout
 router.get("/logout", isAuth, logout);
