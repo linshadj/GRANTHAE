@@ -1,0 +1,131 @@
+<!-- Custom Notification System - uses project's own Tailwind classes -->
+
+<div id="toast-notification" class="hidden" style="position: fixed; top: 24px; right: 24px; z-index: 9999;">
+    <div id="toast-panel" class="overflow-hidden rounded-2xl bg-apple-card shadow-xl border border-white/10"
+        style="min-width: 320px; max-width: 420px; transform: translateY(-20px); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease;">
+        <div class="flex items-center gap-4 px-6 py-4">
+            <!-- Icon -->
+            <div id="toast-icon-wrapper" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                <i id="toast-icon" class="w-5 h-5"></i>
+            </div>
+            <!-- Message -->
+            <p id="toast-message" class="text-apple-dark font-medium text-sm flex-1"></p>
+            <!-- Close -->
+            <button onclick="closeToast()"
+                class="text-apple-text-gray hover:text-apple-dark transition-colors flex-shrink-0">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+        <!-- Progress bar -->
+        <div class="h-[2px] bg-white/5">
+            <div id="toast-progress" class="h-full bg-apple-gold/40 transition-all" style="width: 100%;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Icon configs matching project's status patterns
+    const toastConfig = {
+        success: {
+            bgClass: 'bg-apple-gold/10',
+            iconName: 'check-circle',
+            iconClass: 'text-apple-gold'
+        },
+        error: {
+            bgClass: 'bg-red-500/10',
+            iconName: 'alert-circle',
+            iconClass: 'text-red-500'
+        },
+        warning: {
+            bgClass: 'bg-yellow-500/10',
+            iconName: 'alert-triangle',
+            iconClass: 'text-yellow-500'
+        },
+        info: {
+            bgClass: 'bg-blue-500/10',
+            iconName: 'info',
+            iconClass: 'text-blue-500'
+        }
+    };
+
+    let toastTimer = null;
+    let progressInterval = null;
+
+    function showToast(type, message) {
+        const config = toastConfig[type] || toastConfig.info;
+        const toast = document.getElementById('toast-notification');
+        const panel = document.getElementById('toast-panel');
+        const iconWrapper = document.getElementById('toast-icon-wrapper');
+        const icon = document.getElementById('toast-icon');
+        const msg = document.getElementById('toast-message');
+        const progress = document.getElementById('toast-progress');
+
+        // Set content
+        msg.textContent = message;
+
+        // Set icon classes
+        iconWrapper.className = 'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ' + config.bgClass;
+        icon.setAttribute('data-lucide', config.iconName);
+        icon.className = 'w-5 h-5 ' + config.iconClass;
+
+        // Re-render lucide icon
+        lucide.createIcons({ nodes: [icon] });
+
+        // Show
+        toast.classList.remove('hidden');
+        progress.style.width = '100%';
+
+        // Animate in
+        requestAnimationFrame(() => {
+            panel.style.transform = 'translateY(0)';
+            panel.style.opacity = '1';
+        });
+
+        // Progress bar countdown
+        const duration = 4000;
+        const start = Date.now();
+        clearInterval(progressInterval);
+        progressInterval = setInterval(() => {
+            const elapsed = Date.now() - start;
+            const remaining = Math.max(0, 1 - elapsed / duration);
+            progress.style.width = (remaining * 100) + '%';
+            if (remaining <= 0) clearInterval(progressInterval);
+        }, 30);
+
+        // Auto close
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => closeToast(), duration);
+    }
+
+    function closeToast() {
+        const panel = document.getElementById('toast-panel');
+        const toast = document.getElementById('toast-notification');
+
+        panel.style.transform = 'translateY(-20px)';
+        panel.style.opacity = '0';
+
+        clearTimeout(toastTimer);
+        clearInterval(progressInterval);
+
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 300);
+    }
+
+    // On page load, check URL params
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        const message = urlParams.get('message');
+
+        if (status && message) {
+            showToast(status.toLowerCase(), decodeURIComponent(message));
+
+            // Clean URL
+            const url = new URL(window.location);
+            url.searchParams.delete('status');
+            url.searchParams.delete('message');
+            window.history.replaceState({}, document.title, url.pathname);
+        }
+    });
+</script>
