@@ -380,7 +380,7 @@
         setTimeout(() => {
             viewModal.classList.add('hidden');
             toggleModalState(false);
-        }, 300);
+        }, 200);
     }
 
     // Modal Action Handlers
@@ -388,7 +388,7 @@
         // Close view modal first
         closeViewAddressModal();
         // Wait then open default confirm
-        setTimeout(() => openDefaultModal(), 300);
+        setTimeout(() => openDefaultModal(), 200);
     }
 
     function openDefaultModal() {
@@ -412,7 +412,7 @@
         setTimeout(() => {
             defaultModal.classList.add('hidden');
             toggleModalState(false);
-        }, 300);
+        }, 200);
     }
 
     async function confirmSetDefault() {
@@ -445,11 +445,11 @@
     function handleDeleteAddress() {
         if(isSelectedAddressDefault) {
             closeViewAddressModal();
-            setTimeout(() => openCannotDeleteModal(), 300);
+            setTimeout(() => openCannotDeleteModal(), 200);
             return;
         }else {
             closeViewAddressModal();
-            setTimeout(() => openDeleteModal(), 300);
+            setTimeout(() => openDeleteModal(), 200);
         }
     }
 
@@ -474,7 +474,7 @@
         setTimeout(() => {
             deleteModal.classList.add('hidden');
             toggleModalState(false);
-        }, 300);
+        }, 200);
     }
 
     function openCannotDeleteModal() {
@@ -499,7 +499,7 @@
         setTimeout(() => {
             cannotDeleteModal.classList.add('hidden');
             toggleModalState(false);
-        }, 300);
+        }, 200);
     }
 
 
