@@ -2,21 +2,22 @@
     <div class="text-center mb-8">
         <div
             class="w-16 h-16 bg-apple-gold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-apple-gold/20">
-            <i data-lucide="shield-lock" class="w-8 h-8 text-[#1a231e]"></i>
+            <i data-lucide="shield" class="w-8 h-8 text-[#1a231e]"></i>
         </div>
         <h1 class="text-3xl font-bold font-serif text-apple-dark mb-2">Admin Access</h1>
         <p class="text-apple-text-gray text-sm">Authorized personnel only.</p>
     </div>
 
-    <form class="space-y-5" action="/admin/dashboard" method="GET">
+    <form class="space-y-5" action="/admin/dashboard" method="GET" novalidate>
         <div>
             <label class="block text-xs font-semibold text-apple-text-gray uppercase tracking-wider mb-2">Email</label>
             <div class="relative">
                 <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
-                <input type="email" value="admin@granthae.com"
+                <input id="email" name="email" type="email"
                     class="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-apple-gold focus:ring-1 focus:ring-apple-gold transition-all"
                     placeholder="Enter admin email">
             </div>
+            <p id="emailError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
         </div>
 
         <div>
@@ -24,23 +25,120 @@
                 class="block text-xs font-semibold text-apple-text-gray uppercase tracking-wider mb-2">Password</label>
             <div class="relative">
                 <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
-                <input type="password" value="password"
+                <input id="password" name="password" type="password"
                     class="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-apple-gold focus:ring-1 focus:ring-apple-gold transition-all"
                     placeholder="••••••••">
             </div>
+            <p id="passwordError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
         </div>
 
-        <button type="submit"
-            class="w-full py-3.5 bg-gradient-to-r from-apple-gold to-yellow-600 text-[#1a231e] font-bold rounded-xl shadow-lg shadow-apple-gold/20 hover:brightness-110 active:scale-95 transition-all text-sm">
+        <p id="backendError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
+
+        <button id="submitButton" type="submit"
+            class="z-20 relative w-full py-3.5 bg-gradient-to-r from-apple-gold to-yellow-600 text-[#1a231e] font-bold rounded-xl shadow-lg shadow-apple-gold/20 hover:brightness-110 active:scale-95 transition-all text-sm">
             Authenticate
         </button>
+
+        <div class="my-6 flex items-center justify-center gap-4">
+            <div class="h-px bg-white/10 flex-1"></div>
+            <span class="text-xs text-apple-text-gray uppercase tracking-widest">Or continue with</span>
+            <div class="h-px bg-white/10 flex-1"></div>
+        </div>
     </form>
 
     <div class="mt-8 text-center">
         <a href="/"
-            class="text-sm text-apple-text-gray hover:text-white transition-colors flex items-center justify-center gap-2">
+            class="z-20 relative text-sm text-apple-text-gray hover:text-white transition-colors flex items-center justify-center gap-2">
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
             Back to Platform
         </a>
     </div>
 </div>
+
+<script>
+    const form = document.querySelector("form");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const emailError = document.getElementById("emailError")
+  const passwordError = document.getElementById("passwordError")
+  const backendError = document.getElementById("backendError");
+  const submitButton = document.getElementById("submitButton");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    submitButton.disabled = true;
+    submitButton.classList.add("opacity-50", "cursor-not-allowed");
+    submitButton.textContent = "Authenticating...";
+
+    let isValid = true;
+
+    // Email Validation
+    if (email.value.trim() === "") {
+      resetSubmitButton();
+      isValid = false;
+      emailError.classList.remove("hidden");
+      emailError.textContent = "Email is required.";
+    } else if (!validateEmail(email.value.trim())) {
+      resetSubmitButton();
+      isValid = false;
+      emailError.classList.remove("hidden");
+      emailError.textContent = "Please enter a valid email address.";
+    } else {
+      emailError.classList.add("hidden");
+    }
+
+    // Password Validation
+    if (password.value.trim() === "") {
+      resetSubmitButton();
+      isValid = false;
+      passwordError.classList.remove("hidden");
+      passwordError.textContent = "Password is required.";
+    } else {
+      passwordError.classList.add("hidden");
+    }
+
+    if (isValid) {
+      try {
+        const res = await fetch("/admin/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email.value.trim(),
+            password: password.value.trim(),
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          window.location.href = data.redirectUrl;
+        } else {
+          resetSubmitButton();
+          backendError.classList.remove("hidden");
+          backendError.textContent = data.message;
+        }
+      } catch (error) {
+        console.log("Error in adminLogin fetch:", error);
+        resetSubmitButton();
+        backendError.classList.remove("hidden");
+        backendError.textContent = error;
+      }
+    }
+  });
+
+  function validateEmail(email) {
+    const emailRegex = /^[^/\s@]+@[^/\s@]+\.[^/\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  // enable button function
+  function resetSubmitButton() {
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = false;
+    submitButton.classList.remove("opacity-50", "cursor-not-allowed");
+    submitButton.textContent = "Authenticate";
+  }
+</script>

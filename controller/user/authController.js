@@ -7,8 +7,8 @@ import {
   signInVerify,
   signupVerify,
   updatePassword,
-} from "../../service/authService.js";
-import { updateEmail } from "../../service/settingsService.js";
+} from "../../service/user/authService.js";
+import { updateEmail } from "../../service/user/settingsService.js";
 
 export const signIn = async (req, res) => {
   res.render("pages/login", { title: "SignIn", layout: "layouts/auth" });

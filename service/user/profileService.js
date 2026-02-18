@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import addressDb from "../models/addressDb.js";
-import userDb from "../models/userDb.js";
+import addressDb from "../../models/addressDb.js";
+import userDb from "../../models/userDb.js";
 
 export const updateProfile = async (updateData, userId) => {
   return await userDb.findByIdAndUpdate(userId, { $set: updateData }, { new: true });

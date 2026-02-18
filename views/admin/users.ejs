@@ -11,10 +11,38 @@
         <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
             <h3 class="font-bold text-lg text-apple-dark">Registered Users</h3>
             <div class="flex gap-2">
-                <button
-                    class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5">
-                    Filter: All
-                </button>
+                <div class="relative" id="userFilterWrap">
+                    <button onclick="document.getElementById('userFilterMenu').classList.toggle('hidden')"
+                        class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5">
+                        <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                        <span id="userFilterLabel">All</span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div id="userFilterMenu"
+                        class="hidden absolute right-0 mt-2 w-40 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
+                        <button onclick="setUserFilter('All')"
+                            class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                            <i data-lucide="layers" class="w-3.5 h-3.5"></i> All
+                        </button>
+                        <button onclick="setUserFilter('Active')"
+                            class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-400"></i> Active
+                        </button>
+                        <button onclick="setUserFilter('Blocked')"
+                            class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                            <i data-lucide="ban" class="w-3.5 h-3.5 text-red-400"></i> Blocked
+                        </button>
+                        <div class="border-t border-white/5 my-1"></div>
+                        <button onclick="setUserFilter('User')"
+                            class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                            <i data-lucide="user" class="w-3.5 h-3.5 text-blue-400"></i> User
+                        </button>
+                        <button onclick="setUserFilter('Admin')"
+                            class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                            <i data-lucide="shield" class="w-3.5 h-3.5 text-purple-400"></i> Admin
+                        </button>
+                    </div>
+                </div>
                 <div class="relative">
                     <i data-lucide="search"
                         class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray"></i>
@@ -51,10 +79,11 @@
                             <span
                                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400">Active</span>
                         </td>
-                        <td class="px-6 py-4 text-apple-text-gray">Oct 24, 2026</td>
+                        <td class="px-6 py-4 text-apple-text-gray">Oct 24, 2024</td>
                         <td class="px-6 py-4 text-right">
-                            <button class="text-apple-text-gray hover:text-apple-gold transition-colors">
-                                <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                            <button onclick="toggleBlock(this)" data-blocked="false"
+                                class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20">
+                                <i data-lucide="ban" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Block
                             </button>
                         </td>
                     </tr>
@@ -72,17 +101,82 @@
                         <td class="px-6 py-4 text-apple-text-gray">Member</td>
                         <td class="px-6 py-4">
                             <span
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-yellow-500/10 text-yellow-500">Suspended</span>
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500/10 text-red-400">Blocked</span>
                         </td>
-                        <td class="px-6 py-4 text-apple-text-gray">Nov 01, 2026</td>
+                        <td class="px-6 py-4 text-apple-text-gray">Nov 01, 2024</td>
                         <td class="px-6 py-4 text-right">
-                            <button class="text-apple-text-gray hover:text-apple-gold transition-colors">
-                                <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                            <button onclick="toggleBlock(this)" data-blocked="true"
+                                class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-green-500/20 bg-green-500/10 text-green-400 hover:bg-green-500/20">
+                                <i data-lucide="shield-check"
+                                    class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Unblock
                             </button>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination -->
+        <div class="p-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-xs text-apple-text-gray">Showing <span class="font-bold text-apple-dark">1–2</span> of <span
+                    class="font-bold text-apple-dark">48</span> users</p>
+            <div class="flex items-center gap-1">
+                <button
+                    class="px-3 py-1.5 text-xs font-semibold text-apple-text-gray bg-white/5 rounded-lg hover:bg-white/10 transition-colors border border-white/5 disabled:opacity-30"
+                    disabled>
+                    <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                </button>
+                <button
+                    class="px-3 py-1.5 text-xs font-bold rounded-lg transition-colors bg-apple-gold text-[#1a231e] shadow-sm">1</button>
+                <button
+                    class="px-3 py-1.5 text-xs font-semibold text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors">2</button>
+                <button
+                    class="px-3 py-1.5 text-xs font-semibold text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors">3</button>
+                <span class="px-2 text-xs text-apple-text-gray">...</span>
+                <button
+                    class="px-3 py-1.5 text-xs font-semibold text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors">24</button>
+                <button
+                    class="px-3 py-1.5 text-xs font-semibold text-apple-text-gray bg-white/5 rounded-lg hover:bg-white/10 transition-colors border border-white/5">
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    function setUserFilter(val) {
+        document.getElementById('userFilterLabel').textContent = val;
+        document.getElementById('userFilterMenu').classList.add('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function toggleBlock(btn) {
+        const isBlocked = btn.getAttribute('data-blocked') === 'true';
+        const row = btn.closest('tr');
+        const statusBadge = row.querySelector('td:nth-child(3) span');
+
+        if (isBlocked) {
+            // Unblock → set to Active
+            btn.setAttribute('data-blocked', 'false');
+            btn.className = 'px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20';
+            btn.innerHTML = '<i data-lucide="ban" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Block';
+            statusBadge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400';
+            statusBadge.textContent = 'Active';
+        } else {
+            // Block → set to Blocked
+            btn.setAttribute('data-blocked', 'true');
+            btn.className = 'px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-green-500/20 bg-green-500/10 text-green-400 hover:bg-green-500/20';
+            btn.innerHTML = '<i data-lucide="shield-check" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Unblock';
+            statusBadge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500/10 text-red-400';
+            statusBadge.textContent = 'Blocked';
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    document.addEventListener('click', function (e) {
+        const wrap = document.getElementById('userFilterWrap');
+        if (wrap && !wrap.contains(e.target)) {
+            document.getElementById('userFilterMenu').classList.add('hidden');
+        }
+    });
+</script>

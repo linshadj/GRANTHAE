@@ -6,8 +6,7 @@ import {
   editAddressService,
   setDefaultAddressService,
   updateProfile,
-} from "../../service/profileService.js";
-import e from "express";
+} from "../../service/user/profileService.js";
 
 export const viewProfile = async (req, res) => {
   try {

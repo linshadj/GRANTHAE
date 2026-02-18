@@ -1,5 +1,5 @@
-import userDb from "../models/userDb.js";
-import { otpCreator } from "../utils/otpGenerator.js";
+import userDb from "../../models/userDb.js";
+import { otpCreator } from "../../utils/otpGenerator.js";
 import bcrypt from "bcrypt";
 
 export const verifyEmail = async (user, newEmail) => {

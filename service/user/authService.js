@@ -1,9 +1,9 @@
-import otpDb from "../models/otpDb.js";
-import userDb from "../models/userDb.js";
+import otpDb from "../../models/otpDb.js";
+import userDb from "../../models/userDb.js";
 import bcrypt from "bcrypt";
-import { otpCreator } from "../utils/otpGenerator.js";
-import { hashPass } from "../utils/passHasher.js";
-import { validateEmail, validateName, validatePassword } from "../utils/validator.js";
+import { otpCreator } from "../../utils/otpGenerator.js";
+import { hashPass } from "../../utils/passHasher.js";
+import { validateEmail, validateName, validatePassword } from "../../utils/validator.js";
 
 export const signInVerify = async (userData) => {
   const { email, password } = userData;

@@ -1,5 +1,5 @@
 import userDb from "../../models/userDb.js"
-import { changePasswordService, verifyEmail } from "../../service/settingsService.js"
+import { changePasswordService, verifyEmail } from "../../service/user/settingsService.js"
 
 export const viewSettings = async (req, res) => {
     try {
