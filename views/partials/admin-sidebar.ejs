@@ -24,39 +24,42 @@
             <ul class="space-y-1">
                 <li>
                     <a href="/admin/dashboard"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/admin/dashboard' ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
                         <i data-lucide="layout-dashboard"
-                            class="w-5 h-5 group-hover:text-apple-gold transition-colors"></i>
+                            class="w-5 h-5 <%= path === '/admin/dashboard' ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Dashboard
                     </a>
                 </li>
                 <li>
                     <a href="/admin/users"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
-                        <i data-lucide="users" class="w-5 h-5 group-hover:text-apple-gold transition-colors"></i>
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/users') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
+                        <i data-lucide="users"
+                            class="w-5 h-5 <%= path.startsWith('/admin/users') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Users
                     </a>
                 </li>
                 <li>
                     <a href="/admin/products"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
-                        <i data-lucide="shopping-bag" class="w-5 h-5 group-hover:text-apple-gold transition-colors"></i>
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/products') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
+                        <i data-lucide="shopping-bag"
+                            class="w-5 h-5 <%= path.startsWith('/admin/products') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Products
                     </a>
                 </li>
                 <li>
                     <a href="/admin/rentals"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
-                        <i data-lucide="book-open" class="w-5 h-5 group-hover:text-apple-gold transition-colors"></i>
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/rentals') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
+                        <i data-lucide="book-open"
+                            class="w-5 h-5 <%= path.startsWith('/admin/rentals') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Rentals
                     </a>
                 </li>
                 <li>
                 <li>
                     <a href="/admin/requests"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/requests') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
                         <i data-lucide="clipboard-list"
-                            class="w-5 h-5 group-hover:text-apple-gold transition-colors"></i>
+                            class="w-5 h-5 <%= path.startsWith('/admin/requests') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Requests
                         <span
                             class="ml-auto bg-apple-gold text-[#1a231e] text-[0.6rem] font-bold px-1.5 py-0.5 rounded-full">3</span>
@@ -64,30 +67,33 @@
                 </li>
                 <li>
                     <a href="/admin/categories"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
-                        <i data-lucide="tags" class="w-5 h-5 group-hover:text-apple-gold transition-colors"></i>
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/categories') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
+                        <i data-lucide="tags"
+                            class="w-5 h-5 <%= path.startsWith('/admin/categories') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Categories
                     </a>
                 </li>
                 <li>
                     <a href="/admin/orders"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/orders') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
                         <i data-lucide="shopping-cart"
-                            class="w-5 h-5 group-hover:text-apple-gold transition-colors"></i>
+                            class="w-5 h-5 <%= path.startsWith('/admin/orders') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Orders
                     </a>
                 </li>
                 <li>
                     <a href="/admin/offers"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
-                        <i data-lucide="percent" class="w-5 h-5 group-hover:text-apple-gold transition-colors"></i>
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/offers') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
+                        <i data-lucide="percent"
+                            class="w-5 h-5 <%= path.startsWith('/admin/offers') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Offers
                     </a>
                 </li>
                 <li>
                     <a href="/admin/coupons"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
-                        <i data-lucide="ticket" class="w-5 h-5 group-hover:text-apple-gold transition-colors"></i>
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/coupons') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
+                        <i data-lucide="ticket"
+                            class="w-5 h-5 <%= path.startsWith('/admin/coupons') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Coupons
                     </a>
                 </li>
@@ -100,15 +106,17 @@
             <ul class="space-y-1">
                 <li>
                     <a href="/admin/reports"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
-                        <i data-lucide="bar-chart-2" class="w-5 h-5 group-hover:text-apple-gold transition-colors"></i>
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/reports') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
+                        <i data-lucide="bar-chart-2"
+                            class="w-5 h-5 <%= path.startsWith('/admin/reports') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Reports
                     </a>
                 </li>
                 <li>
                     <a href="/admin/settings"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
-                        <i data-lucide="settings" class="w-5 h-5 group-hover:text-apple-gold transition-colors"></i>
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/settings') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
+                        <i data-lucide="settings"
+                            class="w-5 h-5 <%= path.startsWith('/admin/settings') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Settings
                     </a>
                 </li>
@@ -119,7 +127,7 @@
     <!-- Admin User Footer -->
     <div class="p-4 border-t border-white/5 bg-black/20">
         <a href="/admin/profile"
-            class="flex items-center gap-3 mb-4 px-2 group hover:bg-white/5 p-2 rounded-lg transition-colors">
+            class="flex items-center gap-3 mb-4 px-2 p-2 rounded-lg transition-colors <%= path.startsWith('/admin/profile') ? 'bg-white/5' : 'hover:bg-white/5' %>">
             <div
                 class="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center text-xs font-bold text-white border border-white/10 group-hover:border-apple-gold/50 transition-colors">
                 AD
