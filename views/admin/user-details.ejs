@@ -1,102 +1,188 @@
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-apple-dark">User Details</h1>
-            <p class="text-apple-text-gray/80 text-sm">Managing user: <span class="font-medium text-apple-dark">John
-                    Doe</span></p>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div
+                class="w-16 h-16 rounded-full bg-apple-blue/10 flex items-center justify-center text-xl font-bold text-apple-blue">
+                JD
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-apple-dark">John Doe</h1>
+                <div class="flex items-center gap-2 mt-1">
+                    <span
+                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-500/10 text-blue-400">Member</span>
+                    <span
+                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400">Active</span>
+                    <span class="text-xs text-apple-text-gray">• Joined Oct 24, 2024</span>
+                </div>
+            </div>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-2">
             <button
-                class="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-medium transition-colors border border-red-200">
-                Block User
+                class="px-4 py-2 bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors text-sm font-semibold border border-white/5 flex items-center gap-2">
+                <i data-lucide="edit-3" class="w-4 h-4"></i> Edit
             </button>
             <button
-                class="px-4 py-2 bg-white border border-gray-200 text-apple-dark hover:bg-gray-50 rounded-lg text-sm font-medium transition-colors">
-                Reset Password
+                class="px-4 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors text-sm font-semibold border border-red-500/10 flex items-center gap-2">
+                <i data-lucide="ban" class="w-4 h-4"></i> Block
             </button>
         </div>
     </div>
 
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-apple-card p-4 rounded-2xl border border-white/5 shadow-sm">
+            <p class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">Total Rentals</p>
+            <div class="mt-2 flex items-baseline gap-2">
+                <h3 class="text-2xl font-bold text-apple-dark font-serif">24</h3>
+            </div>
+        </div>
+        <div class="bg-apple-card p-4 rounded-2xl border border-white/5 shadow-sm">
+            <p class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">Active Rentals</p>
+            <div class="mt-2 flex items-baseline gap-2">
+                <h3 class="text-2xl font-bold text-apple-dark font-serif">3</h3>
+                <span class="text-xs text-apple-text-gray font-medium">Books in hand</span>
+            </div>
+        </div>
+        <div class="bg-apple-card p-4 rounded-2xl border border-white/5 shadow-sm">
+            <p class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">Wallet Balance</p>
+            <div class="mt-2 flex items-baseline gap-2">
+                <h3 class="text-2xl font-bold text-apple-dark font-serif">$125.50</h3>
+            </div>
+        </div>
+        <div class="bg-apple-card p-4 rounded-2xl border border-white/5 shadow-sm">
+            <p class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">Total Spent</p>
+            <div class="mt-2 flex items-baseline gap-2">
+                <h3 class="text-2xl font-bold text-apple-dark font-serif">$450.00</h3>
+            </div>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main Info -->
-        <div class="lg:col-span-2 space-y-6">
-            <!-- Stats -->
-            <div class="grid grid-cols-3 gap-4">
-                <div class="glass-card p-4 text-center">
-                    <div class="text-2xl font-bold text-apple-dark">12</div>
-                    <div class="text-xs text-apple-text-gray uppercase tracking-wider font-medium">Rentals</div>
+        <!-- Profile Info -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-apple-card p-6 rounded-2xl border border-white/5 shadow-sm">
+                <h3 class="font-bold text-lg text-apple-dark mb-4">Contact Info</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 bg-white/5 rounded-lg text-apple-text-gray">
+                            <i data-lucide="mail" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-apple-text-gray uppercase tracking-wider">Email</span>
+                            <span class="text-sm font-medium text-apple-dark">john.doe@example.com</span>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 bg-white/5 rounded-lg text-apple-text-gray">
+                            <i data-lucide="phone" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-apple-text-gray uppercase tracking-wider">Phone</span>
+                            <span class="text-sm font-medium text-apple-dark">+1 (555) 123-4567</span>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 bg-white/5 rounded-lg text-apple-text-gray">
+                            <i data-lucide="map-pin" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-apple-text-gray uppercase tracking-wider">Address</span>
+                            <span class="text-sm font-medium text-apple-dark">123 Library lane,<br>Booktown, BK
+                                90210</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="glass-card p-4 text-center">
-                    <div class="text-2xl font-bold text-apple-dark">$450</div>
-                    <div class="text-xs text-apple-text-gray uppercase tracking-wider font-medium">Spent</div>
-                </div>
-                <div class="glass-card p-4 text-center">
-                    <div class="text-2xl font-bold text-green-500">Active</div>
-                    <div class="text-xs text-apple-text-gray uppercase tracking-wider font-medium">Status</div>
-                </div>
-            </div>
 
-            <div class="glass-card p-6 space-y-6">
-                <h3 class="font-semibold text-apple-dark border-b border-gray-100 pb-2">Personal Information</h3>
-                <div class="grid grid-cols-2 gap-6">
-                    <div>
-                        <span class="block text-xs uppercase text-apple-text-gray font-bold mb-1">Full Name</span>
-                        <p class="text-apple-dark">John Doe</p>
-                    </div>
-                    <div>
-                        <span class="block text-xs uppercase text-apple-text-gray font-bold mb-1">Email</span>
-                        <p class="text-apple-dark">john.doe@example.com</p>
-                    </div>
-                    <div>
-                        <span class="block text-xs uppercase text-apple-text-gray font-bold mb-1">Phone</span>
-                        <p class="text-apple-dark">+1 (555) 123-4567</p>
-                    </div>
-                    <div>
-                        <span class="block text-xs uppercase text-apple-text-gray font-bold mb-1">Joined Date</span>
-                        <p class="text-apple-dark">Jan 15, 2023</p>
-                    </div>
+                <div class="mt-8 pt-6 border-t border-white/5">
+                    <h3 class="font-bold text-lg text-apple-dark mb-2">About</h3>
+                    <p class="text-sm text-apple-text-gray leading-relaxed">
+                        Avid reader and book collector. Loves science fiction and history. Always returns books on time
+                        and active in the community.
+                    </p>
                 </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="glass-card overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                    <h3 class="font-semibold text-apple-dark">Recent Activity</h3>
-                </div>
-                <table class="w-full text-sm text-left">
-                    <thead class="text-xs text-apple-text-gray uppercase bg-gray-50/50">
-                        <tr>
-                            <th class="px-6 py-3">Action</th>
-                            <th class="px-6 py-3">Date</th>
-                            <th class="px-6 py-3">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        <tr>
-                            <td class="px-6 py-4 font-medium text-apple-dark">Rented Book</td>
-                            <td class="px-6 py-4 text-apple-text-gray">2 hours ago</td>
-                            <td class="px-6 py-4">Steve Jobs (Walter Isaacson)</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 font-medium text-apple-dark">Login from New Device</td>
-                            <td class="px-6 py-4 text-apple-text-gray">Yesterday</td>
-                            <td class="px-6 py-4">MacBook Pro - San Francisco, CA</td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
 
-        <!-- Sidebar -->
-        <div class="space-y-6">
-            <div class="glass-card p-6 flex flex-col items-center text-center">
-                <div
-                    class="w-24 h-24 rounded-full bg-apple-blue/10 flex items-center justify-center text-apple-blue font-bold text-2xl mb-4">
-                    JD
+        <!-- Tabs & History -->
+        <div class="lg:col-span-2">
+            <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden min-h-[500px]">
+                <!-- Tab Headers -->
+                <div class="flex border-b border-white/5">
+                    <button
+                        class="flex-1 px-6 py-4 text-sm font-bold text-apple-dark border-b-2 border-apple-gold bg-white/5">
+                        Rental History
+                    </button>
+                    <button
+                        class="flex-1 px-6 py-4 text-sm font-semibold text-apple-text-gray hover:text-apple-dark hover:bg-white/5 transition-colors">
+                        Transactions
+                    </button>
+                    <button
+                        class="flex-1 px-6 py-4 text-sm font-semibold text-apple-text-gray hover:text-apple-dark hover:bg-white/5 transition-colors">
+                        Activity Log
+                    </button>
                 </div>
-                <h3 class="text-lg font-bold text-apple-dark">John Doe</h3>
-                <p class="text-apple-text-gray text-sm">Customer</p>
+
+                <!-- Tab Content: Rentals (Active) -->
+                <div class="p-0">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-white/5 text-apple-text-gray uppercase text-xs font-bold tracking-wider">
+                                <tr>
+                                    <th class="px-6 py-4">Book</th>
+                                    <th class="px-6 py-4">Date</th>
+                                    <th class="px-6 py-4">Due</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                <tr class="group hover:bg-white/5 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-apple-dark">The Psychology of Money</td>
+                                    <td class="px-6 py-4 text-apple-text-gray">Feb 15, 2026</td>
+                                    <td class="px-6 py-4 text-apple-text-gray">Feb 22, 2026</td>
+                                    <td class="px-6 py-4">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400">Active</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-medium text-apple-dark">$2.00</td>
+                                </tr>
+                                <tr class="group hover:bg-white/5 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-apple-dark">Atomic Habits</td>
+                                    <td class="px-6 py-4 text-apple-text-gray">Jan 20, 2026</td>
+                                    <td class="px-6 py-4 text-apple-text-gray">Jan 27, 2026</td>
+                                    <td class="px-6 py-4">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-500/10 text-blue-400">Returned</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-medium text-apple-dark">$3.00</td>
+                                </tr>
+                                <tr class="group hover:bg-white/5 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-apple-dark">Deep Work</td>
+                                    <td class="px-6 py-4 text-apple-text-gray">Jan 10, 2026</td>
+                                    <td class="px-6 py-4 text-apple-text-gray">Jan 17, 2026</td>
+                                    <td class="px-6 py-4">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500/10 text-red-400">Overdue
+                                            (Returned)</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-medium text-apple-dark">$2.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Footer / Pagination for Table -->
+                <div class="p-4 border-t border-white/5 flex items-center justify-between">
+                    <span class="text-xs text-apple-text-gray">Showing 3 of 24 rentals</span>
+                    <div class="flex gap-1">
+                        <button class="px-2 py-1 text-xs bg-white/5 rounded hover:bg-white/10 text-apple-text-gray"
+                            disabled>Prev</button>
+                        <button
+                            class="px-2 py-1 text-xs bg-white/5 rounded hover:bg-white/10 text-apple-text-gray">Next</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

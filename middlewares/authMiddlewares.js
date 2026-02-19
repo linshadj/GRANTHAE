@@ -32,16 +32,18 @@ export const ifAuth = (req, res, next) => {
   return next();
 };
 
-export const isAdmin = (req, res, next) => {
+export const isAdmin = async (req, res, next) => {
   if (req.session.isAdmin) {
-    return next();
+    const admin = await userDb.findOne({ _id: req.session.adminId, role: "admin" } );
+    if (!admin.isBlocked) {
+      return next();
+    }
   }
-  return res.redirect("/admin");
-  next();
+  return res.redirect(`/admin/login?status=error&message=${encodeURIComponent("Please login")}`);
 };
 
 export const ifAdmin = (req, res, next) => {
-  if (req.session.isAdmin) {
+  if (req.session && req.session.isAdmin) {
     return res.redirect("/admin/dashboard");
   }
   return next();
