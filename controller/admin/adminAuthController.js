@@ -34,6 +34,7 @@ export const adminLogoutHandler = (req, res) => {
         console.error("Error destroying admin session: ", err);
         return res.status(500).json({ success: false, message: "Failed to log out" });
       }
+      res.clearCookie("connect.sid");
       return res.status(200).json({ success: true, redirectUrl: "/admin/login?status=success&message=Logged out successfully" });
     });
   } catch (err) {
