@@ -85,104 +85,120 @@
                     <i data-lucide="search" class="absolute left-3 w-3.5 h-3.5 text-apple-text-gray"></i>
                     <input id="searchInput" type="text" value="<%= userDb.searchQuery || '' %>"
                         placeholder="Search Users..."
-                        class="pl-10 pr-4 py-3 w-64 text-xs bg-white/5 border border-white/5 rounded-lg focus:outline-none focus:ring-1 focus:ring-apple-gold/50 text-apple-dark placeholder-apple-text-gray/50 transition-all hover:bg-white/10">
-
-                </div>
+                        class="pl-10 pr-20 py-3 w-64 text-xs bg-white/5 border border-white/5 rounded-lg focus:outline-none focus:ring-1 focus:ring-apple-gold/50 text-apple-dark placeholder-apple-text-gray/50 transition-all hover:bg-white/10">
+                    <!-- Clear button -->
+                    <button id="clearSearchBtn"
+                        class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 text-xs font-semibold rounded-lg text-apple-text-gray hover:bg-white/10 transition-colors"
+                        title="Clear search">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                    </button>
             </div>
-        </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-                <thead class="bg-white/5">
-                    <tr class="text-left text-xs font-bold text-apple-text-gray uppercase tracking-wider">
-                        <th class="px-6 py-4">User</th>
-                        <th class="px-6 py-4">Role</th>
-                        <th class="px-6 py-4">Status</th>
-                        <th class="px-6 py-4">Joined</th>
-                        <th class="px-6 py-4 text-right">Actions</th>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+            <thead class="bg-white/5">
+                <tr class="text-left text-xs font-bold text-apple-text-gray uppercase tracking-wider">
+                    <th class="px-6 py-4">User</th>
+                    <th class="px-6 py-4">Role</th>
+                    <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4">Joined</th>
+                    <th class="px-6 py-4 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                <% if (userDb.totalFilteredUser===0) { %>
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-apple-text-gray">No users found</td>
                     </tr>
-                </thead>
-                <tbody class="divide-y divide-white/5">
-                    <% if (userDb.totalFilteredUser===0) { %>
-                        <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-apple-text-gray">No users found</td>
-                        </tr>
-                        <% } else { %>
-                            <% userDb.users.forEach(user=> { %>
-                                <tr data-userid="<%= user._id %>"
-                                    onclick="window.location.href='/admin/users/<%= user._id %>'"
-                                    class="group hover:bg-white/5 transition-colors cursor-pointer">
-                                    <td class="px-6 py-4 flex items-center gap-3">
-                                        <div
-                                            class="w-8 h-8 bg-[#1C2A3A] rounded-full relative overflow-hidden group shadow-lg">
-                                            <img id="avatarPreview" src="<%= user.avatar %>"
-                                                class="w-full h-full object-cover">
-                                        </div>
-                                        <div class="font-medium text-apple-dark">
-                                            <%= user.firstName %>
-                                                <%= user.lastName %>
-                                        </div>
-                                        <div class="text-xs text-apple-text-gray">
-                                            <%= user.email %>
-                                        </div>
-        </div>
-        </td>
-        <td class="px-6 py-4 text-apple-text-gray">
-            <%= user.role %>
-        </td>
-        <td class="px-6 py-4">
-            <span
-                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold <%= user.isBlocked ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400' %>">
-                <%= user.isBlocked ? 'Blocked' : 'Active' %>
-            </span>
-        </td>
-        <td class="px-6 py-4 text-apple-text-gray">
-            <%= user.createdAt.toLocaleDateString() %>
-        </td>
-        <td class="px-6 py-4 text-right">
-            <button onclick="event.stopPropagation(); toggleBlock(this)" data-blocked="<%= user.isBlocked %>"
-                class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all border <%= user.isBlocked ? 'border-green-500/20 bg-green-500/10 text-green-400 hover:bg-green-500/20' : 'border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20' %>">
-                <% if (user.isBlocked) { %>
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Unblock
                     <% } else { %>
-                        <i data-lucide="ban" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Block
-                        <% } %>
-            </button>
-        </td>
-        </tr>
-        <% }) %>
-            <% } %>
-                </tbody>
-                </table>
+                        <% userDb.users.forEach(user=> { %>
+                            <tr data-userid="<%= user._id %>"
+                                onclick="window.location.href='/admin/users/<%= user._id %>'"
+                                class="group hover:bg-white/5 transition-colors cursor-pointer">
+                                <td class="px-6 py-4 flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 bg-[#1C2A3A] rounded-full relative overflow-hidden group shadow-lg">
+                                        <img id="avatarPreview" src="<%= user.avatar %>"
+                                            class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="font-medium text-apple-dark">
+                                        <%= user.firstName %>
+                                            <%= user.lastName %>
+                                    </div>
+                                    <div class="text-xs text-apple-text-gray">
+                                        <%= user.email %>
+                                    </div>
     </div>
+    </td>
+    <td class="px-6 py-4 text-apple-text-gray">
+        <%= user.role %>
+    </td>
+    <td class="px-6 py-4">
+        <span
+            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold <%= user.isBlocked ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400' %>">
+            <%= user.isBlocked ? 'Blocked' : 'Active' %>
+        </span>
+    </td>
+    <td class="px-6 py-4 text-apple-text-gray">
+        <%= user.createdAt.toLocaleDateString() %>
+    </td>
+    <td class="px-6 py-4 text-right">
+        <button onclick="event.stopPropagation(); toggleBlock(this)" data-blocked="<%= user.isBlocked %>"
+            class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all border <%= user.isBlocked ? 'border-green-500/20 bg-green-500/10 text-green-400 hover:bg-green-500/20' : 'border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20' %>">
+            <% if (user.isBlocked) { %>
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Unblock
+                <% } else { %>
+                    <i data-lucide="ban" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Block
+                    <% } %>
+        </button>
+    </td>
+    </tr>
+    <% }) %>
+        <% } %>
+            </tbody>
+            </table>
+</div>
 
-    <!-- Pagination -->
-    <div class="p-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-xs text-apple-text-gray">Showing <span class="font-bold text-apple-dark">
-                <% if(userDb.totalFilteredUser===0) { %>0<% } else { %>
-                        <%= (userDb.currentPage - 1) * userDb.limit + 1 %>-<%= Math.min(userDb.currentPage *
-                                userDb.limit, userDb.totalFilteredUser) %>
-                                <% } %>
-            </span> of <span class="font-bold text-apple-dark">
-                <%= userDb.totalFilteredUser %>
-            </span> users</p>
-        <div class="flex items-center gap-1">
-            <% for(let i=1; i <=userDb.totalPages; i++) { %>
-                <a href="/admin/users?page=<%= i %>&sort=<%= userDb.selectedSort || '' %>&filter=<%= userDb.selectedFilter || '' %>&search=<%= userDb.searchQuery || '' %>"
-                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors 
+<!-- Pagination -->
+<div class="p-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <p class="text-xs text-apple-text-gray">Showing <span class="font-bold text-apple-dark">
+            <% if(userDb.totalFilteredUser===0) { %>0<% } else { %>
+                    <%= (userDb.currentPage - 1) * userDb.limit + 1 %>-<%= Math.min(userDb.currentPage * userDb.limit,
+                            userDb.totalFilteredUser) %>
+                            <% } %>
+        </span> of <span class="font-bold text-apple-dark">
+            <%= userDb.totalFilteredUser %>
+        </span> users</p>
+    <div class="flex items-center gap-1">
+        <% for(let i=1; i <=userDb.totalPages; i++) { %>
+            <a href="/admin/users?page=<%= i %>&sort=<%= userDb.selectedSort || '' %>&filter=<%= userDb.selectedFilter || '' %>&search=<%= userDb.searchQuery || '' %>"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors 
        <%= i === userDb.currentPage ? 'bg-apple-gold text-[#1a231e] font-bold' : 'text-apple-text-gray hover:bg-white/10' %>">
-                    <%= i %>
-                </a>
-                <% } %>
+                <%= i %>
+            </a>
+            <% } %>
 
-        </div>
     </div>
+</div>
 </div>
 </div>
 
 <script>
 
     const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+    function updateClearBtnVisibility() {
+        if (!clearSearchBtn) return;
+        clearSearchBtn.classList.toggle('hidden', !searchInput.value.trim());
+    }
+
+    searchInput.addEventListener('input', updateClearBtnVisibility);
+    updateClearBtnVisibility();
+
     searchInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             const searchQuery = searchInput.value.trim();
@@ -193,13 +209,29 @@
         }
     });
 
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            searchInput.value = '';
+            updateClearBtnVisibility();
+
+            const currentPage = 1;
+            const currentSort = '<%= userDb.selectedSort || '' %>';
+            const currentFilter = '<%= userDb.selectedFilter || '' %>';
+            
+            window.location.href = `/admin/users?page=${currentPage}&sort=${currentSort}&filter=${currentFilter}&search=`;
+        });
+    }
+
+
     window.toggleBlock = async (btn) => {
-        // Handle both string "true" and boolean true from EJS
+        
         const rawBlocked = btn.getAttribute('data-blocked');
         const isBlocked = rawBlocked === 'true' || rawBlocked === true;
 
         const action = isBlocked ? 'Unblock' : 'Block';
-        const confirmBtnColor = isBlocked ? '#22c55e' : '#ef4444'; // Green for unblock, Red for block
+        const confirmBtnColor = isBlocked ? '#22c55e' : '#ef4444'; 
 
         Swal.fire({
             title: `Are you sure?`,
@@ -231,7 +263,36 @@
                     const res = await data.json();
 
                     if (res.success) {
-                        window.location.href = res.redirectUrl || '/admin/users';
+                        const newStatus = !isBlocked;
+
+                        // Simulate backend update logic
+                        const row = btn.closest('tr');
+                        const statusBadge = row.querySelector('td:nth-child(3) span');
+
+                        // Update button state immediately
+                        btn.setAttribute('data-blocked', newStatus.toString());
+
+                        if (isBlocked) {
+                            // Unblock → set to Active
+                            btn.className = 'px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20';
+                            btn.innerHTML = '<i data-lucide="ban" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Block';
+                            if (statusBadge) {
+                                statusBadge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400';
+                                statusBadge.textContent = 'Active';
+                            }
+                            window.location.href = '/admin/users?status=success&message=User unblocked successfully';
+                        } else {
+                            // Block → set to Blocked
+                            btn.className = 'px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-green-500/20 bg-green-500/10 text-green-400 hover:bg-green-500/20';
+                            btn.innerHTML = '<i data-lucide="shield-check" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Unblock';
+                            if (statusBadge) {
+                                statusBadge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500/10 text-red-400';
+                                statusBadge.textContent = 'Blocked';
+                            }
+                            window.location.href = '/admin/users?status=success&message=User blocked successfully';
+                        }
+
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
                     } else {
                         Swal.fire({
                             title: 'Error!',
@@ -247,37 +308,6 @@
                 } catch (error) {
                     console.error('Error toggling user block status:', error);
                 }
-                // Determine new status
-                const newStatus = !isBlocked;
-
-                // Simulate backend update logic
-                const row = btn.closest('tr');
-                const statusBadge = row.querySelector('td:nth-child(3) span');
-
-                // Update button state immediately
-                btn.setAttribute('data-blocked', newStatus.toString());
-
-                if (isBlocked) {
-                    // Unblock → set to Active
-                    btn.className = 'px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20';
-                    btn.innerHTML = '<i data-lucide="ban" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Block';
-                    if (statusBadge) {
-                        statusBadge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400';
-                        statusBadge.textContent = 'Active';
-                    }
-                    window.location.href = '/admin/users?status=success&message=User unblocked successfully'; 
-                } else {
-                    // Block → set to Blocked
-                    btn.className = 'px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-green-500/20 bg-green-500/10 text-green-400 hover:bg-green-500/20';
-                    btn.innerHTML = '<i data-lucide="shield-check" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i>Unblock';
-                    if (statusBadge) {
-                        statusBadge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500/10 text-red-400';
-                        statusBadge.textContent = 'Blocked';
-                    }   
-                    window.location.href = '/admin/users?status=success&message=User blocked successfully'; 
-                }
-
-                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
         });
     }

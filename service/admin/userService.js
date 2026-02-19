@@ -63,6 +63,9 @@ export const toggleBlockUserService = async (userId, action) => {
   if (!user) {
     throw new Error("User not found");
   }
+  if (user.role === "admin") {
+    throw new Error("Cannot block/unblock an admin user");
+  }
   if (action === "block") {
     user.isBlocked = true;
     console.log("Blocking user:", userId);
