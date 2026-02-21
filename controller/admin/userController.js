@@ -25,3 +25,23 @@ export const toggleBlockUser = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
+
+export const liveUsersSearch = async (req, res) => {
+  try {
+    const page = 1; // Always first page during live search
+    const search = req.query.search || "";
+    const sort = req.query.sort || "newest";
+    const filter = req.query.filter || "all";
+
+    const userDbData = await userDetails(page, search, sort, filter);
+
+    res.json({
+      success: true,
+      users: userDbData.users,
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

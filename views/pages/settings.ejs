@@ -53,7 +53,7 @@
           <p class="text-apple-text-gray text-sm"><%= user.email %></p>
         </div>
         <button
-          onclick="openEmailModal()"
+          onclick="<%= user.googleId ? 'openCannotChangeEmailModal()' : 'openEmailModal()' %>"
           class="z-20 relative px-4 py-2 bg-white/5 text-apple-dark hover:bg-white/10 rounded-lg text-sm transition-all font-medium border border-white/10"
         >
           Change Email
@@ -67,7 +67,7 @@
     <h2 class="text-lg font-semibold text-apple-dark border-b border-white/10 pb-2">Security</h2>
     <div class="space-y-4">
       <button
-        onclick="openPasswordModal()"
+        onclick="<%= user.googleId ? 'openCannotChangePasswordModal()' : 'openPasswordModal()' %>"
         class="z-20 relative w-full text-left px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-between group"
       >
         <span class="text-apple-text-gray group-hover:text-apple-dark transition-colors"
@@ -196,9 +196,109 @@
             >
               Cancel
             </button>
-            <button id="passwordSubmit" type="submit" class="flex-1 btn-primary">Update Password</button>
+            <button id="passwordSubmit" type="submit" class="flex-1 btn-primary">
+              Update Password
+            </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cannot change email modal -->
+
+<div
+  id="cannot-change-email-modal"
+  class="fixed inset-0 z-[999] hidden"
+  role="dialog"
+  aria-modal="true"
+>
+  <div
+    class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity opacity-0"
+    id="cannot-change-email-modal-backdrop"
+  ></div>
+
+  <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4 text-center">
+      <div
+        class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 scale-95 border border-white/10"
+        id="cannot-change-email-modal-panel"
+      >
+        <div class="p-8 text-center space-y-4">
+          <div
+            class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <i data-lucide="alert-triangle" class="w-8 h-8 text-red-500"></i>
+          </div>
+
+          <h3 class="text-xl font-bold text-apple-dark font-serif">Cannot Change Email Address</h3>
+
+          <p class="text-apple-text-gray text-sm">
+             Unable to change your email address since it is <span class="font-bold text-red-500">linked to a Google account</span>.
+             <br>
+              To change it,
+            please disconnect your Google account first.
+          </p>
+        </div>
+
+        <div class="p-6 border-t border-white/10 bg-white/5 flex justify-center">
+          <button
+            type="button"
+            onclick="closeCannotChangeEmailModal()"
+            class="px-6 py-2 bg-apple-blue text-black hover:bg-apple-blue/90 rounded-lg text-sm transition-all font-medium shadow-lg"
+          >
+            Okay
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Cannot change password modal -->
+
+<div
+  id="cannot-change-password-modal"
+  class="fixed inset-0 z-[999] hidden"
+  role="dialog"
+  aria-modal="true"
+>
+  <div
+    class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity opacity-0"
+    id="cannot-change-password-modal-backdrop"
+  ></div>
+
+  <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4 text-center">
+      <div
+        class="relative transform overflow-hidden rounded-2xl bg-apple-card text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md opacity-0 translate-y-4 scale-95 border border-white/10"
+        id="cannot-change-password-modal-panel"
+      >
+        <div class="p-8 text-center space-y-4">
+          <div
+            class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <i data-lucide="alert-triangle" class="w-8 h-8 text-red-500"></i>
+          </div>
+
+          <h3 class="text-xl font-bold text-apple-dark font-serif">Cannot Change Password</h3>
+          <p class="text-apple-text-gray text-sm">
+             Unable to change your password since it is <span class="font-bold text-red-500">linked to a Google account</span>.
+             <br>
+              To change it,
+            please disconnect your Google account first.
+          </p>
+        </div>
+
+        <div class="p-6 border-t border-white/10 bg-white/5 flex justify-center">
+          <button
+            type="button"
+            onclick="closeCannotChangePasswordModal()"
+            class="px-6 py-2 bg-apple-blue text-black hover:bg-apple-blue/90 rounded-lg text-sm transition-all font-medium shadow-lg"
+          >
+            Okay
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -380,9 +480,18 @@
   const confirmNewPasswordError = document.getElementById("confirmNewPasswordError");
   const backendPasswordError = document.getElementById("backendPasswordError");
 
-  const emailSubmitText = "Send Code"
-    const otpSubmitText = "Verify & Save"
-    const passwordSubmitText = "Update Password"
+  const emailSubmitText = "Send Code";
+  const otpSubmitText = "Verify & Save";
+  const passwordSubmitText = "Update Password";
+
+  const cannotChangeEmailModal = document.getElementById("cannot-change-email-modal");
+  const cannotChangeEmailBackdrop = document.getElementById("cannot-change-email-modal-backdrop");
+  const cannotChangeEmailPanel = document.getElementById("cannot-change-email-modal-panel");
+
+  const cannotChangePasswordModal = document.getElementById("cannot-change-password-modal");
+  const cannotChangePasswordBackdrop = document.getElementById("cannot-change-password-modal-backdrop");
+  const cannotChangePasswordPanel = document.getElementById("cannot-change-password-modal-panel");
+
 
   // OTP Input auto-focus
 
@@ -606,6 +715,61 @@
     }, 200);
   }
 
+  function openCannotChangeEmailModal() {
+    if (!cannotChangeEmailModal) return;
+
+    document.body.appendChild(cannotChangeEmailModal);
+    toggleModalState(true);
+
+    cannotChangeEmailModal.classList.remove("hidden");
+
+    setTimeout(() => {
+      cannotChangeEmailBackdrop.classList.remove("opacity-0");
+      cannotChangeEmailPanel.classList.remove("opacity-0", "translate-y-4", "scale-95");
+      cannotChangeEmailPanel.classList.add("opacity-100", "translate-y-0", "scale-100");
+    }, 10);
+  }
+
+  function closeCannotChangeEmailModal() {
+    if (!cannotChangeEmailModal) return;
+
+    cannotChangeEmailBackdrop.classList.add("opacity-0");
+    cannotChangeEmailPanel.classList.remove("opacity-100", "translate-y-0", "scale-100");
+    cannotChangeEmailPanel.classList.add("opacity-0", "translate-y-4", "scale-95");
+
+    setTimeout(() => {
+      cannotChangeEmailModal.classList.add("hidden");
+      toggleModalState(false);
+    }, 200);
+  }
+
+  function openCannotChangePasswordModal() {
+    if (!cannotChangePasswordModal) return;
+
+    document.body.appendChild(cannotChangePasswordModal);
+    toggleModalState(true);
+
+    cannotChangePasswordModal.classList.remove("hidden");
+
+    setTimeout(() => {
+      cannotChangePasswordBackdrop.classList.remove("opacity-0");
+      cannotChangePasswordPanel.classList.remove("opacity-0", "translate-y-4", "scale-95");
+      cannotChangePasswordPanel.classList.add("opacity-100", "translate-y-0", "scale-100");
+    }, 10);
+  }
+
+  function closeCannotChangePasswordModal() {
+    if (!cannotChangePasswordModal) return;
+
+    cannotChangePasswordBackdrop.classList.add("opacity-0");
+    cannotChangePasswordPanel.classList.remove("opacity-100", "translate-y-0", "scale-100");
+    cannotChangePasswordPanel.classList.add("opacity-0", "translate-y-4", "scale-95");
+    setTimeout(() => {
+      cannotChangePasswordModal.classList.add("hidden");
+      toggleModalState(false);
+    }, 200);
+  }
+
   // Email Modal Flow Logic
   const emailModal = document.getElementById("email-modal");
   const emailBackdrop = document.getElementById("email-backdrop");
@@ -737,7 +901,6 @@
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return passwordRegex.test(password);
   }
-
 
   if (passwordBackdrop) passwordBackdrop.addEventListener("click", closePasswordModal);
   if (emailBackdrop) emailBackdrop.addEventListener("click", closeEmailModal);

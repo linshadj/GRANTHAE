@@ -108,7 +108,7 @@
                     <th class="px-6 py-4 text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-white/5">
+            <tbody id="usersTableBody" class="divide-y divide-white/5">
                 <% if (userDb.totalFilteredUser===0) { %>
                     <tr>
                         <td colspan="5" class="px-6 py-4 text-center text-apple-text-gray">No users found</td>
@@ -199,15 +199,116 @@
     searchInput.addEventListener('input', updateClearBtnVisibility);
     updateClearBtnVisibility();
 
-    searchInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            const searchQuery = searchInput.value.trim();
-            const currentPage = 1; // Reset to first page on new search
-            const currentSort = '<%= userDb.selectedSort || '' %>';
-            const currentFilter = '<%= userDb.selectedFilter || '' %>';
-            window.location.href = `/admin/users?page=${currentPage}&sort=${currentSort}&filter=${currentFilter}&search=${encodeURIComponent(searchQuery)}`;
+    function debounce(func, delay) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+
+    const usersTableBody = document.getElementById("usersTableBody");
+    const paginationSection = document.querySelector(".p-4.border-t");
+
+    async function liveSearch() {
+
+        const searchQuery = searchInput.value.trim();
+        const currentSort = "<%= userDb.selectedSort || '' %>";
+        const currentFilter = "<%= userDb.selectedFilter || '' %>";
+
+        try {
+
+            const res = await fetch(
+                `/admin/users/live?search=${encodeURIComponent(searchQuery)}&sort=${currentSort}&filter=${currentFilter}`
+            );
+
+            const data = await res.json();
+
+            usersTableBody.innerHTML = "";
+
+            if (!data.success || data.users.length === 0) {
+
+                usersTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-apple-text-gray">
+                            No users found
+                        </td>
+                    </tr>
+                `;
+
+                paginationSection.style.display = "none";
+                return;
+            }
+
+            data.users.forEach(user => {
+
+                usersTableBody.innerHTML += `
+                    <tr onclick="window.location.href='/admin/users/${user._id}'"
+                        class="group hover:bg-white/5 transition-colors cursor-pointer">
+
+                        <td class="px-6 py-4 flex items-center gap-3">
+                            <div class="w-8 h-8 bg-[#1C2A3A] rounded-full overflow-hidden">
+                                <img src="${user.avatar}" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <div class="font-medium text-apple-dark">
+                                    ${user.firstName} ${user.lastName}
+                                </div>
+                                <div class="text-xs text-apple-text-gray">
+                                    ${user.email}
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-6 py-4 text-apple-text-gray">
+                            ${user.role}
+                        </td>
+
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold
+                                ${user.isBlocked
+                                    ? 'bg-red-500/10 text-red-400'
+                                    : 'bg-green-500/10 text-green-400'}">
+                                ${user.isBlocked ? 'Blocked' : 'Active'}
+                            </span>
+                        </td>
+
+                        <td class="px-6 py-4 text-apple-text-gray">
+                            ${new Date(user.createdAt).toLocaleDateString()}
+                        </td>
+
+                        <td class="px-6 py-4 text-right"></td>
+
+                    </tr>
+                `;
+            });
+
+            paginationSection.style.display = searchQuery ? "none" : "flex";
+
+        } catch (error) {
+            console.error("Live search error:", error);
         }
+    }
+
+
+    const debouncedSearch = debounce(liveSearch, 400);
+
+    searchInput.addEventListener("input", function () {
+        updateClearBtnVisibility();
+        debouncedSearch();
     });
+
+
+    searchInput.addEventListener('input', function () {
+        updateClearBtnVisibility();
+        debouncedSearch();
+    });
+
+
+
+
 
     if (clearSearchBtn) {
         clearSearchBtn.addEventListener('click', function (e) {
