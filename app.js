@@ -5,6 +5,7 @@ import session from 'express-session'
 import expressLayouts from 'express-ejs-layouts'
 import userRoutes from './routes/userRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
+import { notFound, errorHandler } from './middlewares/errorMiddleware.js'
 
 import dotenv from 'dotenv'
 import { connectDb } from './config/dbConnect.js'
@@ -52,6 +53,9 @@ app.use((req, res, next) => {
 
 app.use('/', userRoutes)
 app.use('/admin', adminRoutes)
+
+app.use(notFound)
+app.use(errorHandler)
 
 await connectDb()
 app.listen(PORT, () => {

@@ -9,6 +9,8 @@ import {
   updatePassword,
 } from "../../service/user/authService.js";
 import { updateEmail } from "../../service/user/settingsService.js";
+import { STATUS_CODES } from "../../utils/statusCodes.js";
+
 
 export const signIn = async (req, res) => {
   res.render("pages/login", { title: "SignIn", layout: "layouts/auth" });
@@ -25,10 +27,10 @@ export const signInData = async (req, res) => {
     const user = await signInVerify(body);
     req.session.user = user._id;
 
-    return res.status(200).json({ success: true, redirectUrl: "/home" });
+    return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: "/home" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
   }
 };
 
@@ -40,7 +42,7 @@ export const signupData = async (req, res) => {
     req.session.tempUser = body;
     req.session.otpRequested = true
 
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
       message: "User validated successfully.",
       data: validateUser,
@@ -48,7 +50,7 @@ export const signupData = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
   }
 };
 
@@ -67,7 +69,7 @@ export const otpHandler = async (req, res) => {
         .json({ success: false, message: "Session expired. Please try again" });
     }
     if (!otp) {
-      return res.status(400).json({ success: false, message: "OTP not found" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: "OTP not found" });
     }
 
     await otpValidator(email, otp);
@@ -78,21 +80,21 @@ export const otpHandler = async (req, res) => {
       const newUser = await createNewUser(tempUser);
       req.session.tempUser = null;
       req.session.user = newUser;
-      return res.status(200).json({ success: true, redirectUrl: "/home" });
+      return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: "/home" });
     } else if (forgotPassEmail) {
       req.session.canResetPass = true;
-      return res.status(200).json({ success: true, redirectUrl: "/reset-password" });
+      return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: "/reset-password" });
     } else if (newEmail) {
       await updateEmail(req.session.newEmail, req.session.user);
       req.session.newEmail = null;
-      return res.status(200).json({
+      return res.status(STATUS_CODES.OK).json({
         success: true,
         redirectUrl: "/settings?status=success&message= email updated",
       });
     }
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
   }
 };
 
@@ -107,9 +109,9 @@ export const resendOtp = async (req, res) => {
     }
 
     const data = await resendOtpService(firstName, email);
-    return res.status(200).json({ success: true, message: data.message });
+    return res.status(STATUS_CODES.OK).json({ success: true, message: data.message });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "An error occurred while resending OTP. Please try again later.",
     });
@@ -132,10 +134,10 @@ export const forgotPassData = async (req, res) => {
     req.session.firstName = firstName;
     req.session.otpRequested = true;
 
-    return res.status(200).json({ success: true, redirectUrl: "/otp" });
+    return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: "/otp" });
   } catch (error) {
     console.log("error in forgotPassData: ", error.message);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
   }
 };
 
@@ -149,7 +151,7 @@ export const setNewPassData = async (req, res) => {
     const email = req.session.forgotPassEmail;
 
     if (!email || !newPassword) {
-      return res.status(403).json({
+      return res.status(STATUS_CODES.FORBIDDEN).json({
         success: false,
         message: "Session expired. Please redo again.",
       });
@@ -161,10 +163,10 @@ export const setNewPassData = async (req, res) => {
     req.session.canResetPass = false;
     req.session.otpRequested = false;
 
-    return res.status(200).json({ success: true, redirectUrl: "/password-changed" });
+    return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: "/password-changed" });
   } catch (error) {
     console.log("Error in resetPassData: ", error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
   }
 };
 
@@ -189,6 +191,6 @@ export const logout = (req, res) => {
     });
   } catch (error) {
     console.log("Error in logout: ", error);
-    return res.status(500).json({ success: false, message: "Failed to logout" });
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to logout" });
   }
 };

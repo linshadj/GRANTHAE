@@ -1,5 +1,7 @@
 import userDb from "../../models/userDb.js"
 import { changePasswordService, verifyEmail } from "../../service/user/settingsService.js"
+import { STATUS_CODES } from "../../utils/statusCodes.js";
+
 
 export const viewSettings = async (req, res) => {
     try {
@@ -19,10 +21,10 @@ export const changeEmail = async (req, res) => {
         req.session.newEmail = newEmail;
         req.session.otpRequested = true;
     
-        return res.status(200).json({ success: true, message: "Verification code sent to new email."});
+        return res.status(STATUS_CODES.OK).json({ success: true, message: "Verification code sent to new email."});
       } catch (error) {
         console.log("error in updateEmail: ", error.message);
-        return res.status(500).json({ success: false, message: error.message });
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
       }
 }
 
@@ -33,9 +35,9 @@ export const changePassword = async (req, res) => {
         
         await changePasswordService(userId, currentPassword, newPassword);
 
-        return res.status(200).json({ success: true, message: "Password updated successfully.", redirectUrl: "/settings?status=success&message=Password updated successfully." });
+        return res.status(STATUS_CODES.OK).json({ success: true, message: "Password updated successfully.", redirectUrl: "/settings?status=success&message=Password updated successfully." });
     } catch (error) {
         console.log("Error in changePassword: ", error.message);
-        return res.status(500).json({ success: false, message: error.message });
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
     }
 }

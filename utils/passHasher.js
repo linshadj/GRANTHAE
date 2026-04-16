@@ -7,8 +7,8 @@ export const hashPass = async (password) => {
 };
 
 export const compareHashedPass = async (plainPass, hashedPass) => {
-    const isPassMatching = await bcrypt.compare(plainPass, hashedPass, (err) => {
-        if(err) console.log('error in comparing pass: ', err.message)
+    const isPassMatching = bcrypt.compare(plainPass, hashedPass, (err) => {
+        if (err) console.log('error in comparing pass: ', err.message);
     })
 
     return isPassMatching

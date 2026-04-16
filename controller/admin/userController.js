@@ -1,4 +1,6 @@
 import { toggleBlockUserService, userDetails } from "../../service/admin/userService.js";
+import { STATUS_CODES } from "../../utils/statusCodes.js";
+
 
 export const usersPage = async (req, res) => {
   const page = req.query.page || 1;
@@ -19,10 +21,10 @@ export const toggleBlockUser = async (req, res) => {
 
     await toggleBlockUserService(userId, action);
 
-    return res.status(200).json({ success: true, message: `User has been ${action}ed successfully.`, redirectUrl: "/admin/users?status=updated&&message=User+has+been+successfully+updated." });
+    return res.status(STATUS_CODES.OK).json({ success: true, message: `User has been ${action}ed successfully.`, redirectUrl: "/admin/users?status=updated&&message=User+has+been+successfully+updated." });
   } catch (error) {
     console.error("Error in toggleBlockUser: ", error.message);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
   }
 }
 
@@ -41,7 +43,7 @@ export const liveUsersSearch = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
   }
 };
 

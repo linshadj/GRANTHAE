@@ -1,0 +1,41 @@
+<div class="text-center space-y-8 py-4">
+    <div class="relative mx-auto w-28 h-28 mb-8 flex items-center justify-center">
+        <!-- Animated pulse background -->
+        <div class="absolute inset-0 bg-red-500/20 rounded-full animate-ping opacity-75"></div>
+        <div class="absolute inset-2 bg-red-500/10 rounded-full animate-pulse"></div>
+        
+        <!-- Icon container -->
+        <div class="relative bg-white/5 shadow-inner rounded-full w-20 h-20 flex items-center justify-center border border-red-500/30 backdrop-blur-md">
+            <i data-lucide="shield-alert" class="w-10 h-10 text-red-500"></i>
+        </div>
+    </div>
+    
+    <div class="space-y-4">
+        <h1 class="text-7xl font-bold font-serif text-transparent bg-clip-text bg-gradient-to-br from-apple-dark to-gray-400 drop-shadow-sm"><%= statusCode %></h1>
+        <h2 class="text-2xl font-luxury text-apple-dark">
+            <% if(statusCode === 404) { %>
+                Page Not Found
+            <% } else { %>
+                Something Went Wrong
+            <% } %>
+        </h2>
+        <p class="text-apple-text-gray text-base max-w-sm mx-auto leading-relaxed">
+            <% if(statusCode === 404) { %>
+                The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+            <% } else { %>
+                <%= typeof message !== 'undefined' ? message : 'We encountered an unexpected error.' %>
+            <% } %>
+        </p>
+    </div>
+
+    <div class="flex justify-center flex-col sm:flex-row gap-4 pt-6 border-t border-white/5">
+        <a href="javascript:history.back()" class="btn-secondary flex-1 flex items-center justify-center gap-2 group shadow-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
+            Go Back
+        </a>
+        <a href="/" class="btn-primary flex-1 flex items-center justify-center gap-2 group shadow-md shadow-apple-gold/10">
+            <i data-lucide="home" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+            Home
+        </a>
+    </div>
+</div>

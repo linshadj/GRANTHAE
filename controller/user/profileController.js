@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { STATUS_CODES } from "../../utils/statusCodes.js";
 import addressDb from "../../models/addressDb.js";
 import userDb from "../../models/userDb.js";
 import {
@@ -57,20 +58,20 @@ export const editProfile = async (req, res) => {
     const updatedUser = await updateProfile(updateData, userId);
 
     if (!updatedUser) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         success: false,
         message: "User not found",
       });
     }
 
     // Success response
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
       redirectUrl: `/profile?status=success&message=${encodeURIComponent("Profile successfully updated")}`,
     });
   } catch (err) {
     console.error("Error in editProfile:", err.message);
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -85,13 +86,13 @@ export const addNewAddress = async (req, res) => {
 
     await addNewAddressService(addressData, userId);
 
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
       redirectUrl: `/profile?status=success&message=${encodeURIComponent("New address added")}`,
     });
   } catch (err) {
     console.error("Error in addNewAddress: ", err.message);
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: err.message,
     });
@@ -105,13 +106,13 @@ export const setDefaultAddress = async (req, res) => {
 
     await setDefaultAddressService(addressId, userId);
 
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
       redirectUrl: `/profile?status=success&message=${encodeURIComponent("Default address updated")}`,
     });
   } catch (err) {
     console.error("Error in setDefaultAddress:", err.message);
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Failed to update default address",
     });
@@ -128,10 +129,10 @@ export const editAddress = async (req, res) => {
 
     await editAddressService(addressData, userId, addressId); 
 
-    return res.status(200).json({ success: true, redirectUrl: `/profile?status=success&message=${encodeURIComponent("Address updated")}` });
+    return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: `/profile?status=success&message=${encodeURIComponent("Address updated")}` });
   } catch (err) {
     console.error("Error in editAddress:", err.message);
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: err,
     });
@@ -145,13 +146,13 @@ export const deleteAddress = async (req, res) => {
 
     await addressDb.findOneAndDelete({ _id: addressId, userId: new mongoose.Types.ObjectId(userId) });
 
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
       redirectUrl: `/profile?status=success&message=${encodeURIComponent("Address deleted")}`,
     });
   } catch (err) {
     console.error("Error in deleteAddress:", err.message);
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Failed to delete address",
     });
