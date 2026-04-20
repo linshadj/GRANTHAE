@@ -1,7 +1,9 @@
 <div
     class="glass-card group relative p-3 flex flex-col h-full overflow-hidden hover:scale-[1.02] transition-all duration-500">
     <div class="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-gray-100">
-        <img src="<%= book.image %>" alt="<%= book.title %>"
+        <% let displayImg = book.coverImage || book.image || (book.images && book.images.length > 0 ? book.images[0] : '/images/default-book.jpg'); %>
+        <% let displayTitle = book.name || book.title || 'Untitled'; %>
+        <img src="<%= displayImg %>" alt="<%= displayTitle %>"
             class="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110">
 
         <!-- Hover Overlay -->
@@ -20,8 +22,7 @@
 
         <div
             class="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg text-xs font-semibold text-apple-dark">
-            $<%= book.price %>
-                <%= (typeof type !=='undefined' && type==='buy' ) ? '' : '/day' %>
+            ₹<%= book.price %>
         </div>
     </div>
 
@@ -34,9 +35,9 @@
                 </span>
                 <h3
                     class="text-base font-semibold text-apple-dark group-hover:text-apple-blue transition-colors clamp-1">
-                    <a href="/book/1<%= (typeof type !== 'undefined' && type === 'buy') ? '?type=buy' : '' %>">
+                    <a href="/product/<%= book._id %>">
                         <span class="absolute inset-0"></span>
-                        <%= book.title %>
+                        <%= displayTitle %>
                     </a>
                 </h3>
             </div>

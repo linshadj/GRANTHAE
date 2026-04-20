@@ -32,17 +32,13 @@ export const signInVerify = async (userData) => {
 export const signupVerify = async (userData) => {
   const { firstName, lastName, email, password } = userData;
 
-  validateName(firstName);
-  if (!validateName) throw new Error("First name should contain only letters.");
+  if (!validateName(firstName)) throw new Error("First name should contain only letters.");
 
-  validateName(lastName);
-  if (!validateName) throw new Error("Last name should contain only letters.");
+  if (!validateName(lastName)) throw new Error("Last name should contain only letters.");
 
-  validateEmail(email);
-  if (!validateEmail) throw new Error("Please enter a valid email address.");
+  if (!validateEmail(email)) throw new Error("Please enter a valid email address.");
 
-  validatePassword(password);
-  if (!validatePassword)
+  if (!validatePassword(password))
     throw new Error(
       "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
     );
@@ -55,7 +51,7 @@ export const signupVerify = async (userData) => {
 };
 
 export const otpValidator = async (email, otp) => {
-  const otpExists = await otpDb.findOne({ email }).sort({createdAt: -1});
+  const otpExists = await otpDb.findOne({ email }).sort({ createdAt: -1 });
   if (!otpExists) {
     throw new Error("OTP does not exist");
   }

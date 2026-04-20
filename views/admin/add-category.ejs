@@ -1,0 +1,277 @@
+<div class="max-w-4xl mx-auto space-y-8 pb-12">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-apple-dark">Add New Category</h2>
+            <p class="text-apple-text-gray text-sm mt-1">Create a new category for your bookstore.</p>
+        </div>
+        <a href="/admin/categories" class="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-apple-text-gray hover:text-white transition-all text-sm flex items-center gap-2">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to List
+        </a>
+    </div>
+
+    <form id="addCategoryForm" class="space-y-8" enctype="multipart/form-data">
+        <!-- Section 1: Basic Information -->
+        <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden p-6 space-y-6">
+            <div class="flex items-center gap-3 border-b border-white/5 pb-4">
+                <div class="p-2 bg-blue-500/10 rounded-lg">
+                    <i data-lucide="info" class="w-5 h-5 text-blue-400"></i>
+                </div>
+                <h3 class="font-bold text-lg text-apple-dark">Basic Information</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Category Name</label>
+                    <input type="text" id="name" name="name" placeholder="e.g. Fiction"
+                        class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:ring-1 focus:ring-apple-gold/50 transition-all">
+                    <span id="nameError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Slug</label>
+                    <input type="text" id="slug" name="slug" placeholder="e.g. fiction"
+                        class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:ring-1 focus:ring-apple-gold/50 transition-all">
+                    <span id="slugError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Description</label>
+                <textarea id="description" name="description" rows="4" placeholder="Briefly describe what this category contains..."
+                    class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:ring-1 focus:ring-apple-gold/50 transition-all resize-none"></textarea>
+                <span id="descriptionError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
+            </div>
+        </div>
+
+        <!-- Section 3: Status & Media -->
+        <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden p-6 space-y-6">
+            <div class="flex items-center gap-3 border-b border-white/5 pb-4">
+                <div class="p-2 bg-green-500/10 rounded-lg">
+                    <i data-lucide="image" class="w-5 h-5 text-green-400"></i>
+                </div>
+                <h3 class="font-bold text-lg text-apple-dark">Status & Media</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl">
+                        <div>
+                            <p class="text-sm font-bold text-apple-dark">Featured Category</p>
+                            <p class="text-[10px] text-apple-text-gray">Show this category in the featured section</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="featured" class="sr-only peer">
+                            <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-apple-text-gray after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-apple-gold peer-checked:after:bg-[#1a231e]"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl">
+                        <div>
+                            <p class="text-sm font-bold text-apple-dark">Active Status</p>
+                            <p class="text-[10px] text-apple-text-gray">Enable or disable this category</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="active" checked class="sr-only peer">
+                            <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-apple-text-gray after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500 peer-checked:after:bg-white"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Cover Image</label>
+                    <div id="imageUploadArea" class="relative group cursor-pointer aspect-video rounded-2xl border-2 border-dashed border-white/10 hover:border-apple-gold/50 transition-all overflow-hidden bg-white/5 flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="upload-cloud" class="w-8 h-8 text-apple-text-gray group-hover:text-apple-gold transition-colors"></i>
+                        <p class="text-xs text-apple-text-gray group-hover:text-apple-gold transition-colors">Click to upload cover</p>
+                        <input type="file" id="coverImageInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                        <img id="imagePreview" class="absolute inset-0 w-full h-full object-cover hidden">
+                    </div>
+                    <span id="coverImageError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-3 pt-6 border-t border-white/5">
+            <a href="/admin/categories" class="px-6 py-2.5 rounded-xl border border-white/5 text-apple-text-gray font-bold text-sm hover:bg-white/5 transition-all">
+                Discard
+            </a>
+            <button type="submit" class="px-8 py-2.5 rounded-xl bg-apple-gold text-[#1a231e] font-bold text-sm hover:bg-yellow-600 transition-all shadow-lg shadow-apple-gold/20">
+                Save Category
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Image Crop Modal -->
+<div id="cropModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[2000] p-4 flex items-center justify-center">
+    <div class="bg-[#1a231e] border border-white/10 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl">
+        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+            <h3 class="font-bold text-apple-dark">Crop Cover Image</h3>
+            <button type="button" onclick="closeCropModal()" class="text-apple-text-gray hover:text-white"><i data-lucide="x"></i></button>
+        </div>
+        <div class="p-6">
+            <div class="max-h-[60vh] overflow-hidden rounded-xl bg-black/40">
+                <img id="cropImage" class="max-w-full">
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button type="button" onclick="closeCropModal()" class="px-4 py-2 border border-white/10 rounded-lg text-apple-text-gray text-sm hover:bg-white/5">Cancel</button>
+                <button type="button" id="applyCrop" class="px-6 py-2 bg-apple-gold text-[#1a231e] rounded-lg text-sm font-bold hover:bg-yellow-600">Apply Crop</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+
+<script>
+    let cropper = null;
+    let croppedBlob = null;
+
+    // Slug Auto-generation
+    const nameInput = document.getElementById('name');
+    const slugInput = document.getElementById('slug');
+
+    nameInput.addEventListener('input', () => {
+        const val = nameInput.value;
+        slugInput.value = val.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+    });
+
+    // Image Upload & Crop
+    const coverInput = document.getElementById('coverImageInput');
+    const cropModal = document.getElementById('cropModal');
+    const cropImage = document.getElementById('cropImage');
+    const imagePreview = document.getElementById('imagePreview');
+
+    coverInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                cropImage.src = e.target.result;
+                cropModal.classList.remove('hidden');
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(cropImage, {
+                    aspectRatio: 16 / 9,
+                    viewMode: 1,
+                    background: false
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    window.closeCropModal = () => {
+        cropModal.classList.add('hidden');
+        coverInput.value = '';
+    };
+
+    document.getElementById('applyCrop').addEventListener('click', () => {
+        if (cropper) {
+            cropper.getCroppedCanvas({ width: 1200, height: 675 }).toBlob((blob) => {
+                croppedBlob = blob;
+                const url = URL.createObjectURL(blob);
+                imagePreview.src = url;
+                imagePreview.classList.remove('hidden');
+                cropModal.classList.add('hidden');
+            }, 'image/jpeg', 0.9);
+        }
+    });
+
+    // Validation
+    const validateForm = async () => {
+        let isValid = true;
+        const errors = {};
+
+        // Reset
+        document.querySelectorAll('.error-msg').forEach(e => e.classList.add('hidden'));
+        document.querySelectorAll('input, textarea').forEach(e => e.classList.remove('border-red-500'));
+
+        const name = document.getElementById('name');
+        const slug = document.getElementById('slug');
+        const description = document.getElementById('description');
+
+        if (!name.value.trim()) {
+            errors.name = "Category name is required";
+            name.classList.add('border-red-500');
+        }
+        if (!slug.value.trim()) {
+            errors.slug = "Slug is required";
+            slug.classList.add('border-red-500');
+        }
+
+        for (const [key, msg] of Object.entries(errors)) {
+            const el = document.getElementById(key + 'Error');
+            if (el) {
+                el.textContent = msg;
+                el.classList.remove('hidden');
+            }
+            isValid = false;
+        }
+
+        if (!isValid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Failed',
+                text: 'Please check the required fields.',
+                background: '#1e2a22',
+                color: '#E6CFA7',
+                confirmButtonColor: '#E6CFA7'
+            });
+        }
+
+        return isValid;
+    };
+
+    // Submit
+    document.getElementById('addCategoryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const isValid = await validateForm();
+        if (!isValid) return;
+
+        const formData = new FormData();
+        formData.append('name', nameInput.value);
+        formData.append('slug', slugInput.value);
+        formData.append('description', document.getElementById('description').value);
+        formData.append('featured', document.getElementById('featured').checked);
+        formData.append('active', document.getElementById('active').checked);
+
+        if (croppedBlob) {
+            formData.append('coverImage', croppedBlob, 'category_cover.jpg');
+        }
+
+        try {
+            const res = await fetch('/admin/categories/add', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Category Created',
+                    text: data.message,
+                    background: '#1e2a22',
+                    color: '#E6CFA7',
+                    confirmButtonColor: '#E6CFA7'
+                }).then(() => window.location.href = data.redirectUrl);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message,
+                    background: '#1e2a22',
+                    color: '#E6CFA7'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong!', background: '#1e2a22', color: '#E6CFA7' });
+        }
+    });
+</script>

@@ -24,6 +24,7 @@ import { ifAuth, isAuth, otpVerify, resetPassAuth } from "../middlewares/authMid
 import { addNewAddress, deleteAddress, editAddress, editProfile, setDefaultAddress, viewEditProfile, viewProfile } from "../controller/user/profileController.js";
 import { upload } from "../middlewares/multerUpload.js";
 import { changeEmail, changePassword, viewSettings } from "../controller/user/settingsController.js";
+import { listProducts, productDetails } from "../controller/user/shopController.js";
 
 const router = express.Router();
 
@@ -31,7 +32,11 @@ router.get("/", (req, res) => {
   res.redirect("/home");
 });
 
-router.get("/home", homePage);
+router.get("/home", isAuth, homePage);
+
+// Shop
+router.get("/shop", listProducts);
+router.get("/product/:id", productDetails);
 
 // Sign In
 router.route("/sign-in")

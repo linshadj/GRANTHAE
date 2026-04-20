@@ -2,39 +2,38 @@ import mongoose from "mongoose";
 import { mailSender } from "../utils/mailSender.js";
 
 const otpSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    lowercase: true,
-  },
+    firstName: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    email: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true,
+    },
 
-  otp: {
-    type: Number,
-    required: true,
-    match: [/^\d{6}]$/, "OTP must be exactly 6 digits"],
-  },
+    otp: {
+        type: String,
+        required: true,
+    },
 
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    expires: 60 * 5,
-  },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        expires: 60 * 5,
+    },
 });
 
 otpSchema.index({ email: 1, createdAt: -1 });
 
 const sendVerificationMail = async (firstName, email, otp) => {
-  try {
-    await mailSender(
-      email,
-      "GRANTHAE Otp verfication",
-      `<!DOCTYPE html>
+    try {
+        await mailSender(
+            email,
+            "GRANTHAE Otp verfication",
+            `<!DOCTYPE html>
             <html>
 
             <head>
@@ -198,21 +197,21 @@ const sendVerificationMail = async (firstName, email, otp) => {
             </body>
 
             </html>`,
-    );
+        );
 
-    console.log("otp stored and verfication email is sent");
-    console.log(otp)
-  } catch (err) {
-    console.log("error in sendVerificationMail on otpDb");
-  }
+        console.log("otp stored and verfication email is sent");
+        console.log(otp)
+    } catch (err) {
+        console.log("error in sendVerificationMail on otpDb");
+    }
 };
 
 otpSchema.pre("save", async function () {
-  console.log(`new document otp stored`);
-  if (this.isNew) {
-    console.log(this.firstName, "otpDb");
-    await sendVerificationMail(this.firstName, this.email, this.otp);
-  }
+    console.log(`new document otp stored`);
+    if (this.isNew) {
+        console.log(this.firstName, "otpDb");
+        await sendVerificationMail(this.firstName, this.email, this.otp);
+    }
 });
 
 export default mongoose.model("OTP", otpSchema);

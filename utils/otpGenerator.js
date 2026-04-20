@@ -19,9 +19,6 @@ export const hashOtp = async (otp) => {
 };
 
 export const compareHashedOtp = async (plainOtp, hashedOtp) => {
-    const isOtpMatching = bcrypt.compare(plainOtp, hashedOtp, (err) => {
-        if (err) console.log('error in comparing pass: ', err.message);
-    })
-
-    return isOtpMatching
+    const isOtpMatching = await bcrypt.compare(plainOtp, hashedOtp);
+    return isOtpMatching;
 };

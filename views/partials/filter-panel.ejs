@@ -1,90 +1,85 @@
-<div class="space-y-8">
+<form action="/shop" method="GET" id="filterForm" class="space-y-8">
+    <!-- Search (Hidden or integrated if needed, but shop view handles search separately) -->
+    <% if (query.search) { %>
+        <input type="hidden" name="search" value="<%= query.search %>">
+    <% } %>
+
     <!-- Categories -->
     <div>
         <h3 class="text-sm font-semibold text-apple-dark mb-4 uppercase tracking-wider">Genres</h3>
         <div class="space-y-3">
-            <label class="flex items-center group cursor-pointer">
-                <input type="checkbox"
-                    class="w-4 h-4 rounded border-gray-300 text-apple-dark focus:ring-apple-dark transition-all">
-                <span
-                    class="ml-3 text-sm text-apple-text-gray group-hover:text-apple-dark transition-colors">Fiction</span>
-            </label>
-            <label class="flex items-center group cursor-pointer">
-                <input type="checkbox"
-                    class="w-4 h-4 rounded border-gray-300 text-apple-dark focus:ring-apple-dark transition-all">
-                <span
-                    class="ml-3 text-sm text-apple-text-gray group-hover:text-apple-dark transition-colors">Non-Fiction</span>
-            </label>
-            <label class="flex items-center group cursor-pointer">
-                <input type="checkbox"
-                    class="w-4 h-4 rounded border-gray-300 text-apple-dark focus:ring-apple-dark transition-all">
-                <span
-                    class="ml-3 text-sm text-apple-text-gray group-hover:text-apple-dark transition-colors">Technology</span>
-            </label>
-            <label class="flex items-center group cursor-pointer">
-                <input type="checkbox"
-                    class="w-4 h-4 rounded border-gray-300 text-apple-dark focus:ring-apple-dark transition-all">
-                <span
-                    class="ml-3 text-sm text-apple-text-gray group-hover:text-apple-dark transition-colors">Sci-Fi</span>
-            </label>
+            <% categories.forEach(category => { %>
+                <label class="flex items-center group cursor-pointer">
+                    <input type="checkbox" name="category" value="<%= category._id %>"
+                        class="w-4 h-4 rounded border-gray-300 text-apple-dark focus:ring-apple-dark transition-all"
+                        <%= (Array.isArray(query.category) ? query.category.includes(category._id.toString()) : query.category === category._id.toString()) ? 'checked' : '' %>
+                        onchange="this.form.submit()">
+                    <span class="ml-3 text-sm text-apple-text-gray group-hover:text-apple-dark transition-colors">
+                        <%= category.name %>
+                    </span>
+                </label>
+            <% }) %>
         </div>
     </div>
 
     <!-- Divider -->
     <div class="h-px bg-gray-200"></div>
 
-    <!-- Rating -->
+    <!-- Price Range -->
     <div>
-        <h3 class="text-sm font-semibold text-apple-dark mb-4 uppercase tracking-wider">Rating</h3>
-        <div class="space-y-3">
-            <label class="flex items-center group cursor-pointer">
-                <input type="radio" name="rating" class="w-4 h-4 border-gray-300 text-apple-dark focus:ring-apple-dark">
-                <div class="ml-3 flex items-center">
-                    <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
-                    <span class="ml-1 text-sm text-apple-text-gray group-hover:text-apple-dark">4★ & above</span>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-apple-dark uppercase tracking-wider">Price</h3>
+            <button type="button" onclick="resetPrice()" class="text-xs text-apple-blue hover:underline">Reset</button>
+        </div>
+        <div class="space-y-4">
+            <div class="flex items-center gap-4">
+                <div class="flex-1">
+                    <label class="text-[10px] text-apple-text-gray uppercase mb-1 block">Min</label>
+                    <input type="number" name="minPrice" value="<%= query.minPrice %>" placeholder="₹0"
+                        class="w-full text-sm border-gray-200 rounded-lg focus:ring-apple-dark focus:border-apple-dark">
                 </div>
-            </label>
-            <label class="flex items-center group cursor-pointer">
-                <input type="radio" name="rating" class="w-4 h-4 border-gray-300 text-apple-dark focus:ring-apple-dark">
-                <div class="ml-3 flex items-center">
-                    <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
-                    <span class="ml-1 text-sm text-apple-text-gray group-hover:text-apple-dark">3★ & above</span>
+                <div class="flex-1">
+                    <label class="text-[10px] text-apple-text-gray uppercase mb-1 block">Max</label>
+                    <input type="number" name="maxPrice" value="<%= query.maxPrice %>" placeholder="₹500+"
+                        class="w-full text-sm border-gray-200 rounded-lg focus:ring-apple-dark focus:border-apple-dark">
                 </div>
-            </label>
+            </div>
+            <button type="submit" class="w-full py-2 bg-apple-dark text-white text-xs font-semibold rounded-lg hover:bg-black transition-colors">
+                Apply Price
+            </button>
         </div>
     </div>
 
-    <!-- Price Range -->
+    <!-- Divider -->
+    <div class="h-px bg-gray-200"></div>
+
+    <!-- Sort By -->
     <div>
-        <h3 class="text-sm font-semibold text-apple-dark mb-4 uppercase tracking-wider">Price / Day</h3>
-        <div class="space-y-4">
-            <div class="flex items-center justify-between text-sm text-apple-text-gray">
-                <span>$0</span>
-                <span>$100</span>
-            </div>
-            <input type="range"
-                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-apple-dark">
-        </div>
-        <!-- Sort By -->
-        <div class="h-px bg-gray-200 my-8"></div>
-        <div>
-            <h3 class="text-sm font-semibold text-apple-dark mb-4 uppercase tracking-wider">Sort By</h3>
-            <div class="space-y-2">
-                <a href="?sort=popular"
-                    class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors <%= (!query.sort || query.sort === 'popular') ? 'bg-apple-dark text-white' : 'text-apple-text-gray hover:bg-gray-50' %>">
-                    Most Popular
-                </a>
-                <a href="?sort=newest"
-                    class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors <%= query.sort === 'newest' ? 'bg-apple-dark text-white' : 'text-apple-text-gray hover:bg-gray-50' %>">
-                    Newest Arrivals
-                </a>
-                <a href="?sort=price_asc"
-                    class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors <%= query.sort === 'price_asc' ? 'bg-apple-dark text-white' : 'text-apple-text-gray hover:bg-gray-50' %>">
-                    Price: Low to High
-                </a>
-                <a href="?sort=price_desc"
-                    class="block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors <%= query.sort === 'price_desc' ? 'bg-apple-dark text-white' : 'text-apple-text-gray hover:bg-gray-50' %>">
-                    Price: High to Low
-                </a>
-            </div>
-        </div>
+        <h3 class="text-sm font-semibold text-apple-dark mb-4 uppercase tracking-wider">Sort By</h3>
+        <select name="sort" onchange="this.form.submit()" 
+            class="w-full text-sm border-gray-200 rounded-lg focus:ring-apple-dark focus:border-apple-dark">
+            <option value="newest" <%= query.sort === 'newest' ? 'selected' : '' %>>Newest Arrivals</option>
+            <option value="price_asc" <%= query.sort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+            <option value="price_desc" <%= query.sort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+            <option value="name_asc" <%= query.sort === 'name_asc' ? 'selected' : '' %>>Name: A-Z</option>
+            <option value="name_desc" <%= query.sort === 'name_desc' ? 'selected' : '' %>>Name: Z-A</option>
+        </select>
+    </div>
+
+    <!-- Clear All -->
+    <div class="pt-4">
+        <a href="/shop" class="flex items-center justify-center gap-2 text-sm text-apple-text-gray hover:text-red-600 transition-colors py-2 border border-dashed border-gray-300 rounded-lg">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            Reset All Filters
+        </a>
+    </div>
+</form>
+
+<script>
+    function resetPrice() {
+        const form = document.getElementById('filterForm');
+        form.querySelector('input[name="minPrice"]').value = '';
+        form.querySelector('input[name="maxPrice"]').value = '';
+        form.submit();
+    }
+</script>

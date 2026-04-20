@@ -1,0 +1,226 @@
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div class="flex gap-2">
+            <a href="/admin/products/add" class="px-4 py-2 bg-apple-gold text-[#1a231e] font-bold rounded-lg hover:bg-yellow-600 transition-colors text-sm flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> Add Product
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h3 class="font-bold text-lg text-apple-dark">Products List</h3>
+            <div class="flex gap-2">
+                <!-- Sort Dropdown -->
+                <div class="relative" id="prodSortWrap">
+                    <button onclick="document.getElementById('prodSortMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5">
+                        <i data-lucide="arrow-up-down" class="w-3.5 h-3.5"></i>
+                        <span id="prodSortLabel">
+                            <% const sortLabels = { 'a-z': 'Name (A-Z)', 'z-a': 'Name (Z-A)', 'newest': 'Newest First', 'oldest': 'Oldest First' }; %>
+                            <%= sortLabels[selectedSort] || 'Sort By' %>
+                        </span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div id="prodSortMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
+                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&sort=a-z" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                            <i data-lucide="a-arrow-down" class="w-3.5 h-3.5"></i> Name (A-Z)
+                        </a>
+                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&sort=z-a" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                            <i data-lucide="a-arrow-up" class="w-3.5 h-3.5"></i> Name (Z-A)
+                        </a>
+                        <div class="border-t border-white/5 my-1"></div>
+                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&sort=newest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                            <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> Newest First
+                        </a>
+                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&sort=oldest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Oldest First
+                        </a>
+                    </div>
+                </div>
+
+                <div class="relative flex items-center">
+                    <i data-lucide="search" class="absolute left-3 w-3.5 h-3.5 text-apple-text-gray"></i>
+                    <input id="searchInput" type="text" value="<%= searchQuery || '' %>" placeholder="Search Products..."
+                        class="pl-10 pr-10 py-3 text-xs w-64 bg-white/5 border border-white/5 rounded-lg focus:outline-none focus:ring-1 focus:ring-apple-gold/50 text-apple-dark placeholder-apple-text-gray/50 transition-all hover:bg-white/10">
+                    <button id="clearSearchBtn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs font-semibold rounded-lg text-apple-text-gray hover:bg-white/10 transition-colors" title="Clear search">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-white/5">
+                    <tr class="text-left text-xs font-bold text-apple-text-gray uppercase tracking-wider">
+                        <th class="px-6 py-4">Image</th>
+                        <th class="px-6 py-4">Name</th>
+                        <th class="px-6 py-4">Category</th>
+                        <th class="px-6 py-4">Price</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody" class="divide-y divide-white/5">
+                    <% if (products.length === 0) { %>
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-apple-text-gray">No products found</td>
+                        </tr>
+                    <% } else { %>
+                        <% products.forEach(product => { %>
+                            <tr class="group hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="w-10 h-10 rounded overflow-hidden bg-white/5 flex items-center justify-center">
+                                        <% let displayImg = product.coverImage || (product.images && product.images.length > 0 ? product.images[0] : null); %>
+                                        <% if(displayImg) { %>
+                                            <img src="<%= displayImg %>" alt="<%= product.name %>" class="w-full h-full object-cover">
+                                        <% } else { %>
+                                            <i data-lucide="image" class="w-5 h-5 text-gray-500"></i>
+                                        <% } %>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 font-medium text-apple-dark whitespace-nowrap">
+                                    <%= product.name %>
+                                </td>
+                                <td class="px-6 py-4 text-apple-text-gray">
+                                    <%= product.category ? product.category.name : 'Unknown' %>
+                                </td>
+                                <td class="px-6 py-4 text-apple-text-gray font-semibold">
+                                    ₹<%= product.price.toFixed(2) %>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold <%= product.isDeleted ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400' %>">
+                                        <%= product.isDeleted ? 'Soft Deleted' : 'Active' %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right space-x-2 w-64">
+                                    <a href="/admin/products/edit/<%= product._id %>"
+                                        class="px-3 py-1.5 inline-block text-xs font-bold rounded-lg transition-all border border-blue-500/20 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20">
+                                        <i data-lucide="edit" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i> Edit
+                                    </a>
+                                    
+                                    <% if (product.isDeleted) { %>
+                                        <button onclick="toggleDelete('<%= product._id %>', false)"
+                                            class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-green-500/20 bg-green-500/10 text-green-400 hover:bg-green-500/20">
+                                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i> Restore
+                                        </button>
+                                    <% } else { %>
+                                        <button onclick="toggleDelete('<%= product._id %>', true)"
+                                            class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i> Delete
+                                        </button>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <% if (totalPages > 0) { %>
+        <div class="p-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-xs text-apple-text-gray">
+                Showing <span class="font-bold text-apple-dark"><%= (currentPage - 1) * 10 + 1 %></span> 
+                to <span class="font-bold text-apple-dark"><%= Math.min(currentPage * 10, totalProducts) %></span> 
+                of <span class="font-bold text-apple-dark"><%= totalProducts %></span> results
+            </p>
+            <div class="flex items-center gap-1">
+                <% for(let i=1; i <=totalPages; i++) { %>
+                    <a href="/admin/products?page=<%= i %>&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>"
+                        class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors <%= i === currentPage ? 'bg-apple-gold text-[#1a231e] font-bold' : 'text-apple-text-gray hover:bg-white/10' %>">
+                        <%= i %>
+                    </a>
+                <% } %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+    function updateClearBtnVisibility() {
+        if (!clearSearchBtn) return;
+        clearSearchBtn.classList.toggle('hidden', !searchInput.value.trim());
+    }
+
+    searchInput.addEventListener('input', updateClearBtnVisibility);
+    updateClearBtnVisibility();
+
+    function debounce(func, delay) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => { func.apply(this, args); }, delay);
+        };
+    }
+
+    async function liveSearch() {
+        const query = searchInput.value.trim();
+        const sort = '<%= selectedSort || '' %>';
+        
+        if(query === '') {
+            window.location.href = `/admin/products?page=1&sort=${sort}&search=`;
+            return;
+        }
+
+        window.location.href = `/admin/products?page=1&sort=${sort}&search=${encodeURIComponent(query)}`;
+    }
+
+    const debouncedSearch = debounce(liveSearch, 600);
+
+    searchInput.addEventListener("input", function () {
+        updateClearBtnVisibility();
+        debouncedSearch();
+    });
+
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            searchInput.value = '';
+            window.location.href = `/admin/products?page=1&sort=<%= selectedSort || '' %>&search=`;
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        const sortWrap = document.getElementById('prodSortWrap');
+        if (sortWrap && !sortWrap.contains(e.target)) {
+            document.getElementById('prodSortMenu').classList.add('hidden');
+        }
+    });
+
+    window.toggleDelete = async (id, isDeleting) => {
+        const actionText = isDeleting ? 'Delete' : 'Restore';
+        const color = isDeleting ? '#ef4444' : '#22c55e';
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you want to ${actionText} this product?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: color,
+            background: '#1e2a22',
+            color: '#E6CFA7',
+            confirmButtonText: `Yes, ${actionText}`
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`/admin/products/toggle-status/${id}/${isDeleting ? 'delete' : 'restore'}`, {
+                        method: 'PATCH'
+                    });
+                    const data = await res.json();
+                    if(data.success) {
+                        window.location.reload();
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: data.message, background: '#1e2a22', color: '#E6CFA7' });
+                    }
+                } catch(e) { console.error(e); }
+            }
+        });
+    };
+</script>

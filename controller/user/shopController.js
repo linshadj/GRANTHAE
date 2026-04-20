@@ -1,0 +1,56 @@
+import { getFilteredProducts, getProductById, getRelatedProducts } from "../../service/user/shopService.js";
+import { Category } from "../../models/categoryDb.js";
+import { STATUS_CODES } from "../../utils/statusCodes.js";
+
+export const listProducts = async (req, res) => {
+    try {
+        const query = req.query;
+        const { products, totalProducts, totalPages, currentPage } = await getFilteredProducts(query);
+        const categories = await Category.find({ isBlocked: false, isDeleted: false });
+
+        res.render("pages/shop", {
+            title: "Shop - GRANTHAE",
+            products,
+            categories,
+            totalProducts,
+            totalPages,
+            currentPage,
+            query // Pass query back to views for persistence in filters/pagination
+        });
+    } catch (error) {
+        console.error("Error in listProducts:", error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("pages/error", {
+            message: "Something went wrong while loading the shop.",
+            error
+        });
+    }
+};
+
+export const productDetails = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const product = await getProductById(id);
+
+        if (!product) {
+            // Only redirect if product doesn't exist at all (deleted or wrong ID)
+            return res.redirect("/shop?message=Product not found");
+        }
+
+        const relatedProducts = product.isUnavailable 
+            ? [] 
+            : await getRelatedProducts(product.category._id, product._id);
+
+        res.render("pages/product-details", {
+            title: `${product.name} - GRANTHAE`,
+            product,
+            relatedProducts,
+            isUnavailable: product.isUnavailable
+        });
+    } catch (error) {
+        console.error("Error in productDetails:", error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("pages/error", {
+            message: "Something went wrong while loading product details.",
+            error
+        });
+    }
+};

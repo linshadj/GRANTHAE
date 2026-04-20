@@ -1,0 +1,549 @@
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold font-serif text-apple-dark">Edit Product</h2>
+        <a href="/admin/products" class="px-4 py-2 border border-white/10 rounded-lg text-sm text-apple-text-gray hover:text-white hover:bg-white/5 transition-colors">
+            Cancel & Back
+        </a>
+    </div>
+
+    <form id="editProductForm" class="space-y-6">
+        <input type="hidden" id="productId" value="<%= product._id %>">
+
+        <!-- 1. Basic Information -->
+        <div class="bg-apple-card border border-white/5 rounded-2xl p-6 shadow-sm">
+            <h3 class="text-lg font-bold text-apple-dark mb-4 border-b border-white/5 pb-2">1. Basic Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-apple-text-gray mb-1">Book Title <span class="text-red-500">*</span></label>
+                        <input type="text" id="name" value="<%= product.name %>" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                        <span id="nameError" class="error-msg text-red-500 text-xs mt-1 hidden"></span>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-apple-text-gray mb-1">Author <span class="text-red-500">*</span></label>
+                        <input type="text" id="author" value="<%= product.author %>" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                        <span id="authorError" class="error-msg text-red-500 text-xs mt-1 hidden"></span>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-apple-text-gray mb-1">ISBN <span class="text-apple-text-gray/50 text-xs font-normal ml-1">(Optional)</span></label>
+                        <input type="text" id="isbn" value="<%= product.isbn %>" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                        <span id="isbnError" class="error-msg text-red-500 text-xs mt-1 hidden"></span>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-apple-text-gray mb-1">Brand <span class="text-apple-text-gray/50 text-xs font-normal ml-1">(Optional)</span></label>
+                        <input type="text" id="brand" value="<%= product.brand || '' %>" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                        <span id="brandError" class="error-msg text-red-500 text-xs mt-1 hidden"></span>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-apple-text-gray mb-1">Highlights <span class="text-apple-text-gray/50 text-xs font-normal ml-1">(Comma separated)</span></label>
+                        <input type="text" id="highlights" value="<%= (product.highlights && product.highlights.length > 0) ? product.highlights.join(', ') : '' %>" placeholder="Premium Paper, Signed Copy, First Edition" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                        <span id="highlightsError" class="error-msg text-red-500 text-xs mt-1 hidden"></span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-apple-text-gray mb-1">Base Price <span class="text-red-500">*</span></label>
+                            <input type="number" id="price" value="<%= product.price %>" min="0" step="0.01" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                            <span id="priceError" class="error-msg text-red-500 text-xs mt-1 hidden"></span>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-apple-text-gray mb-1">Base Stock <span class="text-red-500">*</span></label>
+                            <input type="number" id="stock" value="<%= product.stock %>" min="0" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                            <span id="stockError" class="error-msg text-red-500 text-xs mt-1 hidden"></span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-apple-text-gray mb-1">Description <span class="text-red-500">*</span></label>
+                    <textarea id="description" rows="5" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-apple-dark focus:outline-none focus:border-apple-gold/50 h-[210px]"><%= product.description %></textarea>
+                    <span id="descriptionError" class="error-msg text-red-500 text-xs mt-1 hidden"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Product Categorization -->
+        <div class="bg-apple-card border border-white/5 rounded-2xl p-6 shadow-sm">
+            <h3 class="text-lg font-bold text-apple-dark mb-4 border-b border-white/5 pb-2">2. Product Categorization</h3>
+            <div class="max-w-md">
+                <label class="block text-sm font-medium text-apple-text-gray mb-1">Category <span class="text-red-500">*</span></label>
+                <select id="category" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-apple-dark focus:outline-none focus:border-apple-gold/50 h-[46px]">
+                    <option value="">Select Category...</option>
+                    <% categories.forEach(cat => { %>
+                        <option value="<%= cat._id %>" <%= String(product.category._id) === String(cat._id) ? 'selected' : '' %>><%= cat.name %></option>
+                    <% }) %>
+                </select>
+                <span id="categoryError" class="error-msg text-red-500 text-xs mt-1 hidden"></span>
+            </div>
+        </div>
+
+        <!-- 3. Product Variants -->
+        <div class="bg-apple-card border border-white/5 rounded-2xl p-6 shadow-sm">
+            <div class="flex justify-between items-center border-b border-white/5 pb-2 mb-4">
+                <h3 class="text-lg font-bold text-apple-dark">3. Product Variants <span class="text-xs font-normal text-apple-text-gray ml-2">(Optional)</span></h3>
+                <button type="button" onclick="addVariantRow()" class="px-3 py-1.5 bg-white/5 text-apple-gold hover:bg-white/10 rounded-lg text-xs font-bold transition-all flex items-center gap-1 border border-white/10">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Variant
+                </button>
+            </div>
+            
+            <div id="variantsContainer" class="space-y-3">
+                <% if(product.variants && product.variants.length > 0) { %>
+                    <% product.variants.forEach(variant => { %>
+                        <div class="variant-row flex flex-col sm:grid sm:grid-cols-5 gap-3 p-3 bg-white/5 border border-white/10 rounded-xl items-end relative">
+                            <div class="w-full">
+                                <label class="block text-[10px] font-bold text-apple-text-gray/50 uppercase mb-1">Type</label>
+                                <input type="text" value="<%= variant.name %>" class="var-name w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                                <span class="v-error text-[10px] text-red-500 mt-1 hidden">Req.</span>
+                            </div>
+                            <div class="w-full">
+                                <label class="block text-[10px] font-bold text-apple-text-gray/50 uppercase mb-1">Price</label>
+                                <input type="number" step="0.01" min="0" value="<%= variant.priceOverride %>" class="var-price w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                                <span class="v-error text-[10px] text-red-500 mt-1 hidden">Invalid</span>
+                            </div>
+                            <div class="w-full">
+                                <label class="block text-[10px] font-bold text-apple-text-gray/50 uppercase mb-1">SKU</label>
+                                <input type="text" value="<%= variant.sku %>" class="var-sku w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                                <span class="v-error text-[10px] text-red-500 mt-1 hidden">Req.</span>
+                            </div>
+                            <div class="w-full">
+                                <label class="block text-[10px] font-bold text-apple-text-gray/50 uppercase mb-1">Stock</label>
+                                <input type="number" min="0" value="<%= variant.stock %>" class="var-stock w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                                <span class="v-error text-[10px] text-red-500 mt-1 hidden">Req.</span>
+                            </div>
+                            <div class="flex justify-end pb-1.5">
+                                <button type="button" onclick="this.parentElement.parentElement.remove(); checkVariants();" class="p-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg transition-colors border border-red-500/20">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } %>
+                <p id="noVariantsMsg" class="text-sm text-apple-text-gray italic" style="<%= (product.variants && product.variants.length > 0) ? 'display: none;' : '' %>">No variants added. Base price and stock will be used.</p>
+            </div>
+        </div>
+
+        <!-- 4. Images Upload & Cover -->
+        <div class="bg-apple-card border border-white/5 rounded-2xl p-6 shadow-sm">
+            <div class="border-b border-white/5 pb-2 mb-4">
+                <h3 class="text-lg font-bold text-apple-dark">4. Images & Cover Image</h3>
+                <p class="text-xs text-apple-text-gray">Manage your product images. Tick the star over an image to mark it as the Main Cover Image.</p>
+            </div>
+            
+            <div class="flex gap-4 mb-4">
+                <label class="px-4 py-2 bg-white/10 hover:bg-white/20 transition-all font-semibold text-sm rounded-lg cursor-pointer flex items-center gap-2 border border-dashed border-white/20">
+                    <i data-lucide="upload-cloud" class="w-4 h-4 text-apple-gold"></i>
+                    <span>Add New Image...</span>
+                    <input type="file" id="imageInput" accept="image/jpeg, image/png, image/webp" class="hidden">
+                    <span id="imageError" class="error-msg text-red-500 text-xs mt-1 hidden"></span>
+                </label>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div id="imageGallery" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
+            </div>
+            <span id="galleryError" class="error-msg text-red-500 text-xs mt-1 hidden"></span>
+        </div>
+
+        <!-- 5. Visibility -->
+        <div class="bg-apple-card border border-white/5 rounded-2xl p-6 shadow-sm">
+            <h3 class="text-lg font-bold text-apple-dark mb-4 border-b border-white/5 pb-2">5. Visibility Options</h3>
+            <label class="flex items-center gap-3 cursor-pointer p-4 border border-white/10 rounded-xl hover:bg-white/5 transition-colors w-max">
+                <input type="checkbox" id="featured" <%= product.featured ? 'checked' : '' %> class="w-5 h-5 rounded border-white/20 bg-white/5 accent-apple-gold cursor-pointer">
+                <div>
+                    <span class="block text-sm font-bold text-apple-dark">Featured Product</span>
+                    <span class="block text-xs text-apple-text-gray">Display this product prominently on the storefront.</span>
+                </div>
+            </label>
+        </div>
+
+        <div class="pt-2 flex justify-end">
+            <button type="submit" id="submitBtn" class="px-8 py-3 text-sm font-bold bg-apple-gold text-[#1a231e] rounded-xl hover:bg-yellow-600 transition-colors flex items-center gap-2 shadow-lg shadow-apple-gold/20">
+                <i data-lucide="save" class="w-4 h-4"></i> Update Product
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Cropper Modal -->
+<div id="cropperModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+    <div class="bg-apple-card border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
+            <h3 class="font-bold text-lg text-white">Crop Image</h3>
+            <button id="closeCropperBtn" type="button" class="text-gray-400 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        
+        <div class="p-4 bg-black/40 flex-1 overflow-hidden min-h-[400px] flex items-center justify-center">
+            <img id="cropperImage" class="max-w-full max-h-full block">
+        </div>
+        
+        <div class="p-4 border-t border-white/10 flex justify-between items-center bg-black/20">
+            <div class="text-xs text-gray-400">Aspect Ratio: 1:1 Recommended</div>
+            <div class="flex gap-3">
+                <button type="button" id="cancelCropBtn" class="px-4 py-2 text-sm font-bold text-gray-300 hover:text-white border border-white/10 rounded-lg hover:bg-white/5 transition-colors">Cancel</button>
+                <button type="button" id="confirmCropBtn" class="px-4 py-2 text-sm font-bold bg-apple-gold text-[#1a231e] rounded-lg hover:bg-yellow-600 transition-colors">Crop & Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let cropper;
+    
+    // Setup Backend Data
+    let existingImages = <%- JSON.stringify(product.images || []) %>;
+    let backendCoverImage = "<%- product.coverImage || '' %>";
+    
+    // Find cover image index inside global concatenated array
+    let coverImageIndex = Math.max(0, existingImages.indexOf(backendCoverImage));
+    
+    const croppedImagesBlobs = []; 
+
+    const imageInput = document.getElementById('imageInput');
+    const cropperModal = document.getElementById('cropperModal');
+    const cropperImage = document.getElementById('cropperImage');
+    const closeCropperBtn = document.getElementById('closeCropperBtn');
+    const cancelCropBtn = document.getElementById('cancelCropBtn');
+    const confirmCropBtn = document.getElementById('confirmCropBtn');
+    const imageGallery = document.getElementById('imageGallery');
+    const form = document.getElementById('editProductForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const productId = document.getElementById('productId').value;
+
+    // Variants Handling
+    const variantsContainer = document.getElementById('variantsContainer');
+    const noVariantsMsg = document.getElementById('noVariantsMsg');
+
+    window.addVariantRow = () => {
+        noVariantsMsg.style.display = 'none';
+        
+        const row = document.createElement('div');
+        row.className = 'variant-row flex flex-col sm:grid sm:grid-cols-5 gap-3 p-3 bg-white/5 border border-white/10 rounded-xl items-end relative';
+        row.innerHTML = `
+            <div class="w-full">
+                <label class="block text-[10px] font-bold text-apple-text-gray/50 uppercase mb-1">Type</label>
+                <input type="text" placeholder="e.g. Hardcover" class="var-name w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                <span class="v-error text-[10px] text-red-500 mt-1 hidden">Req.</span>
+            </div>
+            <div class="w-full">
+                <label class="block text-[10px] font-bold text-apple-text-gray/50 uppercase mb-1">Price</label>
+                <input type="number" step="0.01" min="0" placeholder="Base" class="var-price w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                <span class="v-error text-[10px] text-red-500 mt-1 hidden">Invalid</span>
+            </div>
+            <div class="w-full">
+                <label class="block text-[10px] font-bold text-apple-text-gray/50 uppercase mb-1">SKU</label>
+                <input type="text" placeholder="SKU001" class="var-sku w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                <span class="v-error text-[10px] text-red-500 mt-1 hidden">Req.</span>
+            </div>
+            <div class="w-full">
+                <label class="block text-[10px] font-bold text-apple-text-gray/50 uppercase mb-1">Stock</label>
+                <input type="number" min="0" placeholder="0" class="var-stock w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-apple-dark focus:outline-none focus:border-apple-gold/50">
+                <span class="v-error text-[10px] text-red-500 mt-1 hidden">Req.</span>
+            </div>
+            <div class="flex justify-end pb-1.5">
+                <button type="button" onclick="this.parentElement.parentElement.remove(); checkVariants();" class="p-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg transition-colors border border-red-500/20">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+        `;
+        variantsContainer.appendChild(row);
+        lucide.createIcons();
+    };
+
+    window.checkVariants = () => {
+        if(variantsContainer.querySelectorAll('.variant-row').length === 0) {
+            noVariantsMsg.style.display = 'block';
+        }
+    };
+
+    // Images Handling
+    function resetCropper() {
+        if(cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        imageInput.value = '';
+        cropperModal.classList.add('hidden');
+    }
+
+    [closeCropperBtn, cancelCropBtn].forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetCropper();
+        });
+    });
+
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+
+        const url = URL.createObjectURL(file);
+        cropperImage.src = url;
+        cropperModal.classList.remove('hidden');
+
+        if(cropper) cropper.destroy();
+
+        cropper = new Cropper(cropperImage, {
+            aspectRatio: 1, 
+            viewMode: 2,
+            background: false,
+            autoCropArea: 0.9,
+            zoomable: true
+        });
+    });
+
+    confirmCropBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if(!cropper) return;
+
+        cropper.getCroppedCanvas({
+            width: 800,
+            height: 800,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        }).toBlob((blob) => {
+            blob.name = `cropped-${Date.now()}.webp`; 
+            croppedImagesBlobs.push(blob);
+            updateGallery();
+            resetCropper();
+
+        }, 'image/webp', 0.8);
+    });
+
+    window.setCover = (index) => {
+        coverImageIndex = index;
+        updateGallery();
+    };
+
+    function updateGallery() {
+        imageGallery.innerHTML = '';
+        let globalIndex = 0;
+        
+        // Render Existing
+        existingImages.forEach((url, i) => {
+            const div = document.createElement('div');
+            const isCover = (coverImageIndex === globalIndex);
+            div.className = 'relative group aspect-square rounded-xl overflow-hidden shadow-lg border-2 ' + (isCover ? 'border-apple-gold bg-apple-gold/10' : 'border-white/10 bg-white/5');
+            
+            div.innerHTML = `
+                <img src="${url}" class="w-full h-full object-cover">
+                <div class="absolute inset-x-0 bottom-0 bg-black/60 p-1 text-[10px] text-center text-apple-gold font-semibold">Existing</div>
+                <button type="button" onclick="setCover(${globalIndex})" title="Set as Cover" class="absolute top-2 left-2 w-8 h-8 rounded-full ${isCover ? 'bg-apple-gold text-[#1a231e]' : 'bg-black/50 text-white hover:bg-apple-gold hover:text-[#1a231e]'} flex items-center justify-center shadow-md transition-all z-20">
+                    <i data-lucide="star" class="w-4 h-4 ${isCover ? 'fill-current' : ''}"></i>
+                </button>
+                <div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button type="button" onclick="removeExistingImage(${i}, ${globalIndex})" class="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+            imageGallery.appendChild(div);
+            globalIndex++;
+        });
+
+        // Render New Blobs
+        croppedImagesBlobs.forEach((blob, i) => {
+            const url = URL.createObjectURL(blob);
+            const div = document.createElement('div');
+            const isCover = (coverImageIndex === globalIndex);
+            div.className = 'relative group aspect-square rounded-xl overflow-hidden shadow-lg border-2 ' + (isCover ? 'border-apple-gold bg-apple-gold/10' : 'border-dashed border-apple-gold/50 bg-white/5');
+            
+            div.innerHTML = `
+                <img src="${url}" class="w-full h-full object-cover">
+                <div class="absolute inset-x-0 bottom-0 bg-apple-gold/90 p-1 text-[10px] text-center text-[#1a231e] font-bold">New</div>
+                <button type="button" onclick="setCover(${globalIndex})" title="Set as Cover" class="absolute top-2 left-2 w-8 h-8 rounded-full ${isCover ? 'bg-apple-gold text-[#1a231e]' : 'bg-black/50 text-white hover:bg-apple-gold hover:text-[#1a231e]'} flex items-center justify-center shadow-md transition-all z-20">
+                    <i data-lucide="star" class="w-4 h-4 ${isCover ? 'fill-current' : ''}"></i>
+                </button>
+                <div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button type="button" onclick="removeNewImage(${i}, ${globalIndex})" class="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+            imageGallery.appendChild(div);
+            globalIndex++;
+        });
+
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+
+        // Hide error if requirements met
+        if ((existingImages.length + croppedImagesBlobs.length) >= 3) {
+            const errorEl = document.getElementById('galleryError');
+            if (errorEl) errorEl.classList.add('hidden');
+        }
+    }
+
+    window.removeExistingImage = (arrIndex, globalIndex) => {
+        existingImages.splice(arrIndex, 1);
+        adjustCoverIndexOnRemoval(globalIndex);
+        updateGallery();
+    };
+
+    window.removeNewImage = (arrIndex, globalIndex) => {
+        croppedImagesBlobs.splice(arrIndex, 1);
+        adjustCoverIndexOnRemoval(globalIndex);
+        updateGallery();
+    };
+
+    function adjustCoverIndexOnRemoval(removedGlobalIndex) {
+        if(coverImageIndex === removedGlobalIndex) coverImageIndex = 0;
+        else if (coverImageIndex > removedGlobalIndex) coverImageIndex--;
+    }
+
+    updateGallery();
+
+    // Form Validation & Submission
+    async function validateForm() {
+        const errors = {};
+        const fields = ['name', 'author', 'price', 'stock', 'category', 'description'];
+        
+        fields.forEach(field => {
+            const el = document.getElementById(field);
+            const errorEl = document.getElementById(field + 'Error');
+            errorEl.classList.add('hidden');
+            el.classList.remove('border-red-500');
+
+            if (!el.value.trim()) {
+                errors[field] = 'This field is required.';
+            }
+        });
+
+        ['price', 'stock'].forEach(field => {
+            const el = document.getElementById(field);
+            if (el.value !== '' && parseFloat(el.value) < 0) {
+                errors[field] = 'Value cannot be negative.';
+            }
+        });
+
+        const isbn = document.getElementById('isbn').value.trim();
+        if (isbn && isbn.length < 10) {
+            errors.isbn = 'ISBN should be at least 10 characters if provided.';
+        }
+
+        const variantRows = document.querySelectorAll('.variant-row');
+        variantRows.forEach((row, i) => {
+            const vName = row.querySelector('.var-name');
+            const vSku = row.querySelector('.var-sku');
+            const vStock = row.querySelector('.var-stock');
+            const vPrice = row.querySelector('.var-price');
+            
+            row.querySelectorAll('.v-error').forEach(err => err.classList.add('hidden'));
+            [vName, vSku, vStock, vPrice].forEach(el => el.classList.remove('border-red-500'));
+
+            if (!vName.value.trim()) {
+                errors[`vName${i}`] = true;
+                vName.classList.add('border-red-500');
+                vName.nextElementSibling.classList.remove('hidden');
+            }
+            if (!vSku.value.trim()) {
+                errors[`vSku${i}`] = true;
+                vSku.classList.add('border-red-500');
+                vSku.nextElementSibling.classList.remove('hidden');
+            }
+            if (!vStock.value.trim() || parseInt(vStock.value) < 0) {
+                errors[`vStock${i}`] = true;
+                vStock.classList.add('border-red-500');
+                vStock.nextElementSibling.classList.remove('hidden');
+            }
+            if (vPrice.value !== '' && parseFloat(vPrice.value) < 0) {
+                errors[`vPrice${i}`] = true;
+                vPrice.classList.add('border-red-500');
+                vPrice.nextElementSibling.classList.remove('hidden');
+            }
+        });
+
+        if (existingImages.length + croppedImagesBlobs.length < 3) {
+            errors.gallery = 'Minimum 3 images required.';
+        }
+
+        for (const [key, msg] of Object.entries(errors)) {
+            const errorEl = document.getElementById(key + 'Error');
+            if (errorEl) {
+                errorEl.textContent = msg;
+                errorEl.classList.remove('hidden');
+                document.getElementById(key).classList.add('border-red-500');
+            }
+        }
+
+        if (Object.keys(errors).length > 0) {
+            if (errors.gallery) {
+                Swal.fire({ icon: 'warning', title: 'Check Images', text: errors.gallery, background: '#1e2a22', color: '#E6CFA7' });
+            } else if (variantRows.length > 0 && Object.keys(errors).some(k => k.startsWith('v'))) {
+                Swal.fire({ icon: 'warning', title: 'Variant Details', text: 'Please fill all mandatory variant fields (Type, SKU, Stock).', background: '#1e2a22', color: '#E6CFA7' });
+            } else {
+                Swal.fire({ icon: 'warning', title: 'Wait!', text: 'Please fill all required fields correctly.', background: '#1e2a22', color: '#E6CFA7' });
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const isValid = await validateForm();
+        if (!isValid) return;
+
+        const formData = new FormData();
+        formData.append('name', document.getElementById('name').value);
+        formData.append('author', document.getElementById('author').value);
+        formData.append('isbn', document.getElementById('isbn').value);
+        formData.append('price', document.getElementById('price').value);
+        formData.append('stock', document.getElementById('stock').value);
+        formData.append('category', document.getElementById('category').value);
+        formData.append('description', document.getElementById('description').value);
+        formData.append('featured', document.getElementById('featured').checked);
+        formData.append('coverImageIndex', coverImageIndex);
+        formData.append('brand', document.getElementById('brand').value);
+        formData.append('highlights', document.getElementById('highlights').value);
+
+        const variants = [];
+        document.querySelectorAll('.variant-row').forEach(row => {
+            const name = row.querySelector('.var-name').value;
+            const priceOverrideStr = row.querySelector('.var-price').value;
+            const stock = parseInt(row.querySelector('.var-stock').value) || 0;
+            const sku = row.querySelector('.var-sku').value;
+            const priceOverride = priceOverrideStr ? parseFloat(priceOverrideStr) : document.getElementById('price').value;
+            
+            variants.push({ name, priceOverride, stock, sku });
+        });
+        formData.append('variants', JSON.stringify(variants));
+
+        existingImages.forEach((img) => {
+            formData.append('existingImages', img);
+        });
+
+        croppedImagesBlobs.forEach((blob) => {
+            formData.append('images', blob, blob.name);
+        });
+
+        const origText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Updating...';
+        submitBtn.disabled = true;
+
+        try {
+            const res = await fetch(`/admin/products/edit/${productId}`, {
+                method: 'POST',
+                body: formData 
+            });
+            
+            const data = await res.json();
+            if(data.success) {
+                Swal.fire({ icon: 'success', title: 'Success', text: data.message, background: '#1e2a22', color: '#E6CFA7' }).then(() => {
+                    window.location.href = data.redirectUrl || '/admin/products';
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message, background: '#1e2a22', color: '#E6CFA7' });
+                submitBtn.innerHTML = origText;
+                submitBtn.disabled = false;
+                if(typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong', background: '#1e2a22', color: '#E6CFA7' });
+            submitBtn.innerHTML = origText;
+            submitBtn.disabled = false;
+            if(typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    });
+
+</script>

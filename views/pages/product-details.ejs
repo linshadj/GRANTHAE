@@ -1,0 +1,273 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-32">
+    <!-- Breadcrumbs -->
+    <nav class="flex mb-8" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm font-medium text-apple-text-gray">
+            <li><a href="/home" class="hover:text-apple-dark transition-colors">Home</a></li>
+            <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+            <li><a href="/shop" class="hover:text-apple-dark transition-colors">Marketplace</a></li>
+            <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+            <li><a href="/shop?category=<%= product.category._id %>" class="hover:text-apple-dark transition-colors"><%= product.category.name %></a></li>
+            <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+            <li class="text-apple-dark truncate max-w-[200px]"><%= product.name %></li>
+        </ol>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-24">
+        <!-- Image Gallery -->
+        <div class="space-y-6">
+            <div class="relative aspect-square bg-white rounded-3xl overflow-hidden shadow-premium-hover group cursor-zoom-in" id="mainImageContainer">
+                <img src="<%= product.coverImage || product.images[0] %>" alt="<%= product.name %>" 
+                    id="mainImage" class="w-full h-full object-contain transition-transform duration-500">
+                
+                <!-- Zoom Overlay (Hidden by default) -->
+                <div id="zoomLens" class="absolute w-40 h-40 border border-white/20 bg-white/10 backdrop-blur-sm pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                
+                <% if (isUnavailable) { %>
+                    <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-10">
+                        <div class="bg-white/90 px-6 py-3 rounded-2xl shadow-xl transform -rotate-12 border-2 border-red-500">
+                            <span class="text-xl font-black text-red-600 uppercase tracking-widest">Unavailable</span>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+            
+            <!-- Thumbnails -->
+            <div class="grid grid-cols-4 gap-4">
+                <% product.images.forEach((img, index) => { %>
+                    <button onclick="changeMainImage('<%= img %>')" 
+                        class="aspect-square bg-white rounded-xl overflow-hidden border-2 transition-all thumbnail-btn <%= (img === product.coverImage) ? 'border-apple-dark' : 'border-transparent' %>">
+                        <img src="<%= img %>" alt="Thumbnail <%= index + 1 %>" class="w-full h-full object-cover">
+                    </button>
+                <% }) %>
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="flex flex-col">
+            <div class="mb-8">
+                <% if (isUnavailable) { %>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-600 text-xs font-bold uppercase tracking-wider">
+                            <i data-lucide="info" class="w-3 h-3 mr-1"></i>
+                            Currently Unavailable
+                        </span>
+                    </div>
+                <% } else { %>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-apple-teal text-apple-blue text-xs font-bold uppercase tracking-wider mb-4">
+                        <%= product.category.name %>
+                    </span>
+                <% } %>
+                <h1 class="text-4xl font-bold text-apple-dark mb-2 <%= isUnavailable ? 'opacity-50' : '' %>"><%= product.name %></h1>
+                <div class="flex items-center gap-3 mb-4">
+                    <p class="text-xl text-apple-text-gray">by <%= product.author %></p>
+                    <% if (product.brand) { %>
+                        <span class="text-gray-300">|</span>
+                        <span class="text-sm font-semibold px-2 py-0.5 rounded bg-gray-100 text-apple-text-gray inline-flex items-center gap-1">
+                            <i data-lucide="award" class="w-3 h-3"></i>
+                            <%= product.brand %>
+                        </span>
+                    <% } %>
+                </div>
+                
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="flex items-center">
+                        <% for(let i=1; i<=5; i++) { %>
+                            <i data-lucide="star" class="w-5 h-5 <%= i <= Math.round(product.avgRating) ? 'text-yellow-400 fill-current' : 'text-gray-200' %>"></i>
+                        <% } %>
+                        <span class="ml-2 text-sm font-semibold text-apple-dark"><%= product.avgRating %></span>
+                    </div>
+                    <span class="text-gray-300">|</span>
+                    <a href="#reviews" class="text-sm text-apple-blue hover:underline"><%= product.reviews.length %> Reviews</a>
+                </div>
+
+                <div class="flex items-baseline gap-4 mb-8">
+                    <span class="text-3xl font-bold text-apple-dark">₹<%= product.price %></span>
+                    <span class="text-apple-text-gray text-sm">Purchase Price</span>
+                    <% if (product.oldPrice) { %>
+                        <span class="text-lg text-gray-400 line-through">₹<%= product.oldPrice %></span>
+                        <span class="text-green-600 font-bold text-sm">Save <%= Math.round((1 - product.price/product.oldPrice) * 100) %>%</span>
+                    <% } %>
+                </div>
+
+                <!-- Stock Info -->
+                <div class="mb-8">
+                    <% if (isUnavailable) { %>
+                        <div class="p-4 bg-red-50 border border-red-100 rounded-2xl">
+                            <div class="flex items-center text-red-600 font-semibold mb-1">
+                                <i data-lucide="alert-circle" class="w-5 h-5 mr-2"></i>
+                                Item Not Available
+                            </div>
+                            <p class="text-sm text-red-500/80">This item is currently listed as unavailable and cannot be purchased at this time.</p>
+                        </div>
+                    <% } else if (product.stock > 0) { %>
+                        <div class="flex items-center text-green-600 font-semibold mb-2">
+                            <span class="w-2.5 h-2.5 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                            In Stock (<%= product.stock %> copies available)
+                        </div>
+                        <p class="text-sm text-apple-text-gray">Ready for immediate pickup or delivery.</p>
+                    <% } else { %>
+                        <div class="flex items-center text-red-600 font-semibold mb-2">
+                            <span class="w-2.5 h-2.5 bg-red-500 rounded-full mr-2"></span>
+                            Currently Out of Stock
+                        </div>
+                        <p class="text-sm text-apple-text-gray">We'll notify you when it's back!</p>
+                    <% } %>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-4 mb-10">
+                    <% if (isUnavailable) { %>
+                        <button class="flex-1 bg-gray-100 text-gray-400 py-4 rounded-2xl flex items-center justify-center gap-2 cursor-not-allowed" disabled>
+                            <i data-lucide="slash" class="w-5 h-5"></i>
+                            Not Available
+                        </button>
+                    <% } else { %>
+                        <button class="flex-1 btn-primary py-4 rounded-2xl flex items-center justify-center gap-2 <%= product.stock === 0 ? 'opacity-50 cursor-not-allowed' : '' %>" <%= product.stock === 0 ? 'disabled' : '' %>>
+                            <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                            Add to Cart
+                        </button>
+                    <% } %>
+                    <button class="px-6 py-4 rounded-2xl border-2 border-gray-200 text-apple-dark hover:bg-gray-50 transition-all flex items-center justify-center gap-2 <%= isUnavailable ? 'opacity-50 cursor-not-allowed' : '' %>" <%= isUnavailable ? 'disabled' : '' %>>
+                        <i data-lucide="heart" class="w-5 h-5"></i>
+                        Wishlist
+                    </button>
+                </div>
+
+                <!-- Highlights -->
+                <% if (product.highlights && product.highlights.length > 0) { %>
+                    <div class="bg-gray-50 rounded-3xl p-6 mb-8 border border-gray-100">
+                        <h3 class="font-bold text-apple-dark mb-4">Product Highlights</h3>
+                        <ul class="space-y-3">
+                            <% product.highlights.forEach(highlight => { %>
+                                <li class="flex items-start gap-3 text-sm text-apple-text-gray">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-apple-blue flex-shrink-0"></i>
+                                    <%= highlight %>
+                                </li>
+                            <% }) %>
+                        </ul>
+                    </div>
+                <% } %>
+
+                <!-- Description -->
+                <div class="prose prose-apple max-w-none">
+                    <h3 class="font-bold text-apple-dark mb-4">Description</h3>
+                    <p class="text-apple-text-gray leading-relaxed">
+                        <%= product.description %>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    <% if (relatedProducts && relatedProducts.length > 0) { %>
+        <section class="mt-24 border-t border-gray-100 pt-24">
+            <div class="flex items-center justify-between mb-12">
+                <h2 class="text-3xl font-bold text-apple-dark">Suggested for You</h2>
+                <a href="/shop?category=<%= product.category._id %>" class="text-apple-blue hover:underline flex items-center gap-1 font-medium">
+                    View all in <%= product.category.name %>
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </a>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                <% relatedProducts.forEach(relBook => { %>
+                    <%- include('../partials/book-card', { book: {
+                        ...relBook,
+                        title: relBook.name,
+                        image: relBook.coverImage || '/images/default-book.jpg',
+                        rating: '4.5' // Placeholder
+                    }}) %>
+                <% }) %>
+            </div>
+        </section>
+    <% } %>
+
+    <!-- Reviews Section -->
+    <section id="reviews" class="mt-24 border-t border-gray-100 pt-24">
+        <div class="flex items-center justify-between mb-12">
+            <h2 class="text-3xl font-bold text-apple-dark">Reader Reviews</h2>
+            <button class="btn-secondary px-6">Write a Review</button>
+        </div>
+
+        <% if (product.reviews && product.reviews.length > 0) { %>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <% product.reviews.forEach(review => { %>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-50">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-apple-teal text-apple-blue rounded-full flex items-center justify-center font-bold">
+                                    <%= review.user.firstName[0] %>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-apple-dark"><%= review.user.firstName %> <%= review.user.lastName %></p>
+                                    <p class="text-xs text-apple-text-gray"><%= new Date(review.createdAt).toLocaleDateString() %></p>
+                                </div>
+                            </div>
+                            <div class="flex">
+                                <% for(let i=1; i<=5; i++) { %>
+                                    <i data-lucide="star" class="w-4 h-4 <%= i <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-200' %>"></i>
+                                <% } %>
+                            </div>
+                        </div>
+                        <p class="text-apple-text-gray text-sm leading-relaxed">"<%= review.comment %>"</p>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="text-center py-12 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                <i data-lucide="message-square-quote" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                <h3 class="text-lg font-bold text-apple-dark">No reviews yet</h3>
+                <p class="text-apple-text-gray">Be the first to share your thoughts after reading!</p>
+            </div>
+        <% } %>
+    </section>
+</div>
+
+<script>
+    function changeMainImage(src) {
+        const mainImg = document.getElementById('mainImage');
+        mainImg.style.opacity = '0';
+        setTimeout(() => {
+            mainImg.src = src;
+            mainImg.style.opacity = '1';
+        }, 150);
+
+        // Update active thumbnail
+        document.querySelectorAll('.thumbnail-btn').forEach(btn => {
+            btn.classList.remove('border-apple-dark');
+            btn.classList.add('border-transparent');
+            if (btn.querySelector('img').src === src) {
+                btn.classList.add('border-apple-dark');
+                btn.classList.remove('border-transparent');
+            }
+        });
+    }
+
+    // Modern Image Zoom
+    const container = document.getElementById('mainImageContainer');
+    const img = document.getElementById('mainImage');
+    const lens = document.getElementById('zoomLens');
+
+    container.addEventListener('mousemove', (e) => {
+        const { left, top, width, height } = container.getBoundingClientRect();
+        let x = e.pageX - left - window.pageXOffset;
+        let y = e.pageY - top - window.pageYOffset;
+
+        // Keep lens inside container
+        x = Math.max(80, Math.min(width - 80, x));
+        y = Math.max(80, Math.min(height - 80, y));
+
+        lens.style.left = `${x - 80}px`;
+        lens.style.top = `${y - 80}px`;
+
+        // Zoom effect
+        const zoomX = ((x / width) * 100);
+        const zoomY = ((y / height) * 100);
+        img.style.transformOrigin = `${zoomX}% ${zoomY}%`;
+        img.style.transform = 'scale(1.8)';
+    });
+
+    container.addEventListener('mouseleave', () => {
+        img.style.transform = 'scale(1)';
+    });
+</script>
