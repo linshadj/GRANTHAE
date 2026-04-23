@@ -49,19 +49,57 @@
                 <div class="relative items-center hidden sm:flex">
                     <i data-lucide="search" class="absolute left-3 w-4 h-4 text-apple-text-gray"></i>
                     <input id="inventorySearch" type="text" value="<%= searchQuery || '' %>"
-                        placeholder="Search books..."
-                        class="pl-10 pr-4 py-2.5 w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all">
+                        placeholder="Search products..."
+                        class="pl-10 pr-4 py-2.5 h-10 w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all">
                 </div>
 
-                <!-- Sort -->
-                <div class="relative">
-                    <select id="inventorySort" class="appearance-none pl-10 pr-10 py-2.5 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white cursor-pointer transition-all">
-                        <option value="newest" <%= selectedSort === 'newest' ? 'selected' : '' %>>Newest</option>
-                        <option value="stock-low" <%= selectedSort === 'stock-low' ? 'selected' : '' %>>Stock: Low to High</option>
-                        <option value="stock-high" <%= selectedSort === 'stock-high' ? 'selected' : '' %>>Stock: High to Low</option>
-                    </select>
-                    <i data-lucide="sort-desc" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray"></i>
-                    <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray pointer-events-none"></i>
+                <!-- Filter Dropdown -->
+                <div class="relative" id="invFilterWrap">
+                    <button onclick="document.getElementById('invFilterMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5 h-10 min-w-max whitespace-nowrap">
+                        <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                        <span id="invFilterLabel">
+                            <% const filterLabels = { 'all': 'All', 'in-stock': 'In Stock', 'low-stock': 'Low Stock', 'out-of-stock': 'Out of Stock' }; %>
+                            <%= typeof selectedFilter !== 'undefined' ? filterLabels[selectedFilter] || 'Filter By' : 'Filter By' %>
+                        </span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div id="invFilterMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
+                        <a href="/admin/inventory?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=all" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="layers" class="w-3.5 h-3.5"></i> All
+                        </a>
+                        <a href="/admin/inventory?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=in-stock" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-400"></i> In Stock
+                        </a>
+                        <a href="/admin/inventory?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=low-stock" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-yellow-400"></i> Low Stock
+                        </a>
+                        <a href="/admin/inventory?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=out-of-stock" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="x-circle" class="w-3.5 h-3.5 text-red-400"></i> Out of Stock
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Sort Dropdown -->
+                <div class="relative" id="invSortWrap">
+                    <button onclick="document.getElementById('invSortMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5 h-10 min-w-max whitespace-nowrap">
+                        <i data-lucide="arrow-up-down" class="w-3.5 h-3.5"></i>
+                        <span id="invSortLabel">
+                            <% const sortLabels = { 'newest': 'Newest First', 'stock-low': 'Stock: Low to High', 'stock-high': 'Stock: High to Low' }; %>
+                            <%= sortLabels[selectedSort] || 'Sort By' %>
+                        </span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div id="invSortMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
+                        <a href="/admin/inventory?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=newest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> Newest First
+                        </a>
+                        <a href="/admin/inventory?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=stock-low" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i> Stock: Low to High
+                        </a>
+                        <a href="/admin/inventory?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=stock-high" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i> Stock: High to Low
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -139,7 +177,7 @@
                 </p>
                 <div class="flex gap-1">
                     <% for(let i = 1; i <= totalPages; i++) { %>
-                        <a href="?page=<%= i %>&search=<%= searchQuery %>&sort=<%= selectedSort %>" 
+                        <a href="?page=<%= i %>&search=<%= searchQuery %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=<%= selectedSort %>" 
                            class="w-8 h-8 flex items-center justify-center rounded-lg border border-white/5 transition-all text-xs
                            <%= i === currentPage ? 'bg-apple-gold text-[#1a231e] font-bold' : 'bg-white/5 text-white hover:bg-white/10' %>">
                            <%= i %>
@@ -206,19 +244,30 @@
         }
     }
 
-    // Search and Sort
-    const inventorySearch = document.getElementById('inventorySearch');
-    const inventorySort = document.getElementById('inventorySort');
+    document.addEventListener('click', function (e) {
+        const sortWrap = document.getElementById('invSortWrap');
+        if (sortWrap && !sortWrap.contains(e.target)) {
+            const sortMenu = document.getElementById('invSortMenu');
+            if (sortMenu) sortMenu.classList.add('hidden');
+        }
 
+        const filterWrap = document.getElementById('invFilterWrap');
+        if (filterWrap && !filterWrap.contains(e.target)) {
+            const filterMenu = document.getElementById('invFilterMenu');
+            if (filterMenu) filterMenu.classList.add('hidden');
+        }
+    });
+
+    const inventorySearch = document.getElementById('inventorySearch');
+    
     const triggerUpdate = () => {
         const search = inventorySearch.value;
-        const sort = inventorySort.value;
-        window.location.href = `/admin/inventory?page=1&search=${search}&sort=${sort}`;
+        const sort = '<%= typeof selectedSort !== 'undefined' ? selectedSort : 'newest' %>';
+        const filter = '<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>';
+        window.location.href = `/admin/inventory?page=1&search=${search}&sort=${sort}&filter=${filter}`;
     };
 
     inventorySearch.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') triggerUpdate();
     });
-
-    inventorySort.addEventListener('change', triggerUpdate);
 </script>

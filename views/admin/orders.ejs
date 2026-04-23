@@ -19,34 +19,55 @@
                     <i data-lucide="search" class="absolute left-3 w-4 h-4 text-apple-text-gray"></i>
                     <input id="orderSearch" type="text" value="<%= searchQuery || '' %>"
                         placeholder="Search Order ID, Name..."
-                        class="pl-10 pr-10 py-2.5 w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all">
+                        class="pl-10 pr-10 py-2.5 h-10 w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all">
                     <button id="clearOrderSearch" class="absolute right-3 text-apple-text-gray hover:text-white <%= searchQuery ? '' : 'hidden' %>">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
 
-                <!-- Sort -->
-                <div class="relative">
-                    <select id="orderSort" class="appearance-none pl-10 pr-10 py-2.5 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white cursor-pointer transition-all">
-                        <option value="newest" <%= selectedSort === 'newest' ? 'selected' : '' %>>Newest First</option>
-                        <option value="oldest" <%= selectedSort === 'oldest' ? 'selected' : '' %>>Oldest First</option>
-                    </select>
-                    <i data-lucide="sort-desc" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray"></i>
-                    <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray pointer-events-none"></i>
+                <!-- Filter Dropdown -->
+                <div class="relative" id="orderFilterWrap">
+                    <button onclick="document.getElementById('orderFilterMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5 h-10 min-w-max whitespace-nowrap">
+                        <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                        <span id="orderFilterLabel">
+                            <% const filterLabels = { 'all': 'All Status', 'Pending': 'Pending', 'Shipped': 'Shipped', 'Out for delivery': 'Out for Delivery', 'Delivered': 'Delivered', 'Cancelled': 'Cancelled' }; %>
+                            <%= typeof selectedFilter !== 'undefined' ? filterLabels[selectedFilter] || 'Filter By' : 'All Status' %>
+                        </span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div id="orderFilterMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
+                        <% Object.keys(filterLabels).forEach(key => { %>
+                            <a href="/admin/orders?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=<%= key %>" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                                <% if(key==='Pending') { %> <i data-lucide="clock" class="w-3.5 h-3.5 text-yellow-400"></i>
+                                <% } else if(key==='Shipped') { %> <i data-lucide="truck" class="w-3.5 h-3.5 text-blue-400"></i>
+                                <% } else if(key==='Out for delivery') { %> <i data-lucide="package" class="w-3.5 h-3.5 text-purple-400"></i>
+                                <% } else if(key==='Delivered') { %> <i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-400"></i>
+                                <% } else if(key==='Cancelled') { %> <i data-lucide="x-circle" class="w-3.5 h-3.5 text-red-400"></i>
+                                <% } else { %> <i data-lucide="layers" class="w-3.5 h-3.5"></i> <% } %>
+                                <%= filterLabels[key] %>
+                            </a>
+                        <% }) %>
+                    </div>
                 </div>
 
-                <!-- Filter -->
-                <div class="relative">
-                    <select id="orderFilter" class="appearance-none pl-10 pr-10 py-2.5 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white cursor-pointer transition-all">
-                        <option value="all" <%= selectedFilter === 'all' ? 'selected' : '' %>>All Status</option>
-                        <option value="Pending" <%= selectedFilter === 'Pending' ? 'selected' : '' %>>Pending</option>
-                        <option value="Shipped" <%= selectedFilter === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                        <option value="Out for delivery" <%= selectedFilter === 'Out for delivery' ? 'selected' : '' %>>Out for Delivery</option>
-                        <option value="Delivered" <%= selectedFilter === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                        <option value="Cancelled" <%= selectedFilter === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                    </select>
-                    <i data-lucide="filter" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray"></i>
-                    <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray pointer-events-none"></i>
+                <!-- Sort Dropdown -->
+                <div class="relative" id="orderSortWrap">
+                    <button onclick="document.getElementById('orderSortMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5 h-10 min-w-max whitespace-nowrap">
+                        <i data-lucide="arrow-up-down" class="w-3.5 h-3.5"></i>
+                        <span id="orderSortLabel">
+                            <% const sortLabels = { 'newest': 'Newest First', 'oldest': 'Oldest First' }; %>
+                            <%= sortLabels[selectedSort] || 'Sort By' %>
+                        </span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div id="orderSortMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
+                        <a href="/admin/orders?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=newest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> Newest First
+                        </a>
+                        <a href="/admin/orders?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=oldest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Oldest First
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -207,14 +228,12 @@
     }
 
     const orderSearch = document.getElementById('orderSearch');
-    const orderSort = document.getElementById('orderSort');
-    const orderFilter = document.getElementById('orderFilter');
     const clearOrderSearch = document.getElementById('clearOrderSearch');
 
     function applyFilters() {
         const search = orderSearch.value;
-        const sort = orderSort.value;
-        const filter = orderFilter.value;
+        const sort = '<%= typeof selectedSort !== 'undefined' ? selectedSort : 'newest' %>';
+        const filter = '<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>';
         window.location.href = `/admin/orders?page=1&search=${search}&sort=${sort}&filter=${filter}`;
     }
 
@@ -230,8 +249,19 @@
         applyFilters();
     });
 
-    orderSort.addEventListener('change', applyFilters);
-    orderFilter.addEventListener('change', applyFilters);
+    document.addEventListener('click', function (e) {
+        const sortWrap = document.getElementById('orderSortWrap');
+        if (sortWrap && !sortWrap.contains(e.target)) {
+            const sortMenu = document.getElementById('orderSortMenu');
+            if (sortMenu) sortMenu.classList.add('hidden');
+        }
+
+        const filterWrap = document.getElementById('orderFilterWrap');
+        if (filterWrap && !filterWrap.contains(e.target)) {
+            const filterMenu = document.getElementById('orderFilterMenu');
+            if (filterMenu) filterMenu.classList.add('hidden');
+        }
+    });
 
     // Status Modal logic
     const statusModal = document.getElementById('statusModal');

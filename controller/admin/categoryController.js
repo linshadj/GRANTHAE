@@ -10,10 +10,21 @@ export const categoriesPage = async (req, res, next) => {
 
         const searchQuery = req.query.search || '';
         const sortOption = req.query.sort || 'newest';
+        const filterOption = req.query.filter || 'all';
         
         let query = {};
         if (searchQuery) {
             query.name = { $regex: searchQuery, $options: 'i' };
+        }
+
+        if (filterOption === 'active') {
+            query.isDeleted = false;
+            query.isBlocked = false;
+        } else if (filterOption === 'inactive') {
+            query.isDeleted = false;
+            query.isBlocked = true;
+        } else if (filterOption === 'deleted') {
+            query.isDeleted = true;
         }
 
         let sortCriteria = {};
@@ -39,7 +50,8 @@ export const categoriesPage = async (req, res, next) => {
             totalPages,
             totalCategories,
             searchQuery,
-            selectedSort: sortOption
+            selectedSort: sortOption,
+            selectedFilter: filterOption
         });
 
     } catch (error) {

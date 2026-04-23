@@ -6,8 +6,9 @@ export const getInventoryPage = async (req, res, next) => {
         const page = parseInt(req.query.page) || 1;
         const search = req.query.search || "";
         const sort = req.query.sort || "newest";
+        const filter = req.query.filter || "all";
 
-        const inventoryData = await getProductsForInventory(page, search, sort);
+        const inventoryData = await getProductsForInventory(page, search, sort, filter);
 
         res.render("admin/inventory", {
             layout: "layouts/admin-panel",
@@ -18,6 +19,7 @@ export const getInventoryPage = async (req, res, next) => {
             totalProducts: inventoryData.totalProducts,
             searchQuery: search,
             selectedSort: sort,
+            selectedFilter: filter,
             path: "/admin/inventory"
         });
     } catch (error) {

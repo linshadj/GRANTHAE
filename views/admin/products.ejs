@@ -11,9 +11,32 @@
         <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
             <h3 class="font-bold text-lg text-apple-dark">Products List</h3>
             <div class="flex gap-2">
+                <!-- Filter Dropdown -->
+                <div class="relative" id="prodFilterWrap">
+                    <button onclick="document.getElementById('prodFilterMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5 h-10 min-w-max whitespace-nowrap">
+                        <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                        <span id="prodFilterLabel">
+                            <% const filterLabels = { 'all': 'All', 'active': 'Active', 'deleted': 'Soft Deleted' }; %>
+                            <%= typeof selectedFilter !== 'undefined' ? filterLabels[selectedFilter] || 'Filter By' : 'Filter By' %>
+                        </span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div id="prodFilterMenu" class="hidden absolute right-0 mt-2 w-40 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
+                        <a href="/admin/products?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=all" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="layers" class="w-3.5 h-3.5"></i> All
+                        </a>
+                        <a href="/admin/products?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=active" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-400"></i> Active
+                        </a>
+                        <a href="/admin/products?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=deleted" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                            <i data-lucide="trash" class="w-3.5 h-3.5 text-red-400"></i> Soft Deleted
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Sort Dropdown -->
                 <div class="relative" id="prodSortWrap">
-                    <button onclick="document.getElementById('prodSortMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5">
+                    <button onclick="document.getElementById('prodSortMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5 h-10 min-w-max whitespace-nowrap">
                         <i data-lucide="arrow-up-down" class="w-3.5 h-3.5"></i>
                         <span id="prodSortLabel">
                             <% const sortLabels = { 'a-z': 'Name (A-Z)', 'z-a': 'Name (Z-A)', 'newest': 'Newest First', 'oldest': 'Oldest First' }; %>
@@ -22,17 +45,17 @@
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                     </button>
                     <div id="prodSortMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
-                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&sort=a-z" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=a-z" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="a-arrow-down" class="w-3.5 h-3.5"></i> Name (A-Z)
                         </a>
-                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&sort=z-a" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=z-a" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="a-arrow-up" class="w-3.5 h-3.5"></i> Name (Z-A)
                         </a>
                         <div class="border-t border-white/5 my-1"></div>
-                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&sort=newest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=newest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> Newest First
                         </a>
-                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&sort=oldest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors flex items-center gap-2">
+                        <a href="/admin/products?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=oldest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Oldest First
                         </a>
                     </div>
@@ -41,7 +64,7 @@
                 <div class="relative flex items-center">
                     <i data-lucide="search" class="absolute left-3 w-3.5 h-3.5 text-apple-text-gray"></i>
                     <input id="searchInput" type="text" value="<%= searchQuery || '' %>" placeholder="Search Products..."
-                        class="pl-10 pr-10 py-3 text-xs w-64 bg-white/5 border border-white/5 rounded-lg focus:outline-none focus:ring-1 focus:ring-apple-gold/50 text-apple-dark placeholder-apple-text-gray/50 transition-all hover:bg-white/10">
+                        class="pl-10 pr-10 py-3 h-10 text-xs w-64 bg-white/5 border border-white/5 rounded-lg focus:outline-none focus:ring-1 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray/50 transition-all hover:bg-white/10">
                     <button id="clearSearchBtn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs font-semibold rounded-lg text-apple-text-gray hover:bg-white/10 transition-colors" title="Clear search">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
@@ -128,7 +151,7 @@
             </p>
             <div class="flex items-center gap-1">
                 <% for(let i=1; i <=totalPages; i++) { %>
-                    <a href="/admin/products?page=<%= i %>&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>"
+                    <a href="/admin/products?page=<%= i %>&sort=<%= selectedSort || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&search=<%= searchQuery || '' %>"
                         class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors <%= i === currentPage ? 'bg-apple-gold text-[#1a231e] font-bold' : 'text-apple-text-gray hover:bg-white/10' %>">
                         <%= i %>
                     </a>
@@ -162,13 +185,14 @@
     async function liveSearch() {
         const query = searchInput.value.trim();
         const sort = '<%= selectedSort || '' %>';
+        const filter = '<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>';
         
         if(query === '') {
-            window.location.href = `/admin/products?page=1&sort=${sort}&search=`;
+            window.location.href = `/admin/products?page=1&sort=${sort}&filter=${filter}&search=`;
             return;
         }
 
-        window.location.href = `/admin/products?page=1&sort=${sort}&search=${encodeURIComponent(query)}`;
+        window.location.href = `/admin/products?page=1&sort=${sort}&filter=${filter}&search=${encodeURIComponent(query)}`;
     }
 
     const debouncedSearch = debounce(liveSearch, 600);
@@ -183,7 +207,8 @@
             e.stopPropagation();
             e.preventDefault();
             searchInput.value = '';
-            window.location.href = `/admin/products?page=1&sort=<%= selectedSort || '' %>&search=`;
+            const filter = '<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>';
+            window.location.href = `/admin/products?page=1&sort=<%= selectedSort || '' %>&filter=${filter}&search=`;
         });
     }
 
@@ -191,6 +216,11 @@
         const sortWrap = document.getElementById('prodSortWrap');
         if (sortWrap && !sortWrap.contains(e.target)) {
             document.getElementById('prodSortMenu').classList.add('hidden');
+        }
+
+        const filterWrap = document.getElementById('prodFilterWrap');
+        if (filterWrap && !filterWrap.contains(e.target)) {
+            document.getElementById('prodFilterMenu').classList.add('hidden');
         }
     });
 
