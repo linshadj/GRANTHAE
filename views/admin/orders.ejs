@@ -1,0 +1,302 @@
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-white font-serif">Order Management</h2>
+        <div class="flex gap-2">
+            <button class="px-4 py-2 bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors text-sm flex items-center gap-2">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Export Orders
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex flex-col lg:flex-row justify-between items-center gap-4">
+            <h3 class="font-bold text-lg text-apple-dark">All Orders</h3>
+            
+            <div class="flex flex-wrap gap-3">
+                <!-- Search -->
+                <div class="relative flex items-center">
+                    <i data-lucide="search" class="absolute left-3 w-4 h-4 text-apple-text-gray"></i>
+                    <input id="orderSearch" type="text" value="<%= searchQuery || '' %>"
+                        placeholder="Search Order ID, Name..."
+                        class="pl-10 pr-10 py-2.5 w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all">
+                    <button id="clearOrderSearch" class="absolute right-3 text-apple-text-gray hover:text-white <%= searchQuery ? '' : 'hidden' %>">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Sort -->
+                <div class="relative">
+                    <select id="orderSort" class="appearance-none pl-10 pr-10 py-2.5 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white cursor-pointer transition-all">
+                        <option value="newest" <%= selectedSort === 'newest' ? 'selected' : '' %>>Newest First</option>
+                        <option value="oldest" <%= selectedSort === 'oldest' ? 'selected' : '' %>>Oldest First</option>
+                    </select>
+                    <i data-lucide="sort-desc" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray"></i>
+                    <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray pointer-events-none"></i>
+                </div>
+
+                <!-- Filter -->
+                <div class="relative">
+                    <select id="orderFilter" class="appearance-none pl-10 pr-10 py-2.5 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white cursor-pointer transition-all">
+                        <option value="all" <%= selectedFilter === 'all' ? 'selected' : '' %>>All Status</option>
+                        <option value="Pending" <%= selectedFilter === 'Pending' ? 'selected' : '' %>>Pending</option>
+                        <option value="Shipped" <%= selectedFilter === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                        <option value="Out for delivery" <%= selectedFilter === 'Out for delivery' ? 'selected' : '' %>>Out for Delivery</option>
+                        <option value="Delivered" <%= selectedFilter === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                        <option value="Cancelled" <%= selectedFilter === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    </select>
+                    <i data-lucide="filter" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray"></i>
+                    <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray pointer-events-none"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-white/5">
+                    <tr class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">
+                        <th class="px-6 py-4">Order ID</th>
+                        <th class="px-6 py-4">Date</th>
+                        <th class="px-6 py-4">Customer</th>
+                        <th class="px-6 py-4">Total</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody" class="divide-y divide-white/5">
+                    <% if (orders.length === 0) { %>
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-apple-text-gray">
+                                <div class="flex flex-col items-center gap-2">
+                                    <i data-lucide="shopping-cart" class="w-12 h-12 opacity-20"></i>
+                                    <p>No orders found</p>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } else { %>
+                        <% orders.forEach(order => { %>
+                            <tr class="hover:bg-white/5 transition-colors group">
+                                <td class="px-6 py-4 font-mono text-apple-gold">
+                                    <%= order.orderID %>
+                                </td>
+                                <td class="px-6 py-4 text-apple-text-gray">
+                                    <%= new Date(order.createdAt).toLocaleDateString() %>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-col">
+                                        <span class="text-white font-medium"><%= order.shippingAddress.firstName %> <%= order.shippingAddress.lastName %></span>
+                                        <span class="text-xs text-apple-text-gray"><%= order.user.email %></span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-white font-bold">
+                                    ₹<%= order.totalAmount.toLocaleString() %>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <% 
+                                        let statusClass = 'bg-gray-500/10 text-gray-400';
+                                        if (order.orderStatus === 'Pending') statusClass = 'bg-yellow-500/10 text-yellow-400';
+                                        else if (order.orderStatus === 'Shipped') statusClass = 'bg-blue-500/10 text-blue-400';
+                                        else if (order.orderStatus === 'Out for delivery') statusClass = 'bg-purple-500/10 text-purple-400';
+                                        else if (order.orderStatus === 'Delivered') statusClass = 'bg-green-500/10 text-green-400';
+                                        else if (order.orderStatus === 'Cancelled') statusClass = 'bg-red-500/10 text-red-400';
+                                    %>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold <%= statusClass %> border border-current opacity-80">
+                                        <%= order.orderStatus %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="/admin/orders/view/<%= order._id %>" class="p-2 text-apple-text-gray hover:text-apple-gold hover:bg-apple-gold/10 rounded-lg transition-all" title="View Details">
+                                            <i data-lucide="eye" class="w-4 h-4"></i>
+                                        </a>
+                                        <button onclick="openStatusModal('<%= order._id %>', '<%= order.orderStatus %>')" class="p-2 text-apple-text-gray hover:text-white hover:bg-white/10 rounded-lg transition-all" title="Change Status">
+                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+            <div class="p-6 border-t border-white/5 flex items-center justify-between">
+                <p class="text-sm text-apple-text-gray">
+                    Showing <span class="text-white font-medium"><%= (currentPage - 1) * 10 + 1 %></span> to 
+                    <span class="text-white font-medium"><%= Math.min(currentPage * 10, totalOrders) %></span> of 
+                    <span class="text-white font-medium text-lg mx-1"><%= totalOrders %></span> orders
+                </p>
+                <div class="flex gap-2">
+                    <% if (currentPage > 1) { %>
+                        <a href="?page=<%= currentPage - 1 %>&search=<%= searchQuery %>&sort=<%= selectedSort %>&filter=<%= selectedFilter %>" 
+                           class="px-4 py-2 bg-white/5 border border-white/5 text-white rounded-xl hover:bg-white/10 transition-all">
+                           Previous
+                        </a>
+                    <% } %>
+                    
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <a href="?page=<%= i %>&search=<%= searchQuery %>&sort=<%= selectedSort %>&filter=<%= selectedFilter %>" 
+                           class="w-10 h-10 flex items-center justify-center rounded-xl border border-white/5 transition-all
+                           <%= i === currentPage ? 'bg-apple-gold text-[#1a231e] font-bold' : 'bg-white/5 text-white hover:bg-white/10' %>">
+                           <%= i %>
+                        </a>
+                    <% } %>
+
+                    <% if (currentPage < totalPages) { %>
+                        <a href="?page=<%= currentPage + 1 %>&search=<%= searchQuery %>&sort=<%= selectedSort %>&filter=<%= selectedFilter %>" 
+                           class="px-4 py-2 bg-white/5 border border-white/5 text-white rounded-xl hover:bg-white/10 transition-all">
+                           Next
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Status Update Modal -->
+<div id="statusModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+    <div class="bg-[#1a231e] border border-white/10 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="statusModalContent">
+        <div class="p-6 border-b border-white/5">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold text-white font-serif">Update Order Status</h3>
+                <button onclick="closeStatusModal()" class="text-apple-text-gray hover:text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+        <form id="statusForm" class="p-6 space-y-4">
+            <input type="hidden" id="modalOrderId">
+            <div>
+                <label class="block text-sm font-medium text-apple-text-gray mb-2">Select New Status</label>
+                <div class="grid grid-cols-1 gap-2">
+                    <% ['Pending', 'Shipped', 'Out for delivery', 'Delivered', 'Cancelled'].forEach(status => { %>
+                        <label class="relative flex items-center p-4 rounded-xl border border-white/5 bg-white/5 cursor-pointer hover:bg-white/10 transition-all group">
+                            <input type="radio" name="orderStatus" value="<%= status %>" class="w-4 h-4 text-apple-gold bg-transparent border-white/20 focus:ring-apple-gold/50">
+                            <span class="ml-3 text-white font-medium"><%= status %></span>
+                            <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-apple-gold"></i>
+                            </div>
+                        </label>
+                    <% }) %>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button type="button" onclick="closeStatusModal()" class="flex-1 px-4 py-3 bg-white/5 text-white rounded-xl hover:bg-white/10 font-bold transition-all">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 px-4 py-3 bg-apple-gold text-[#1a231e] rounded-xl hover:bg-yellow-600 font-bold transition-all shadow-lg shadow-apple-gold/20">
+                    Update Status
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Search with debounce
+    function debounce(func, timeout = 500) {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        };
+    }
+
+    const orderSearch = document.getElementById('orderSearch');
+    const orderSort = document.getElementById('orderSort');
+    const orderFilter = document.getElementById('orderFilter');
+    const clearOrderSearch = document.getElementById('clearOrderSearch');
+
+    function applyFilters() {
+        const search = orderSearch.value;
+        const sort = orderSort.value;
+        const filter = orderFilter.value;
+        window.location.href = `/admin/orders?page=1&search=${search}&sort=${sort}&filter=${filter}`;
+    }
+
+    orderSearch.addEventListener('input', debounce(() => {
+        if (orderSearch.value) clearOrderSearch.classList.remove('hidden');
+        else clearOrderSearch.classList.add('hidden');
+        applyFilters();
+    }));
+
+    clearOrderSearch.addEventListener('click', () => {
+        orderSearch.value = '';
+        clearOrderSearch.classList.add('hidden');
+        applyFilters();
+    });
+
+    orderSort.addEventListener('change', applyFilters);
+    orderFilter.addEventListener('change', applyFilters);
+
+    // Status Modal logic
+    const statusModal = document.getElementById('statusModal');
+    const statusModalContent = document.getElementById('statusModalContent');
+    const modalOrderId = document.getElementById('modalOrderId');
+
+    function openStatusModal(id, currentStatus) {
+        modalOrderId.value = id;
+        const radio = document.querySelector(`input[name="orderStatus"][value="${currentStatus}"]`);
+        if (radio) radio.checked = true;
+        
+        statusModal.classList.remove('hidden');
+        setTimeout(() => {
+            statusModal.classList.add('opacity-100');
+            statusModalContent.classList.remove('scale-95');
+            statusModalContent.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeStatusModal() {
+        statusModal.classList.remove('opacity-100');
+        statusModalContent.classList.add('scale-95');
+        statusModalContent.classList.remove('scale-100');
+        setTimeout(() => {
+            statusModal.classList.add('hidden');
+        }, 300);
+    }
+
+    document.getElementById('statusForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = modalOrderId.value;
+        const status = document.querySelector('input[name="orderStatus"]:checked').value;
+
+        try {
+            const response = await fetch(`/admin/orders/update-status/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Updated!',
+                    text: data.message,
+                    background: '#1a231e',
+                    color: '#fff',
+                    confirmButtonColor: '#E6CFA7'
+                }).then(() => location.reload());
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message,
+                background: '#1a231e',
+                color: '#fff'
+            });
+        }
+    });
+
+    // Close modal on outside click
+    statusModal.addEventListener('click', (e) => {
+        if (e.target === statusModal) closeStatusModal();
+    });
+</script>

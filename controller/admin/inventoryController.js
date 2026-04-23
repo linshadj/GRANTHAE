@@ -1,0 +1,45 @@
+import { getProductsForInventory, updateProductStock } from "../../service/admin/productService.js";
+import { STATUS_CODES } from "../../utils/statusCodes.js";
+
+export const getInventoryPage = async (req, res, next) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const search = req.query.search || "";
+        const sort = req.query.sort || "newest";
+
+        const inventoryData = await getProductsForInventory(page, search, sort);
+
+        res.render("admin/inventory", {
+            layout: "layouts/admin-panel",
+            title: "Inventory Management",
+            products: inventoryData.products,
+            currentPage: inventoryData.currentPage,
+            totalPages: inventoryData.totalPages,
+            totalProducts: inventoryData.totalProducts,
+            searchQuery: search,
+            selectedSort: sort,
+            path: "/admin/inventory"
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateStock = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { stock } = req.body;
+
+        await updateProductStock(id, parseInt(stock));
+
+        res.status(STATUS_CODES.OK).json({
+            success: true,
+            message: "Stock updated successfully"
+        });
+    } catch (error) {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+            success: false,
+            message: error.message
+        });
+    }
+};

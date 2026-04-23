@@ -1,0 +1,230 @@
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="/admin/orders" class="p-2 bg-white/5 text-apple-text-gray hover:text-white rounded-xl transition-all">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </a>
+            <div>
+                <h2 class="text-2xl font-bold text-white font-serif">Order Details</h2>
+                <p class="text-apple-text-gray text-sm font-mono"><%= order.orderID %></p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button class="px-4 py-2 bg-white/5 text-white border border-white/10 rounded-xl hover:bg-white/10 transition-all text-sm flex items-center gap-2">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                Invoice
+            </button>
+            <button onclick="openStatusModal('<%= order._id %>', '<%= order.orderStatus %>')" class="px-4 py-2 bg-apple-gold text-[#1a231e] rounded-xl hover:bg-yellow-600 font-bold transition-all text-sm flex items-center gap-2 shadow-lg shadow-apple-gold/20">
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                Change Status
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Order Summary & Items -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Items Table -->
+            <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-white/5 bg-white/5">
+                    <h3 class="font-bold text-white flex items-center gap-2">
+                        <i data-lucide="package" class="w-5 h-5 text-apple-gold"></i>
+                        Order Items
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-white/5">
+                            <tr class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">
+                                <th class="px-6 py-4">Product</th>
+                                <th class="px-6 py-4 text-center">Quantity</th>
+                                <th class="px-6 py-4">Price</th>
+                                <th class="px-6 py-4 text-right">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            <% order.items.forEach(item => { %>
+                                <tr class="hover:bg-white/5 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-16 h-16 rounded-xl bg-black/20 p-2 border border-white/5">
+                                                <img src="<%= item.product.coverImage || '/images/placeholder.png' %>" class="w-full h-full object-contain" alt="">
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-white font-medium"><%= item.product.name %></span>
+                                                <% if (item.variant) { %>
+                                                    <span class="text-xs text-apple-text-gray">Variant: <%= item.variant %></span>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center text-white">
+                                        x<%= item.quantity %>
+                                    </td>
+                                    <td class="px-6 py-4 text-apple-text-gray">
+                                        ₹<%= item.price.toLocaleString() %>
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-white font-bold">
+                                        ₹<%= (item.price * item.quantity).toLocaleString() %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                        <tfoot class="bg-white/5">
+                            <tr>
+                                <td colspan="3" class="px-6 py-4 text-right font-bold text-apple-text-gray">Subtotal</td>
+                                <td class="px-6 py-4 text-right text-white font-bold text-lg">₹<%= order.totalAmount.toLocaleString() %></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="px-6 py-4 text-right font-bold text-apple-text-gray">Shipping</td>
+                                <td class="px-6 py-4 text-right text-green-400 font-bold">FREE</td>
+                            </tr>
+                            <tr class="bg-apple-gold/10">
+                                <td colspan="3" class="px-6 py-6 text-right font-black text-apple-gold uppercase tracking-widest">Total Amount</td>
+                                <td class="px-6 py-6 text-right text-apple-gold font-black text-2xl">₹<%= order.totalAmount.toLocaleString() %></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Logistics/Timeline -->
+            <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm p-6">
+                <h3 class="font-bold text-white mb-6 flex items-center gap-2">
+                    <i data-lucide="truck" class="w-5 h-5 text-apple-gold"></i>
+                    Order Status History
+                </h3>
+                <div class="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:bg-white/5">
+                    <div class="relative flex items-center gap-6">
+                        <div class="w-10 h-10 rounded-full bg-apple-gold flex items-center justify-center z-10 shadow-lg shadow-apple-gold/20">
+                            <i data-lucide="check" class="w-5 h-5 text-[#1a231e]"></i>
+                        </div>
+                        <div>
+                            <p class="text-white font-bold">Order Placed</p>
+                            <p class="text-xs text-apple-text-gray"><%= new Date(order.createdAt).toLocaleString() %></p>
+                        </div>
+                    </div>
+                    <% if (order.orderStatus !== 'Pending') { %>
+                        <div class="relative flex items-center gap-6">
+                            <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center z-10">
+                                <i data-lucide="package" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <div>
+                                <p class="text-white font-bold"><%= order.orderStatus %></p>
+                                <p class="text-xs text-apple-text-gray">Updated on <%= new Date(order.updatedAt).toLocaleString() %></p>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Details -->
+        <div class="space-y-8">
+            <!-- Customer Details -->
+            <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm p-6 overflow-hidden relative">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <i data-lucide="user" class="w-20 h-20 text-white"></i>
+                </div>
+                <h3 class="font-bold text-white mb-4">Customer Info</h3>
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center text-white font-bold">
+                        <%= order.user.firstName.charAt(0) %><%= order.user.lastName.charAt(0) %>
+                    </div>
+                    <div>
+                        <p class="text-white font-medium"><%= order.user.firstName %> <%= order.user.lastName %></p>
+                        <p class="text-xs text-apple-text-gray"><%= order.user.email %></p>
+                    </div>
+                </div>
+                <a href="/admin/users/<%= order.user._id %>" class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/5 text-xs font-bold text-apple-text-gray hover:text-white hover:bg-white/5 transition-all">
+                    View Customer Profile
+                </a>
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm p-6">
+                <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="map-pin" class="w-4 h-4 text-apple-gold"></i>
+                    Shipping Address
+                </h3>
+                <div class="text-sm text-apple-text-gray space-y-1">
+                    <p class="text-white font-bold"><%= order.shippingAddress.firstName %> <%= order.shippingAddress.lastName %></p>
+                    <p><%= order.shippingAddress.streetAddress %></p>
+                    <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.pinCode %></p>
+                    <p><%= order.shippingAddress.country %></p>
+                    <div class="pt-3 flex items-center gap-2 text-white">
+                        <i data-lucide="phone" class="w-4 h-4"></i>
+                        <%= order.shippingAddress.phoneNumber %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Info -->
+            <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm p-6">
+                <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="credit-card" class="w-4 h-4 text-apple-gold"></i>
+                    Payment Details
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-apple-text-gray">Method</span>
+                        <span class="text-white font-medium"><%= order.paymentMethod %></span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-apple-text-gray">Status</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest <%= order.paymentStatus === 'Success' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-500' %> border border-current">
+                            <%= order.paymentStatus %>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reusing status modal script from orders.ejs or adding it here if needed -->
+<!-- (Usually, I'd put common modals in partials, but for now I'll include the script) -->
+<div id="statusModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+    <!-- ... same modal content as orders.ejs ... -->
+</div>
+
+<!-- (Skipping duplicate modal HTML for brevity, I should ideally share it) -->
+
+<script>
+    function openStatusModal(id, currentStatus) {
+        // Reuse same logic
+        Swal.fire({
+            title: 'Update Order Status',
+            input: 'select',
+            inputOptions: {
+                'Pending': 'Pending',
+                'Shipped': 'Shipped',
+                'Out for delivery': 'Out for delivery',
+                'Delivered': 'Delivered',
+                'Cancelled': 'Cancelled'
+            },
+            inputValue: currentStatus,
+            showCancelButton: true,
+            background: '#1a231e',
+            color: '#fff',
+            confirmButtonColor: '#E6CFA7'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const status = result.value;
+                try {
+                    const response = await fetch(`/admin/orders/update-status/${id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire({ icon: 'success', title: 'Updated!', background: '#1a231e', color: '#fff' }).then(() => location.reload());
+                    }
+                } catch (e) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+                }
+            }
+        });
+    }
+</script>

@@ -5,6 +5,8 @@ import { adminDashboardPage } from "../controller/admin/dashboardController.js";
 import { liveUsersSearch, toggleBlockUser, usersPage } from "../controller/admin/userController.js";
 import { addCategory, categoriesPage, editCategory, getAddCategoryPage, getEditCategoryPage, liveCategoriesSearch, toggleCategoryStatus } from "../controller/admin/categoryController.js";
 import { addProduct, editProduct, getAddProductPage, getEditProductPage, liveProductsSearch, productsPage, toggleProductStatus } from "../controller/admin/productController.js";
+import { liveOrdersSearch, ordersPage, updateOrderStatus, viewOrderDetail } from "../controller/admin/orderController.js";
+import { getInventoryPage, updateStock } from "../controller/admin/inventoryController.js";
 import multer from "multer";
 
 // Multer setup for Products
@@ -66,6 +68,16 @@ router.get("/products/edit/:id", isAdmin, getEditProductPage);
 router.post("/products/edit/:id", isAdmin, uploadProduct.array("images", 10), editProduct);
 router.patch("/products/toggle-status/:id/:action", isAdmin, toggleProductStatus);
 router.get("/products/live", isAdmin, liveProductsSearch);
+
+// Orders
+router.get("/orders", isAdmin, ordersPage);
+router.get("/orders/view/:id", isAdmin, viewOrderDetail);
+router.patch("/orders/update-status/:id", isAdmin, updateOrderStatus);
+router.get("/orders/live", isAdmin, liveOrdersSearch);
+
+// Inventory
+router.get("/inventory", isAdmin, getInventoryPage);
+router.patch("/inventory/update-stock/:id", isAdmin, updateStock);
 
 router.get("/logout", isAdmin, adminLogoutHandler);
 

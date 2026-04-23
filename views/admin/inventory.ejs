@@ -1,0 +1,224 @@
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-white font-serif">Inventory management</h2>
+        <div class="flex gap-2">
+            <a href="/admin/products/add" class="flex items-center gap-2 px-4 py-2 bg-apple-gold text-[#1a231e] rounded-lg hover:bg-yellow-600 transition-all font-bold text-sm shadow-lg shadow-apple-gold/20">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Add New Product
+            </a>
+        </div>
+    </div>
+
+    <!-- Inventory Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-apple-card rounded-2xl border border-white/5 p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                <i data-lucide="package" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-xs text-apple-text-gray uppercase tracking-wider">Total Products</p>
+                <p class="text-2xl font-bold text-white"><%= totalProducts %></p>
+            </div>
+        </div>
+        <div class="bg-apple-card rounded-2xl border border-white/5 p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-xs text-apple-text-gray uppercase tracking-wider">Low Stock</p>
+                <p class="text-2xl font-bold text-white"><%= products.filter(p => p.stock <= 5).length %></p>
+            </div>
+        </div>
+        <div class="bg-apple-card rounded-2xl border border-white/5 p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500">
+                <i data-lucide="check-circle" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-xs text-apple-text-gray uppercase tracking-wider">In Stock</p>
+                <p class="text-2xl font-bold text-white"><%= products.filter(p => p.stock > 5).length %></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex flex-col lg:flex-row justify-between items-center gap-4">
+            <h3 class="font-bold text-lg text-apple-dark">Stock Levels</h3>
+            
+            <div class="flex flex-wrap gap-3">
+                <!-- Search -->
+                <div class="relative items-center hidden sm:flex">
+                    <i data-lucide="search" class="absolute left-3 w-4 h-4 text-apple-text-gray"></i>
+                    <input id="inventorySearch" type="text" value="<%= searchQuery || '' %>"
+                        placeholder="Search books..."
+                        class="pl-10 pr-4 py-2.5 w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all">
+                </div>
+
+                <!-- Sort -->
+                <div class="relative">
+                    <select id="inventorySort" class="appearance-none pl-10 pr-10 py-2.5 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white cursor-pointer transition-all">
+                        <option value="newest" <%= selectedSort === 'newest' ? 'selected' : '' %>>Newest</option>
+                        <option value="stock-low" <%= selectedSort === 'stock-low' ? 'selected' : '' %>>Stock: Low to High</option>
+                        <option value="stock-high" <%= selectedSort === 'stock-high' ? 'selected' : '' %>>Stock: High to Low</option>
+                    </select>
+                    <i data-lucide="sort-desc" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray"></i>
+                    <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray pointer-events-none"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-white/5">
+                    <tr class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">
+                        <th class="px-6 py-4">Product Inventory</th>
+                        <th class="px-6 py-4">Category</th>
+                        <th class="px-6 py-4">Current Stock</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <% products.forEach(product => { %>
+                        <tr class="hover:bg-white/5 transition-colors group">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-black/20 p-1 border border-white/5 overflow-hidden">
+                                        <img src="<%= product.coverImage %>" class="w-full h-full object-contain" alt="">
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-white font-medium truncate max-w-[200px]"><%= product.name %></span>
+                                        <span class="text-[10px] text-apple-text-gray uppercase tracking-tighter">SKU: <%= product._id.toString().slice(-6).toUpperCase() %></span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-apple-text-gray">
+                                <%= product.category ? product.category.name : 'Uncategorized' %>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-white font-bold text-lg"><%= product.stock %></span>
+                                    <% if (product.stock <= 5) { %>
+                                        <span class="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-black uppercase">Low</span>
+                                    <% } %>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <% if (product.stock === 0) { %>
+                                    <span class="inline-flex items-center gap-1.5 text-red-500 font-bold text-xs uppercase">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                        Out of Stock
+                                    </span>
+                                <% } else if (product.stock <= 5) { %>
+                                    <span class="inline-flex items-center gap-1.5 text-yellow-500 font-bold text-xs uppercase">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                                        Critical
+                                    </span>
+                                <% } else { %>
+                                    <span class="inline-flex items-center gap-1.5 text-green-500 font-bold text-xs uppercase">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                        Healthy
+                                    </span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="quickUpdateStock('<%= product._id %>', '<%= product.stock %>', '<%= product.name %>')" class="px-3 py-1.5 bg-white/5 text-white border border-white/10 rounded-lg hover:bg-apple-gold hover:text-[#1a231e] hover:border-apple-gold transition-all text-xs font-bold">
+                                    Update Stock
+                                </button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+            <div class="p-6 border-t border-white/5 flex items-center justify-between font-serif">
+                <p class="text-sm text-apple-text-gray">
+                    Showing <span class="text-white font-medium"><%= (currentPage - 1) * 10 + 1 %></span> to <%= Math.min(currentPage * 10, totalProducts) %> products
+                </p>
+                <div class="flex gap-1">
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <a href="?page=<%= i %>&search=<%= searchQuery %>&sort=<%= selectedSort %>" 
+                           class="w-8 h-8 flex items-center justify-center rounded-lg border border-white/5 transition-all text-xs
+                           <%= i === currentPage ? 'bg-apple-gold text-[#1a231e] font-bold' : 'bg-white/5 text-white hover:bg-white/10' %>">
+                           <%= i %>
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    async function quickUpdateStock(id, currentStock, name) {
+        const { value: newStock } = await Swal.fire({
+            title: 'Update Stock',
+            text: `Updating inventory for "${name}"`,
+            input: 'number',
+            inputLabel: 'Enter new stock level',
+            inputValue: currentStock,
+            showCancelButton: true,
+            background: '#1a231e',
+            color: '#fff',
+            confirmButtonColor: '#E6CFA7',
+            confirmButtonText: 'Update Now',
+            inputAttributes: {
+                min: 0,
+                step: 1
+            },
+            customClass: {
+                input: 'bg-white/5 border-white/10 text-white rounded-xl'
+            }
+        });
+
+        if (newStock !== undefined) {
+            try {
+                const response = await fetch(`/admin/inventory/update-stock/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stock: newStock })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Inventory updated successfully',
+                        background: '#1a231e',
+                        color: '#fff',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Update Failed',
+                    text: error.message,
+                    background: '#1a231e',
+                    color: '#fff'
+                });
+            }
+        }
+    }
+
+    // Search and Sort
+    const inventorySearch = document.getElementById('inventorySearch');
+    const inventorySort = document.getElementById('inventorySort');
+
+    const triggerUpdate = () => {
+        const search = inventorySearch.value;
+        const sort = inventorySort.value;
+        window.location.href = `/admin/inventory?page=1&search=${search}&sort=${sort}`;
+    };
+
+    inventorySearch.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') triggerUpdate();
+    });
+
+    inventorySort.addEventListener('change', triggerUpdate);
+</script>
