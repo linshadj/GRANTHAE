@@ -9,7 +9,7 @@ export const listProducts = async (req, res) => {
         const categories = await Category.find({ isBlocked: false, isDeleted: false });
 
         res.render("pages/shop", {
-            title: "Shop - GRANTHAE",
+            title: "Marketplace - GRANTHAE",
             products,
             categories,
             totalProducts,
@@ -33,7 +33,7 @@ export const productDetails = async (req, res) => {
 
         if (!product) {
             // Only redirect if product doesn't exist at all (deleted or wrong ID)
-            return res.redirect("/shop?message=Product not found");
+            return res.redirect("/marketplace?message=Product not found");
         }
 
         const relatedProducts = product.isUnavailable 

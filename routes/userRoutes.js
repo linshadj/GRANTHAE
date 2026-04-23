@@ -32,10 +32,11 @@ router.get("/", (req, res) => {
   res.redirect("/home");
 });
 
-router.get("/home", isAuth, homePage);
+router.get("/home", homePage);
 
-// Shop
-router.get("/shop", listProducts);
+// Marketplace
+router.get("/marketplace", listProducts);
+router.get("/shop", (req, res) => res.redirect("/marketplace"));
 router.get("/product/:id", productDetails);
 
 // Sign In

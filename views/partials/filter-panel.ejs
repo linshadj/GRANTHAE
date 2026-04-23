@@ -1,4 +1,4 @@
-<form action="/shop" method="GET" id="filterForm" class="space-y-8">
+<form action="/marketplace" method="GET" id="filterForm" class="space-y-8">
     <!-- Search (Hidden or integrated if needed, but shop view handles search separately) -->
     <% if (query.search) { %>
         <input type="hidden" name="search" value="<%= query.search %>">
@@ -68,7 +68,7 @@
 
     <!-- Clear All -->
     <div class="pt-4">
-        <a href="/shop" class="flex items-center justify-center gap-2 text-sm text-apple-text-gray hover:text-red-600 transition-colors py-2 border border-dashed border-gray-300 rounded-lg">
+        <a href="/marketplace" class="flex items-center justify-center gap-2 text-sm text-apple-text-gray hover:text-red-600 transition-colors py-2 border border-dashed border-gray-300 rounded-lg">
             <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
             Reset All Filters
         </a>

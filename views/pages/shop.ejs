@@ -15,7 +15,7 @@
 
         <!-- Search Bar -->
         <div class="relative w-full md:w-96">
-            <form action="/shop" method="GET" class="relative group">
+            <form action="/marketplace" method="GET" class="relative group">
                 <% if (query.category) { %>
                     <% if (Array.isArray(query.category)) { %>
                         <% query.category.forEach(cat => { %>
@@ -33,7 +33,7 @@
                     class="w-full pl-12 pr-12 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-apple-dark/5 focus:border-apple-dark transition-all shadow-sm group-hover:shadow-md">
                 <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-apple-text-gray"></i>
                 <% if (query.search) { %>
-                    <button type="button" onclick="window.location.href='/shop?<%= new URLSearchParams({...query, search: ''}).toString() %>'"
+                    <button type="button" onclick="window.location.href='/marketplace?<%= new URLSearchParams({...query, search: ''}).toString() %>'"
                         class="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors">
                         <i data-lucide="x" class="w-4 h-4 text-apple-text-gray"></i>
                     </button>
@@ -68,14 +68,14 @@
                 <% if (totalPages > 1) { %>
                     <div class="mt-16 flex items-center justify-center gap-2">
                         <% if (currentPage > 1) { %>
-                            <a href="/shop?<%= new URLSearchParams({...query, page: currentPage - 1}).toString() %>"
+                            <a href="/marketplace?<%= new URLSearchParams({...query, page: currentPage - 1}).toString() %>"
                                 class="p-2 rounded-xl border border-gray-200 hover:bg-white hover:shadow-md transition-all text-apple-dark">
                                 <i data-lucide="chevron-left" class="w-5 h-5"></i>
                             </a>
                         <% } %>
 
                         <% for(let i = 1; i <= totalPages; i++) { %>
-                            <a href="/shop?<%= new URLSearchParams({...query, page: i}).toString() %>"
+                            <a href="/marketplace?<%= new URLSearchParams({...query, page: i}).toString() %>"
                                 class="w-10 h-10 flex items-center justify-center rounded-xl font-medium transition-all
                                 <%= currentPage === i ? 'bg-apple-dark text-white shadow-lg' : 'text-apple-text-gray hover:bg-white hover:shadow-md border border-transparent hover:border-gray-100' %>">
                                 <%= i %>
@@ -83,7 +83,7 @@
                         <% } %>
 
                         <% if (currentPage < totalPages) { %>
-                            <a href="/shop?<%= new URLSearchParams({...query, page: currentPage + 1}).toString() %>"
+                            <a href="/marketplace?<%= new URLSearchParams({...query, page: currentPage + 1}).toString() %>"
                                 class="p-2 rounded-xl border border-gray-200 hover:bg-white hover:shadow-md transition-all text-apple-dark">
                                 <i data-lucide="chevron-right" class="w-5 h-5"></i>
                             </a>
@@ -98,7 +98,7 @@
                     </div>
                     <h2 class="text-xl font-bold text-apple-dark mb-2">No books found</h2>
                     <p class="text-apple-text-gray mb-8">Try adjusting your filters or search terms.</p>
-                    <a href="/shop" class="btn-primary">Clear all filters</a>
+                    <a href="/marketplace" class="btn-primary">Clear all filters</a>
                 </div>
             <% } %>
         </main>

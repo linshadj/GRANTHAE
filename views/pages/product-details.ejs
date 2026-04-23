@@ -4,9 +4,9 @@
         <ol class="flex items-center space-x-2 text-sm font-medium text-apple-text-gray">
             <li><a href="/home" class="hover:text-apple-dark transition-colors">Home</a></li>
             <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
-            <li><a href="/shop" class="hover:text-apple-dark transition-colors">Marketplace</a></li>
+            <li><a href="/marketplace" class="hover:text-apple-dark transition-colors">Marketplace</a></li>
             <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
-            <li><a href="/shop?category=<%= product.category._id %>" class="hover:text-apple-dark transition-colors"><%= product.category.name %></a></li>
+            <li><a href="/marketplace?category=<%= product.category._id %>" class="hover:text-apple-dark transition-colors"><%= product.category.name %></a></li>
             <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
             <li class="text-apple-dark truncate max-w-[200px]"><%= product.name %></li>
         </ol>
@@ -164,7 +164,7 @@
         <section class="mt-24 border-t border-gray-100 pt-24">
             <div class="flex items-center justify-between mb-12">
                 <h2 class="text-3xl font-bold text-apple-dark">Suggested for You</h2>
-                <a href="/shop?category=<%= product.category._id %>" class="text-apple-blue hover:underline flex items-center gap-1 font-medium">
+                <a href="/marketplace?category=<%= product.category._id %>" class="text-apple-blue hover:underline flex items-center gap-1 font-medium">
                     View all in <%= product.category.name %>
                     <i data-lucide="chevron-right" class="w-4 h-4"></i>
                 </a>
