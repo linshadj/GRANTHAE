@@ -1,17 +1,16 @@
 <form action="/marketplace" method="GET" id="filterForm" class="space-y-8">
-    <!-- Search (Hidden or integrated if needed, but shop view handles search separately) -->
     <% if (query.search) { %>
         <input type="hidden" name="search" value="<%= query.search %>">
     <% } %>
 
     <!-- Categories -->
     <div>
-        <h3 class="text-sm font-semibold text-apple-dark mb-4 uppercase tracking-wider">Genres</h3>
+        <h3 class="text-sm font-bold text-apple-dark mb-4 uppercase tracking-wider">Genres</h3>
         <div class="space-y-3">
             <% categories.forEach(category => { %>
                 <label class="flex items-center group cursor-pointer">
                     <input type="checkbox" name="category" value="<%= category._id %>"
-                        class="w-4 h-4 rounded border-gray-300 text-apple-dark focus:ring-apple-dark transition-all"
+                        class="w-4 h-4 rounded border-white/10 bg-white/5 text-apple-blue focus:ring-apple-blue transition-all"
                         <%= (Array.isArray(query.category) ? query.category.includes(category._id.toString()) : query.category === category._id.toString()) ? 'checked' : '' %>
                         onchange="this.form.submit()">
                     <span class="ml-3 text-sm text-apple-text-gray group-hover:text-apple-dark transition-colors">
@@ -23,12 +22,12 @@
     </div>
 
     <!-- Divider -->
-    <div class="h-px bg-gray-200"></div>
+    <div class="h-px bg-white/5"></div>
 
     <!-- Price Range -->
     <div>
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-semibold text-apple-dark uppercase tracking-wider">Price</h3>
+            <h3 class="text-sm font-bold text-apple-dark uppercase tracking-wider">Price</h3>
             <button type="button" onclick="resetPrice()" class="text-xs text-apple-blue hover:underline">Reset</button>
         </div>
         <div class="space-y-4">
@@ -36,28 +35,28 @@
                 <div class="flex-1">
                     <label class="text-[10px] text-apple-text-gray uppercase mb-1 block">Min</label>
                     <input type="number" name="minPrice" value="<%= query.minPrice %>" placeholder="₹0"
-                        class="w-full text-sm border-gray-200 rounded-lg focus:ring-apple-dark focus:border-apple-dark">
+                        class="w-full text-sm border-white/10 rounded-xl focus:ring-apple-blue focus:border-apple-blue py-2.5 px-3 bg-white/5 text-apple-dark shadow-inner transition-all focus:bg-white/10">
                 </div>
                 <div class="flex-1">
                     <label class="text-[10px] text-apple-text-gray uppercase mb-1 block">Max</label>
                     <input type="number" name="maxPrice" value="<%= query.maxPrice %>" placeholder="₹500+"
-                        class="w-full text-sm border-gray-200 rounded-lg focus:ring-apple-dark focus:border-apple-dark">
+                        class="w-full text-sm border-white/10 rounded-xl focus:ring-apple-blue focus:border-apple-blue py-2.5 px-3 bg-white/5 text-apple-dark shadow-inner transition-all focus:bg-white/10">
                 </div>
             </div>
-            <button type="submit" class="w-full py-2 bg-apple-dark text-white text-xs font-semibold rounded-lg hover:bg-black transition-colors">
+            <button type="submit" class="w-full py-2.5 bg-apple-dark text-white text-xs font-bold rounded-xl hover:bg-black transition-all shadow-lg shadow-apple-dark/10">
                 Apply Price
             </button>
         </div>
     </div>
 
     <!-- Divider -->
-    <div class="h-px bg-gray-200"></div>
+    <div class="h-px bg-white/5"></div>
 
     <!-- Sort By -->
     <div>
-        <h3 class="text-sm font-semibold text-apple-dark mb-4 uppercase tracking-wider">Sort By</h3>
+        <h3 class="text-sm font-bold text-apple-dark mb-4 uppercase tracking-wider">Sort By</h3>
         <select name="sort" onchange="this.form.submit()" 
-            class="w-full text-sm border-gray-200 rounded-lg focus:ring-apple-dark focus:border-apple-dark">
+            class="w-full text-sm border-white/10 rounded-xl focus:ring-apple-blue focus:border-apple-blue py-2.5 px-3 bg-white/5 text-apple-dark shadow-inner transition-all focus:bg-white/10">
             <option value="newest" <%= query.sort === 'newest' ? 'selected' : '' %>>Newest Arrivals</option>
             <option value="price_asc" <%= query.sort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
             <option value="price_desc" <%= query.sort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
@@ -68,7 +67,7 @@
 
     <!-- Clear All -->
     <div class="pt-4">
-        <a href="/marketplace" class="flex items-center justify-center gap-2 text-sm text-apple-text-gray hover:text-red-600 transition-colors py-2 border border-dashed border-gray-300 rounded-lg">
+        <a href="/marketplace" class="flex items-center justify-center gap-2 text-sm text-apple-text-gray hover:text-red-600 transition-colors py-3 border border-dashed border-white/10 rounded-xl">
             <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
             Reset All Filters
         </a>

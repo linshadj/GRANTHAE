@@ -1,0 +1,112 @@
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-24 min-h-[80vh]">
+    <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6 relative">
+        <div class="absolute -top-10 -left-10 w-40 h-40 bg-apple-blue/5 rounded-full blur-3xl"></div>
+        
+        <div class="relative">
+            <h1 class="text-4xl font-bold text-apple-dark font-luxury">Order History</h1>
+            <p class="text-apple-text-gray mt-2 text-lg">Manage your luxury orders and tracking.</p>
+        </div>
+
+        <!-- Search Bar -->
+        <form action="/profile/orders" method="GET" class="relative w-full md:w-80 group">
+            <input type="text" name="search" value="<%= searchQuery || '' %>" placeholder="Search Order ID..." 
+                   class="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-apple-blue/50 transition-all font-medium placeholder-apple-text-gray/40 backdrop-blur-md">
+            <i data-lucide="search" class="w-5 h-5 text-apple-text-gray/40 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-apple-blue transition-colors"></i>
+            <% if (searchQuery) { %>
+                <a href="/profile/orders" class="absolute right-4 top-1/2 -translate-y-1/2 text-apple-text-gray/40 hover:text-red-500 transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </a>
+            <% } %>
+        </form>
+    </div>
+
+    <% if (orders && orders.length > 0) { %>
+        <div class="grid grid-cols-1 gap-8">
+            <% orders.forEach(order => { %>
+                <div class="glass-card overflow-hidden rounded-3xl border border-white/10 shadow-2xl transition-all duration-500 hover:shadow-apple-blue/5 group relative">
+                    <!-- Status Indicator Bar -->
+                    <div class="absolute top-0 left-0 w-1.5 h-full transition-all duration-300 group-hover:w-2
+                        <%= order.orderStatus === 'Delivered' ? 'bg-green-500' : 
+                           order.orderStatus === 'Cancelled' ? 'bg-red-500' : 
+                           'bg-apple-blue' %>"></div>
+                    
+                    <div class="p-6 sm:p-10">
+                        <!-- Order Card Header -->
+                        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-10 pb-8 border-b border-white/5 relative z-10">
+                            <!-- Info Columns -->
+                            <div class="flex flex-wrap items-start gap-x-12 gap-y-8 w-full lg:w-auto">
+                                <div class="w-32">
+                                    <p class="text-[9px] uppercase tracking-[0.2em] text-apple-text-gray/50 mb-2 font-bold">Reference</p>
+                                    <p class="text-xs font-mono font-bold text-apple-dark">#<%= order.orderID %></p>
+                                </div>
+                                <div class="w-32">
+                                    <p class="text-[9px] uppercase tracking-[0.2em] text-apple-text-gray/50 mb-2 font-bold">Acquired</p>
+                                    <p class="text-[13px] font-bold text-apple-dark whitespace-nowrap"><%= order.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></p>
+                                </div>
+                                <div class="w-32">
+                                    <p class="text-[9px] uppercase tracking-[0.2em] text-apple-text-gray/50 mb-2 font-bold">Investment</p>
+                                    <p class="text-[13px] font-bold text-apple-blue whitespace-nowrap">₹<%= order.totalAmount %></p>
+                                </div>
+                                <div class="w-32">
+                                    <p class="text-[9px] uppercase tracking-[0.2em] text-apple-text-gray/50 mb-2 font-bold">Ship To</p>
+                                    <p class="text-[13px] font-bold text-apple-dark truncate" title="<%= order.shippingAddress.firstName %> <%= order.shippingAddress.lastName %>">
+                                        <%= order.shippingAddress.firstName %>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Status & Action -->
+                            <div class="flex flex-row lg:flex-col items-center lg:items-end justify-between w-full lg:w-auto gap-4 self-stretch lg:self-center border-t lg:border-t-0 pt-6 lg:pt-0 border-white/5">
+                                <span class="px-5 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] border border-current/10 backdrop-blur-md
+                                    <%= order.orderStatus === 'Pending' ? 'bg-yellow-500/5 text-yellow-500' : '' %>
+                                    <%= order.orderStatus === 'Shipped' ? 'bg-blue-500/5 text-blue-500' : '' %>
+                                    <%= order.orderStatus === 'Delivered' ? 'bg-green-500/5 text-green-500' : '' %>
+                                    <%= order.orderStatus === 'Cancelled' ? 'bg-red-500/5 text-red-500' : '' %>">
+                                    <%= order.orderStatus %>
+                                </span>
+                                <a href="/profile/orders/<%= order._id %>" class="group/btn inline-flex items-center gap-2 text-[10px] font-bold text-apple-blue uppercase tracking-widest hover:text-apple-dark transition-all">
+                                    Examine Details <i data-lucide="arrow-right" class="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-1"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-6 overflow-x-auto pb-4 custom-scrollbar">
+                            <% order.items.forEach(item => { %>
+                                <div class="relative w-24 h-32 flex-shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-white/5 group/img cursor-pointer" title="<%= item.product ? item.product.name : 'Product' %>">
+                                    <img src="<%= item.product && (item.product.coverImage || (item.product.images && item.product.images[0])) ? (item.product.coverImage || item.product.images[0]) : '/images/default-book.jpg' %>" 
+                                         class="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110">
+                                    
+                                    <% if (item.itemStatus === 'Cancelled' || item.itemStatus === 'Returned') { %>
+                                        <div class="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center">
+                                            <span class="text-[8px] font-bold uppercase tracking-tighter text-white rotate-12 border border-white/20 px-1 py-0.5 rounded bg-red-500/20"><%= item.itemStatus %></span>
+                                        </div>
+                                    <% } %>
+                                    
+                                    <div class="absolute bottom-0 right-0 bg-apple-blue text-apple-gray text-[10px] font-bold px-2 py-0.5 rounded-tl-xl backdrop-blur-md shadow-inner">x<%= item.quantity %></div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <div class="glass-card p-20 text-center rounded-3xl max-w-2xl mx-auto shadow-2xl border border-white/10 relative overflow-hidden">
+            <div class="absolute -top-20 -right-20 w-60 h-60 bg-apple-blue/5 rounded-full blur-[100px]"></div>
+            
+            <div class="w-20 h-20 bg-white/5 text-apple-text-gray/20 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-white/5 rotate-12 group-hover:rotate-0 transition-transform">
+                <i data-lucide="package" class="w-10 h-10"></i>
+            </div>
+            
+            <% if (searchQuery) { %>
+                <h2 class="text-3xl font-bold text-apple-dark mb-4 font-luxury">No matches found</h2>
+                <p class="text-apple-text-gray mb-10 text-lg">We couldn't find any orders matching "<%= searchQuery %>".</p>
+                <a href="/profile/orders" class="btn-primary py-4 px-10">Clear Order Search</a>
+            <% } else { %>
+                <h2 class="text-3xl font-bold text-apple-dark mb-4 font-luxury">Awaiting your first selection</h2>
+                <p class="text-apple-text-gray mb-10 text-lg">Your luxury order history is currently empty. Start shopping today.</p>
+                <a href="/marketplace" class="btn-primary py-4 px-10 shadow-2xl shadow-apple-blue/20">Explore Marketplace</a>
+            <% } %>
+        </div>
+    <% } %>
+</div>

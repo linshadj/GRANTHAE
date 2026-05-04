@@ -1,6 +1,7 @@
 import { getFilteredProducts, getProductById, getRelatedProducts } from "../../service/user/shopService.js";
 import { Category } from "../../models/categoryDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
+import wishlistDb from "../../models/wishlistDb.js";
 
 export const listProducts = async (req, res) => {
     try {
@@ -8,14 +9,24 @@ export const listProducts = async (req, res) => {
         const { products, totalProducts, totalPages, currentPage } = await getFilteredProducts(query);
         const categories = await Category.find({ isBlocked: false, isDeleted: false });
 
-        res.render("pages/shop", {
+        let wishlistProductIds = [];
+        if (req.user) {
+            const wishlist = await wishlistDb.findOne({ user: req.user._id });
+            if (wishlist) {
+                wishlistProductIds = wishlist.items.map(item => item.product.toString());
+            }
+        }
+
+        res.render("pages/market-place", {
+
             title: "Marketplace - GRANTHAE",
             products,
             categories,
             totalProducts,
             totalPages,
             currentPage,
-            query // Pass query back to views for persistence in filters/pagination
+            query, // Pass query back to views for persistence in filters/pagination
+            wishlistProductIds
         });
     } catch (error) {
         console.error("Error in listProducts:", error);
@@ -40,11 +51,18 @@ export const productDetails = async (req, res) => {
             ? [] 
             : await getRelatedProducts(product.category._id, product._id);
 
+        let isInWishlist = false;
+        if (req.user) {
+            const wishlist = await wishlistDb.findOne({ user: req.user._id, "items.product": id });
+            if (wishlist) isInWishlist = true;
+        }
+
         res.render("pages/product-details", {
             title: `${product.name} - GRANTHAE`,
             product,
             relatedProducts,
-            isUnavailable: product.isUnavailable
+            isUnavailable: product.isUnavailable,
+            isInWishlist
         });
     } catch (error) {
         console.error("Error in productDetails:", error);

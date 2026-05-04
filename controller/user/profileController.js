@@ -8,6 +8,7 @@ import {
   setDefaultAddressService,
   updateProfile,
 } from "../../service/user/profileService.js";
+import * as orderService from "../../service/user/orderService.js";
 
 export const viewProfile = async (req, res) => {
   try {
@@ -17,6 +18,7 @@ export const viewProfile = async (req, res) => {
         userId: new mongoose.Types.ObjectId(user._id),
       })
       .sort({ isDefault: -1, createdAt: -1 });
+
     res.render("pages/profile", {
       user,
       addresses,

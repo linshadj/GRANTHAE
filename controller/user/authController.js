@@ -10,6 +10,8 @@ import {
 } from "../../service/user/authService.js";
 import { updateEmail } from "../../service/user/settingsService.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
+import { Product } from "../../models/productDb.js";
+import { Category } from "../../models/categoryDb.js";
 
 
 export const signIn = async (req, res) => {
@@ -175,8 +177,40 @@ export const passwordChanged = (req, res) => {
 };
 
 export const homePage = async (req, res) => {
-  const user = await userDb.findById(req.session.user);
-  res.render("pages/home", { user });
+  try {
+    const user = req.session.user ? await userDb.findById(req.session.user) : null;
+    
+    // Fetch featured products
+    const rawTrending = await Product.find({ isBlocked: false, isDeleted: false, featured: true })
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .populate('category');
+
+    const trendingProducts = rawTrending.map(product => {
+      const totalStock = product.variants ? product.variants.reduce((acc, v) => acc + v.stock, 0) : 0;
+      return {
+        ...product.toObject(),
+        totalStock
+      };
+    });
+      
+    // Fetch all active categories
+    const activeCategories = await Category.find({ isBlocked: false, isDeleted: false });
+    
+    res.render("pages/home", { 
+      user, 
+      trendingProducts, 
+      activeCategories 
+    });
+  } catch (error) {
+    console.error("Error in homePage:", error);
+    // If user is logged in but db fails, still try to render
+    res.render("pages/home", { 
+      user: null, 
+      trendingProducts: [], 
+      activeCategories: [] 
+    });
+  }
 };
 
 export const logout = (req, res) => {

@@ -50,11 +50,23 @@
                                             <div class="w-16 h-16 rounded-xl bg-black/20 p-2 border border-white/5">
                                                 <img src="<%= item.product.coverImage || '/images/placeholder.png' %>" class="w-full h-full object-contain" alt="">
                                             </div>
-                                            <div class="flex flex-col">
+                                            <div class="flex flex-col gap-1">
                                                 <span class="text-white font-medium"><%= item.product.name %></span>
                                                 <% if (item.variant) { %>
                                                     <span class="text-xs text-apple-text-gray">Variant: <%= item.variant %></span>
                                                 <% } %>
+                                                <% 
+                                                    let itemStatusClass = 'bg-gray-500/10 text-gray-400';
+                                                    if (item.itemStatus === 'Pending') itemStatusClass = 'bg-yellow-500/10 text-yellow-400';
+                                                    else if (item.itemStatus === 'Shipped') itemStatusClass = 'bg-blue-500/10 text-blue-400';
+                                                    else if (item.itemStatus === 'Out for delivery') itemStatusClass = 'bg-purple-500/10 text-purple-400';
+                                                    else if (item.itemStatus === 'Delivered') itemStatusClass = 'bg-green-500/10 text-green-400';
+                                                    else if (item.itemStatus === 'Cancelled') itemStatusClass = 'bg-red-500/10 text-red-400';
+                                                    else if (item.itemStatus === 'Returned') itemStatusClass = 'bg-orange-500/10 text-orange-400';
+                                                %>
+                                                <span class="inline-flex w-max items-center px-2 py-0.5 mt-1 rounded text-[10px] font-bold <%= itemStatusClass %> border border-current opacity-80 uppercase tracking-widest">
+                                                    <%= item.itemStatus %>
+                                                </span>
                                             </div>
                                         </div>
                                     </td>
@@ -192,17 +204,37 @@
 
 <script>
     function openStatusModal(id, currentStatus) {
-        // Reuse same logic
+        const statusOrder = {
+            'Pending': 1,
+            'Shipped': 2,
+            'Out for delivery': 3,
+            'Delivered': 4,
+            'Cancelled': 5
+        };
+        const currentLevel = statusOrder[currentStatus];
+        const allOptions = {
+            'Pending': 'Pending',
+            'Shipped': 'Shipped',
+            'Out for delivery': 'Out for delivery',
+            'Delivered': 'Delivered',
+            'Cancelled': 'Cancelled'
+        };
+        
+        let allowedOptions = {};
+        if (currentStatus === 'Delivered' || currentStatus === 'Cancelled') {
+            allowedOptions[currentStatus] = currentStatus;
+        } else {
+            Object.keys(allOptions).forEach(key => {
+                if (key === 'Cancelled' || statusOrder[key] >= currentLevel) {
+                    allowedOptions[key] = allOptions[key];
+                }
+            });
+        }
+
         Swal.fire({
             title: 'Update Order Status',
             input: 'select',
-            inputOptions: {
-                'Pending': 'Pending',
-                'Shipped': 'Shipped',
-                'Out for delivery': 'Out for delivery',
-                'Delivered': 'Delivered',
-                'Cancelled': 'Cancelled'
-            },
+            inputOptions: allowedOptions,
             inputValue: currentStatus,
             showCancelButton: true,
             background: '#1a231e',

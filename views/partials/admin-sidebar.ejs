@@ -1,7 +1,13 @@
 <div id="sidebar-overlay"
-    class="fixed inset-0 bg-black/50 z-30 hidden md:hidden glass-blur transition-opacity opacity-0"></div>
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden md:hidden transition-opacity opacity-0" style="z-index: 99999 !important;"></div>
+
+
+
 <aside id="admin-sidebar"
-    class="w-64 bg-[#1a231e] border-r border-white/5 h-screen fixed left-0 top-0 overflow-y-auto transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 ease-in-out flex flex-col">
+    class="w-64 bg-[#1a231e] border-r border-white/5 h-screen fixed left-0 top-0 overflow-y-auto transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col" style="z-index: 100000 !important;">
+
+
+
 
     <!-- Admin Header -->
     <div class="h-16 flex items-center px-6 border-b border-white/5 bg-white/5">
@@ -60,19 +66,27 @@
                         <i data-lucide="shopping-cart"
                             class="w-5 h-5 <%= path.startsWith('/admin/orders') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
                         Orders
+                        <% if (locals.adminNotifications && locals.adminNotifications.orders > 0) { %>
+                            <span class="ml-auto bg-apple-gold text-[#1a231e] text-[0.6rem] font-bold px-1.5 py-0.5 rounded-full animate-pulse">
+                                <%= adminNotifications.orders %>
+                            </span>
+                        <% } %>
                     </a>
                 </li>
                 <li>
-                <li>
-                    <a href="/admin/requests"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/requests') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
-                        <i data-lucide="clipboard-list"
-                            class="w-5 h-5 <%= path.startsWith('/admin/requests') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
-                        Requests
-                        <span
-                            class="ml-auto bg-apple-gold text-[#1a231e] text-[0.6rem] font-bold px-1.5 py-0.5 rounded-full">3</span>
+                    <a href="/admin/rental-requests"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/rental-requests') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">
+                        <i data-lucide="book-plus"
+                            class="w-5 h-5 <%= path.startsWith('/admin/rental-requests') ? 'text-apple-gold' : 'group-hover:text-apple-gold transition-colors' %>"></i>
+                        Rental Requests
+                        <% if (locals.adminNotifications && locals.adminNotifications.rentals > 0) { %>
+                            <span class="ml-auto bg-apple-gold text-[#1a231e] text-[0.6rem] font-bold px-1.5 py-0.5 rounded-full animate-pulse">
+                                <%= adminNotifications.rentals %>
+                            </span>
+                        <% } %>
                     </a>
                 </li>
+
                 <li>
                     <a href="/admin/categories"
                         class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path.startsWith('/admin/categories') ? 'bg-white/5 text-white font-medium border-l-4 border-apple-gold' : 'text-gray-400 hover:bg-white/5 hover:text-white transition-all group' %>">

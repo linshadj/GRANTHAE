@@ -26,7 +26,7 @@
             </div>
             <div>
                 <p class="text-xs text-apple-text-gray uppercase tracking-wider">Low Stock</p>
-                <p class="text-2xl font-bold text-white"><%= products.filter(p => p.stock <= 5).length %></p>
+                <p class="text-2xl font-bold text-white"><%= totalLowStock %></p>
             </div>
         </div>
         <div class="bg-apple-card rounded-2xl border border-white/5 p-6 flex items-center gap-4">
@@ -35,7 +35,7 @@
             </div>
             <div>
                 <p class="text-xs text-apple-text-gray uppercase tracking-wider">In Stock</p>
-                <p class="text-2xl font-bold text-white"><%= products.filter(p => p.stock > 5).length %></p>
+                <p class="text-2xl font-bold text-white"><%= totalInStock %></p>
             </div>
         </div>
     </div>
@@ -44,14 +44,16 @@
         <div class="p-6 border-b border-white/5 flex flex-col lg:flex-row justify-between items-center gap-4">
             <h3 class="font-bold text-lg text-apple-dark">Stock Levels</h3>
             
-            <div class="flex flex-wrap gap-3">
+            <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
+
                 <!-- Search -->
-                <div class="relative items-center hidden sm:flex">
+                <div class="relative items-center flex w-full sm:w-auto">
                     <i data-lucide="search" class="absolute left-3 w-4 h-4 text-apple-text-gray"></i>
                     <input id="inventorySearch" type="text" value="<%= searchQuery || '' %>"
                         placeholder="Search products..."
-                        class="pl-10 pr-4 py-2.5 h-10 w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all">
+                        class="pl-10 pr-4 py-2.5 h-10 w-full sm:w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all">
                 </div>
+
 
                 <!-- Filter Dropdown -->
                 <div class="relative" id="invFilterWrap">
@@ -134,19 +136,31 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-white font-bold text-lg"><%= product.stock %></span>
-                                    <% if (product.stock <= 5) { %>
+                                    <span class="text-white font-bold text-lg"><%= product.totalStock %></span>
+                                    <% if (product.totalStock <= 5) { %>
                                         <span class="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-black uppercase">Low</span>
                                     <% } %>
                                 </div>
+                                <% if (product.variants && product.variants.length > 0) { %>
+                                    <div class="mt-2 space-y-1">
+                                        <% product.variants.forEach(variant => { %>
+                                            <div class="flex items-center justify-between text-[10px] bg-white/5 rounded px-2 py-1 border border-white/5">
+                                                <span class="text-apple-text-gray font-medium"><%= variant.name %>:</span>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="<%= variant.stock <= 5 ? 'text-red-400' : 'text-white' %> font-bold"><%= variant.stock %></span>
+                                                </div>
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                <% } %>
                             </td>
                             <td class="px-6 py-4">
-                                <% if (product.stock === 0) { %>
+                                <% if (product.totalStock === 0) { %>
                                     <span class="inline-flex items-center gap-1.5 text-red-500 font-bold text-xs uppercase">
                                         <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
                                         Out of Stock
                                     </span>
-                                <% } else if (product.stock <= 5) { %>
+                                <% } else if (product.totalStock <= 5) { %>
                                     <span class="inline-flex items-center gap-1.5 text-yellow-500 font-bold text-xs uppercase">
                                         <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
                                         Critical
@@ -158,10 +172,18 @@
                                     </span>
                                 <% } %>
                             </td>
-                            <td class="px-6 py-4 text-right">
-                                <button onclick="quickUpdateStock('<%= product._id %>', '<%= product.stock %>', '<%= product.name %>')" class="px-3 py-1.5 bg-white/5 text-white border border-white/10 rounded-lg hover:bg-apple-gold hover:text-[#1a231e] hover:border-apple-gold transition-all text-xs font-bold">
-                                    Update Stock
-                                </button>
+                            <td class="px-6 py-4">
+                                <div class="flex justify-end">
+                                    <% if (product.variants && product.variants.length > 0) { %>
+                                        <button onclick="showVariantStockManager('<%= product._id %>', '<%= product.name.replace(/'/g, "\\'") %>', <%= JSON.stringify(product.variants) %>)" 
+                                                class="w-10 h-10 flex items-center justify-center bg-white/5 text-apple-gold border border-white/10 rounded-xl hover:bg-apple-gold hover:text-[#1a231e] hover:border-apple-gold transition-all shadow-lg group"
+                                                title="Edit Variant Stock">
+                                            <i data-lucide="edit-3" class="w-5 h-5 transition-transform group-hover:scale-110"></i>
+                                        </button>
+                                    <% } else { %>
+                                        <span class="text-[10px] text-apple-text-gray italic">No variants</span>
+                                    <% } %>
+                                </div>
                             </td>
                         </tr>
                     <% }) %>
@@ -190,7 +212,49 @@
 </div>
 
 <script>
-    async function quickUpdateStock(id, currentStock, name) {
+    async function showVariantStockManager(productId, productName, variants) {
+        let variantsHtml = variants.map(v => `
+            <div class="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl mb-2 hover:border-apple-gold/30 transition-colors">
+                <div class="flex flex-col items-start">
+                    <span class="text-white font-bold text-sm">${v.name}</span>
+                    <span class="text-[10px] text-apple-text-gray uppercase tracking-wider">Current: <span class="${v.stock <= 5 ? 'text-red-400' : 'text-green-400'} font-black">${v.stock}</span></span>
+                </div>
+                <button onclick="window.pendingVariantUpdate = {id: '${productId}', stock: '${v.stock}', name: '${productName.replace(/'/g, "\\'")}', variant: '${v.name}'}; Swal.clickConfirm();" 
+                        class="px-3 py-1.5 bg-apple-gold text-[#1a231e] rounded-lg text-[10px] font-black uppercase hover:bg-white transition-colors">
+                    Edit Stock
+                </button>
+            </div>
+        `).join('');
+
+        const { isConfirmed } = await Swal.fire({
+            title: '<span class="font-serif">Manage Inventory</span>',
+            html: `
+                <div class="mt-4">
+                    <p class="text-[10px] text-apple-text-gray mb-6 text-left uppercase tracking-widest font-bold">Select a variant for <strong>${productName}</strong></p>
+                    <div class="max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                        ${variantsHtml}
+                    </div>
+                </div>
+            `,
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            background: '#1a231e',
+            color: '#fff',
+            customClass: {
+                popup: 'rounded-3xl border border-white/10 shadow-2xl',
+                cancelButton: 'bg-white/5 border border-white/10 text-white rounded-xl px-6 py-2 text-xs font-bold'
+            }
+        });
+
+        if (window.pendingVariantUpdate) {
+            const data = window.pendingVariantUpdate;
+            window.pendingVariantUpdate = null;
+            quickUpdateStock(data.id, data.stock, `${data.name} (${data.variant})`, data.variant);
+        }
+    }
+
+    async function quickUpdateStock(id, currentStock, name, variantName = null) {
         const { value: newStock } = await Swal.fire({
             title: 'Update Stock',
             text: `Updating inventory for "${name}"`,
@@ -216,7 +280,7 @@
                 const response = await fetch(`/admin/inventory/update-stock/${id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ stock: newStock })
+                    body: JSON.stringify({ stock: newStock, variantName: variantName })
                 });
                 const data = await response.json();
                 if (data.success) {

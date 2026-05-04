@@ -72,7 +72,7 @@ export const getAddProductPage = async (req, res, next) => {
 
 export const addProduct = async (req, res, next) => {
     try {
-        const { name, author, isbn, description, price, category, stock, featured, coverImageIndex, brand, highlights } = req.body;
+        const { name, author, isbn, description, price, category, featured, coverImageIndex, brand, highlights } = req.body;
         
         let parsedVariants = [];
         if (req.body.variants) {
@@ -109,7 +109,6 @@ export const addProduct = async (req, res, next) => {
             description,
             price,
             category,
-            stock,
             images,
             coverImage,
             brand,
@@ -149,7 +148,7 @@ export const getEditProductPage = async (req, res, next) => {
 export const editProduct = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { name, author, isbn, description, price, category, stock, featured, coverImageIndex, brand, highlights } = req.body;
+        const { name, author, isbn, description, price, category, featured, coverImageIndex, brand, highlights } = req.body;
         
         let parsedVariants = [];
         if (req.body.variants) {
@@ -194,7 +193,6 @@ export const editProduct = async (req, res, next) => {
             description,
             price,
             category,
-            stock,
             images: totalImages,
             coverImage: finalCoverImage,
             brand,

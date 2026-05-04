@@ -89,10 +89,12 @@ export const getFilteredProducts = async (query) => {
         const avgRating = reviews.length > 0 
             ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
             : 0;
+        const totalStock = product.variants ? product.variants.reduce((acc, v) => acc + v.stock, 0) : 0;
         return {
             ...product.toObject(),
             avgRating,
-            reviewCount: reviews.length
+            reviewCount: reviews.length,
+            totalStock
         };
     }));
 
@@ -117,11 +119,14 @@ export const getProductById = async (id) => {
         ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
         : 0;
 
+    const totalStock = product.variants ? product.variants.reduce((acc, v) => acc + v.stock, 0) : 0;
+
     return {
         ...product.toObject(),
         isUnavailable,
         avgRating,
-        reviews
+        reviews,
+        totalStock
     };
 };
 

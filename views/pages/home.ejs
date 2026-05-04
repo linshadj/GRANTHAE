@@ -1,6 +1,5 @@
 <div class="space-y-24 pb-24">
     <!-- Hero Section -->
-    <!-- Hero Section -->
     <section class="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
             <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 animate-fade-in-up">
@@ -17,8 +16,9 @@
                 <a href="/marketplace" class="btn-primary flex items-center gap-2">
                     Browse Marketplace <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
-                <a href="/list-book" class="btn-secondary">List Your Book</a>
+                <a href="/list-rental-book" class="btn-secondary">List Your Book</a>
             </div>
+
     </section>
 
     <!-- Fixed Home Page Doodles -->
@@ -51,10 +51,25 @@
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
-            <%- include('../partials/book-card', { book: { title: "The Lean Startup" , author: "Eric Ries" ,
-                price: 15, image: "/images/book2.jpg" , genre: "Business" , rating: 4.8 } }) %>
-            <%- include('../partials/book-card', { book: { title: "Zero to One" , author: "Peter Thiel" ,
-                price: 11, image: "/images/book1.jpg" , genre: "Business" , rating: 4.6 } }) %>
+            <% if (typeof trendingProducts !== 'undefined' && trendingProducts && trendingProducts.length > 0) { %>
+                <% trendingProducts.forEach(product => { %>
+                    <%- include('../partials/book-card', { book: { 
+                        _id: product._id,
+                        title: product.name, 
+                        author: product.author,
+                        price: product.price, 
+                        image: product.coverImage || (product.images.length > 0 ? product.images[0] : ''), 
+                        genre: product.category ? product.category.name : 'Uncategorized', 
+                        rating: 4.5,
+                        totalStock: product.totalStock
+                    } }) %>
+
+                <% }) %>
+            <% } else { %>
+                <div class="col-span-full py-20 text-center">
+                    <p class="text-apple-text-gray">No trending books available at the moment.</p>
+                </div>
+            <% } %>
         </div>
     </section>
 
@@ -110,14 +125,15 @@
         <div class="relative bg-apple-card rounded-3xl overflow-hidden p-8 md:p-16 text-center md:text-left">
             <div class="relative z-10 grid md:grid-cols-2 gap-12 items-center">
                 <div>
-                    <h2 class="text-3xl md:text-4xl font-bold text-apple-blue mb-6">Sell your books</h2>
+                    <h2 class="text-3xl md:text-4xl font-bold text-apple-blue mb-6">Rent your books</h2>
                     <p class="text-lg text-apple-text-gray mb-8 leading-relaxed">
-                        Earn money by selling books you've already read. Join thousands of book lovers on GRANTHAE.
+                        Earn passive income by renting out books from your personal library. Join the sharing economy on GRANTHAE.
                     </p>
-                    <a href="/list-book" class="btn-primary inline-flex items-center gap-2">
+                    <a href="/list-rental-book" class="btn-primary inline-flex items-center gap-2">
                         Start Listing
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </a>
+
                 </div>
                 <div class="hidden md:flex justify-center">
                     <div class="relative">
@@ -137,39 +153,29 @@
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-bold text-apple-dark mb-12">Browse by Genre</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <!-- <% const genres=[ { name: 'Fiction' ,
-                image: 'https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&q=80&w=400' },
-                { name: 'Business' ,
-                image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&q=80&w=400' }, {
-                name: 'Sci-Fi' ,
-                image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=400' },
-                { name: 'Biography' ,
-                image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400' }, {
-                name: 'History' ,
-                image: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&q=80&w=400' },
-                { name: 'Self-Help' ,
-                image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=400' } ];
-                %>
-                <% genres.forEach(function(genre) { %>
-                    <a href="/shop?genre=<%= genre.name %>"
+            <% if (typeof activeCategories !== 'undefined' && activeCategories && activeCategories.length > 0) { %>
+                <% activeCategories.forEach(function(category) { %>
+                    <a href="/marketplace?category=<%= category._id %>"
                         class="relative flex items-center justify-center h-32 rounded-xl overflow-hidden shadow-sm hover:shadow-premium-hover transition-all duration-300 group">
-
                         
-                        <img src="<%= genre.image %>" alt="<%= genre.name %>"
+                        <img src="<%= category.coverImage || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400' %>" alt="<%= category.name %>"
                             class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
 
-                        
                         <div
                             class="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300">
                         </div>
 
-                        
                         <span
-                            class="relative z-10 font-bold text-white tracking-wide group-hover:scale-105 transition-transform">
-                            <%= genre.name %>
+                            class="relative z-10 font-bold text-white tracking-wide group-hover:scale-105 transition-transform text-center px-4">
+                            <%= category.name %>
                         </span>
                     </a>
-                    <% }); %> -->
+                <% }); %>
+            <% } else { %>
+                <div class="col-span-full py-10 text-center">
+                    <p class="text-apple-text-gray">No categories available.</p>
+                </div>
+            <% } %>
         </div>
     </section>
 </div>

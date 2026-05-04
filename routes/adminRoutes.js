@@ -2,12 +2,14 @@ import express from "express";
 import { ifAdmin, isAdmin } from "../middlewares/authMiddlewares.js";
 import { adminLoginHandler, adminLoginPage, adminLogoutHandler } from "../controller/admin/adminAuthController.js";
 import { adminDashboardPage } from "../controller/admin/dashboardController.js";
-import { liveUsersSearch, toggleBlockUser, usersPage } from "../controller/admin/userController.js";
+import { liveUsersSearch, toggleBlockUser, usersPage, viewUserDetail } from "../controller/admin/userController.js";
 import { addCategory, categoriesPage, editCategory, getAddCategoryPage, getEditCategoryPage, liveCategoriesSearch, toggleCategoryStatus } from "../controller/admin/categoryController.js";
 import { addProduct, editProduct, getAddProductPage, getEditProductPage, liveProductsSearch, productsPage, toggleProductStatus } from "../controller/admin/productController.js";
 import { liveOrdersSearch, ordersPage, updateOrderStatus, viewOrderDetail } from "../controller/admin/orderController.js";
 import { getInventoryPage, updateStock } from "../controller/admin/inventoryController.js";
+import { getRentalRequestsPage, handleRentalRequest } from "../controller/admin/rentalRequestController.js";
 import multer from "multer";
+
 
 // Multer setup for Products
 const productStorage = multer.diskStorage({
@@ -48,6 +50,7 @@ router.route("/users")
     .post(isAdmin, adminLoginHandler);
 
 router.patch("/users/toggle-block/:id/:action", isAdmin, toggleBlockUser);
+router.get("/users/view/:id", isAdmin, viewUserDetail);
 
 router.get("/users/live", liveUsersSearch);
 
@@ -78,7 +81,12 @@ router.get("/orders/live", isAdmin, liveOrdersSearch);
 // Inventory
 router.get("/inventory", isAdmin, getInventoryPage);
 router.patch("/inventory/update-stock/:id", isAdmin, updateStock);
+ 
+// Rental Requests
+router.get("/rental-requests", isAdmin, getRentalRequestsPage);
+router.patch("/rental-requests/:id", isAdmin, handleRentalRequest);
 
 router.get("/logout", isAdmin, adminLogoutHandler);
+
 
 export default router;

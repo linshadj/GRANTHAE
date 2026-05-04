@@ -1,0 +1,123 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div>
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-2 text-sm font-medium text-apple-text-gray">
+                    <li><a href="/home" class="hover:text-apple-dark transition-colors">Home</a></li>
+                    <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+                    <li><a href="/profile" class="hover:text-apple-dark transition-colors">Profile</a></li>
+                    <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+                    <li class="text-apple-dark">My Listings</li>
+                </ol>
+            </nav>
+            <h1 class="text-4xl font-bold text-apple-dark tracking-tight font-serif">My Listings</h1>
+            <p class="mt-2 text-apple-text-gray">Manage and track the books you've listed for rental.</p>
+        </div>
+
+        <a href="/list-rental-book" class="px-6 py-3 bg-apple-blue text-white rounded-2xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-apple-blue/20 flex items-center gap-2">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            Add New Listing
+        </a>
+    </div>
+
+    <div class="bg-apple-card border border-white/10 rounded-[40px] overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-white/5 text-apple-text-gray text-xs uppercase tracking-widest">
+                        <th class="px-8 py-6 font-bold">Book Details</th>
+                        <th class="px-8 py-6 font-bold">Category</th>
+                        <th class="px-8 py-6 font-bold">Rental Terms</th>
+                        <th class="px-8 py-6 font-bold">Status</th>
+                        <th class="px-8 py-6 font-bold text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <% if (listings.length > 0) { %>
+                        <% listings.forEach(listing => { %>
+                            <tr class="hover:bg-white/[0.02] transition-colors group">
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-16 h-20 rounded-2xl overflow-hidden bg-white/5 border border-white/10 shrink-0">
+                                            <img src="<%= listing.coverImage || listing.images[0] %>" class="w-full h-full object-cover">
+                                        </div>
+                                        <div>
+                                            <p class="text-base font-bold text-apple-dark group-hover:text-apple-blue transition-colors"><%= listing.bookTitle %></p>
+                                            <p class="text-sm text-apple-text-gray"><%= listing.author %></p>
+                                            <p class="text-[10px] text-apple-text-gray/50 mt-1 font-bold uppercase tracking-widest"><%= listing.bookCondition %> Condition</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <span class="inline-block px-3 py-1 bg-apple-blue/10 text-apple-blue rounded-lg text-xs font-bold uppercase tracking-wider">
+                                        <%= listing.category ? listing.category.name : 'Uncategorized' %>
+                                    </span>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <p class="text-base font-bold text-apple-dark">₹<%= listing.dailyRate %>/day</p>
+                                    <p class="text-xs text-apple-text-gray mt-0.5">Dep: ₹<%= listing.depositAmount %></p>
+                                    <p class="text-[10px] text-apple-text-gray/50 mt-1 font-bold uppercase tracking-widest">Min <%= listing.minRentalDays %> Days</p>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <% if (listing.status === 'Pending') { %>
+                                        <div class="flex items-center gap-2 text-yellow-500 bg-yellow-500/10 px-3 py-1.5 rounded-full w-max text-xs font-bold uppercase tracking-wider">
+                                            <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></span>
+                                            Pending Review
+                                        </div>
+                                    <% } else if (listing.status === 'Available') { %>
+                                        <div class="flex items-center gap-2 text-green-500 bg-green-500/10 px-3 py-1.5 rounded-full w-max text-xs font-bold uppercase tracking-wider">
+                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                            Live & Available
+                                        </div>
+                                    <% } else if (listing.status === 'Rejected') { %>
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex items-center gap-2 text-red-500 bg-red-500/10 px-3 py-1.5 rounded-full w-max text-xs font-bold uppercase tracking-wider">
+                                                <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                                                Rejected
+                                            </div>
+                                            <% if (listing.rejectionReason) { %>
+                                                <button onclick="Swal.fire({title: 'Reason for Rejection', text: '<%= listing.rejectionReason %>', icon: 'info', background: '#1e2a22', color: '#E6CFA7'})" class="text-[10px] text-red-500/70 hover:text-red-500 underline text-left px-1 transition-colors">
+                                                    View Reason
+                                                </button>
+                                            <% } %>
+                                        </div>
+                                    <% } else if (listing.status === 'Rented') { %>
+                                        <div class="flex items-center gap-2 text-apple-blue bg-apple-blue/10 px-3 py-1.5 rounded-full w-max text-xs font-bold uppercase tracking-wider">
+                                            <span class="w-1.5 h-1.5 bg-apple-blue rounded-full"></span>
+                                            Currently Rented
+                                        </div>
+                                    <% } %>
+                                </td>
+                                <td class="px-8 py-6 text-right">
+                                    <div class="flex justify-end gap-3">
+                                        <a href="/rental/<%= listing._id %>" class="p-2.5 bg-white/5 text-apple-text-gray hover:text-apple-dark hover:bg-white/10 rounded-xl transition-all" title="View Listing">
+                                            <i data-lucide="eye" class="w-5 h-5"></i>
+                                        </a>
+                                        <button onclick="Swal.fire({title: 'Edit Listing', text: 'Edit feature coming soon!', icon: 'info', background: '#1e2a22', color: '#E6CFA7'})" class="p-2.5 bg-white/5 text-apple-text-gray hover:text-apple-blue hover:bg-apple-blue/10 rounded-xl transition-all" title="Edit Listing">
+                                            <i data-lucide="edit-3" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" class="px-8 py-24 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-20 h-20 bg-apple-blue/10 rounded-3xl flex items-center justify-center mb-6">
+                                        <i data-lucide="book" class="w-10 h-10 text-apple-blue"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-apple-dark mb-2">No listings yet</h3>
+                                    <p class="text-apple-text-gray mb-8 max-w-sm">You haven't listed any books for rental yet. Start earning by sharing your library.</p>
+                                    <a href="/list-rental-book" class="px-8 py-3 bg-apple-blue text-white rounded-2xl font-bold shadow-lg shadow-apple-blue/20 transition-transform active:scale-95">
+                                        List Your First Book
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

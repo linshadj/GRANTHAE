@@ -7,12 +7,13 @@ export const ordersPage = async (req, res, next) => {
         const search = req.query.search || "";
         const sort = req.query.sort || "newest";
         const filter = req.query.filter || "all";
+        const userId = req.query.userId || null;
 
-        const orderData = await orderDetails(page, search, sort, filter);
+        const orderData = await orderDetails(page, search, sort, filter, userId);
 
         res.render("admin/orders", {
             layout: "layouts/admin-panel",
-            title: "Order Management",
+            title: userId ? "User Order History" : "Order Management",
             orders: orderData.orders,
             currentPage: orderData.currentPage,
             totalPages: orderData.totalPages,
@@ -20,6 +21,7 @@ export const ordersPage = async (req, res, next) => {
             searchQuery: search,
             selectedSort: sort,
             selectedFilter: filter,
+            filterUserId: userId,
             path: "/admin/orders"
         });
     } catch (error) {

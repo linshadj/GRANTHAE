@@ -14,17 +14,21 @@
 
                 <!-- Desktop Menu (Centered) -->
                 <div class="hidden md:flex items-center space-x-1">
-                    <a href="/"
-                        class="px-4 py-1.5 text-sm font-medium text-apple-dark/70 hover:text-apple-dark hover:bg-white/5 rounded-full transition-all">Home</a>
+                    <a href="/home"
+                        class="px-4 py-1.5 text-sm font-medium rounded-full transition-all <%= path === '/home' || path === '/' ? 'bg-white/10 text-apple-dark' : 'text-apple-dark/70 hover:text-apple-dark hover:bg-white/5' %>">Home</a>
                     <a href="/marketplace"
-                        class="px-4 py-1.5 text-sm font-medium text-apple-dark/70 hover:text-apple-dark hover:bg-white/5 rounded-full transition-all">Marketplace</a>
+                        class="px-4 py-1.5 text-sm font-medium rounded-full transition-all <%= path === '/marketplace' ? 'bg-white/10 text-apple-dark' : 'text-apple-dark/70 hover:text-apple-dark hover:bg-white/5' %>">Marketplace</a>
+                    <a href="/rental-place"
+                        class="px-4 py-1.5 text-sm font-medium rounded-full transition-all <%= path === '/rental-place' ? 'bg-white/10 text-apple-dark' : 'text-apple-dark/70 hover:text-apple-dark hover:bg-white/5' %>">Rentalplace</a>
+
+
                 </div>
 
                 <!-- Right Side Actions -->
                 <div class="flex items-center gap-2">
                     <!-- Cart (Icon) -->
                     <a href="/cart"
-                        class="p-2 text-apple-dark/70 hover:text-apple-dark transition-colors rounded-full hover:bg-white/10 relative group">
+                        class="p-2 transition-colors rounded-full relative group <%= path === '/cart' ? 'bg-white/10 text-apple-dark' : 'text-apple-dark/70 hover:text-apple-dark hover:bg-white/10' %>">
                         <i data-lucide="shopping-bag" class="w-4 h-4"></i>
                         <span
                             class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-apple-blue rounded-full border border-apple-card opacity-100 transition-opacity"></span>
@@ -32,10 +36,10 @@
 
                     <!-- Wishlist (Icon) -->
                     <a href="/wishlist"
-                        class="p-2 text-apple-dark/70 hover:text-apple-dark transition-colors rounded-full hover:bg-white/10 relative group">
+                        class="p-2 transition-colors rounded-full relative group <%= path === '/wishlist' ? 'bg-white/10 text-apple-dark' : 'text-apple-dark/70 hover:text-apple-dark hover:bg-white/10' %>">
                         <i data-lucide="heart" class="w-4 h-4"></i>
                         <span
-                            class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-apple-card opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                            class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-apple-card <%= path === '/wishlist' ? 'opacity-100' : 'opacity-0' %> group-hover:opacity-100 transition-opacity"></span>
                     </a>
 
                     <!-- Search -->
@@ -45,18 +49,19 @@
                     </button>
 
                     <!-- Sell Button -->
-                    <a href="/list-book"
+                    <a href="/list-rental-book"
                         class="hidden md:flex items-center gap-2 px-4 py-1.5 text-xs font-semibold text-apple-dark bg-white/10 hover:bg-white/20 rounded-full transition-all mr-2">
                         <i data-lucide="plus" class="w-3 h-3"></i>
                         Sell
                     </a>
+
 
                     <!-- Auth -->
                     <div class="hidden md:flex items-center gap-2 pl-2 border-l border-white/10">
                         <% if (typeof user !=='undefined' && user) { %>
                             <!-- Logged In: Profile Icon -->
                             <a href="/profile"
-                                class="p-1.5 ml-1 text-apple-dark/70 hover:text-apple-dark transition-colors rounded-full hover:bg-white/10">
+                                class="p-1.5 ml-1 transition-colors rounded-full <%= path.startsWith('/profile') ? 'bg-white/10 text-apple-dark' : 'text-apple-dark/70 hover:text-apple-dark hover:bg-white/10' %>">
                                 <i data-lucide="user" class="w-5 h-5"></i>
                             </a>
                             <% } else { %>
@@ -85,21 +90,25 @@
         <div id="mobile-menu"
             class="absolute top-full left-0 right-0 mt-2 mx-4 p-4 bg-apple-card/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 ease-in-out transform origin-top opacity-0 -translate-y-4 pointer-events-none invisible">
             <div class="flex flex-col space-y-1">
-                <a href="/"
-                    class="px-4 py-2.5 text-base font-medium text-apple-dark hover:bg-white/5 rounded-xl transition-colors">Home</a>
+                <a href="/home"
+                    class="px-4 py-2.5 text-base font-medium rounded-xl transition-colors <%= path === '/home' || path === '/' ? 'bg-white/10 text-apple-dark' : 'text-apple-dark hover:bg-white/5' %>">Home</a>
                 <a href="/marketplace"
-                    class="px-4 py-2.5 text-base font-medium text-apple-dark hover:bg-white/5 rounded-xl transition-colors">Marketplace</a>
+                    class="px-4 py-2.5 text-base font-medium rounded-xl transition-colors <%= path === '/marketplace' ? 'bg-white/10 text-apple-dark' : 'text-apple-dark hover:bg-white/5' %>">Marketplace</a>
+                <a href="/rental-place"
+                    class="px-4 py-2.5 text-base font-medium rounded-xl transition-colors <%= path === '/rental-place' ? 'bg-white/10 text-apple-dark' : 'text-apple-dark hover:bg-white/5' %>">Rentalplace</a>
+
                 <a href="/wishlist"
-                    class="px-4 py-2.5 text-base font-medium text-apple-dark hover:bg-white/5 rounded-xl transition-colors">Wishlist</a>
-                <a href="/list-book"
+                    class="px-4 py-2.5 text-base font-medium rounded-xl transition-colors <%= path === '/wishlist' ? 'bg-white/10 text-apple-dark' : 'text-apple-dark hover:bg-white/5' %>">Wishlist</a>
+                <a href="/list-rental-book"
                     class="px-4 py-2.5 text-base font-medium text-apple-dark hover:bg-white/5 rounded-xl transition-colors">Sell
                     Book</a>
+
                 <div class="h-px bg-white/10 my-2"></div>
                 <!-- Mobile Auth -->
                 <div class="flex items-center gap-3 px-4 pt-2">
                     <% if (typeof user !=='undefined' && user) { %>
                         <a href="/profile"
-                            class="flex-1 py-2.5 text-center text-sm font-semibold text-apple-dark hover:bg-white/5 rounded-xl transition-colors">
+                            class="flex-1 py-2.5 text-center text-sm font-semibold rounded-xl transition-colors <%= path.startsWith('/profile') ? 'bg-white/10 text-apple-dark' : 'text-apple-dark hover:bg-white/5' %>">
                             My Profile
                         </a>
                         <% } else { %>

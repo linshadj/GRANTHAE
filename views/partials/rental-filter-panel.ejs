@@ -1,0 +1,84 @@
+<form action="/rental-place" method="GET" id="filterForm" class="space-y-8">
+    <% if (query.search) { %>
+        <input type="hidden" name="search" value="<%= query.search %>">
+    <% } %>
+
+    <!-- Categories -->
+    <div>
+        <h3 class="text-sm font-bold text-apple-dark mb-4 uppercase tracking-wider">Genres</h3>
+        <div class="space-y-3">
+            <% categories.forEach(category => { %>
+                <label class="flex items-center group cursor-pointer">
+                    <input type="checkbox" name="category" value="<%= category._id %>"
+                        class="w-4 h-4 rounded border-white/10 bg-white/5 text-apple-blue focus:ring-apple-blue transition-all"
+                        <%= (Array.isArray(query.category) ? query.category.includes(category._id.toString()) : query.category === category._id.toString()) ? 'checked' : '' %>
+                        onchange="this.form.submit()">
+                    <span class="ml-3 text-sm text-apple-text-gray group-hover:text-apple-dark transition-colors">
+                        <%= category.name %>
+                    </span>
+                </label>
+            <% }) %>
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="h-px bg-white/5"></div>
+
+    <!-- Rate Range -->
+    <div>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-apple-dark uppercase tracking-wider">Daily Rate</h3>
+            <button type="button" onclick="resetPrice()" class="text-xs text-apple-blue hover:underline">Reset</button>
+        </div>
+        <div class="space-y-4">
+            <div class="flex items-center gap-4">
+                <div class="flex-1">
+                    <label class="text-[10px] text-apple-text-gray uppercase mb-1 block">Min</label>
+                    <input type="number" name="minPrice" value="<%= query.minPrice %>" placeholder="₹0"
+                        class="w-full text-sm border-white/10 rounded-xl focus:ring-apple-blue focus:border-apple-blue py-2.5 px-3 bg-white/5 text-apple-dark shadow-inner transition-all focus:bg-white/10">
+                </div>
+                <div class="flex-1">
+                    <label class="text-[10px] text-apple-text-gray uppercase mb-1 block">Max</label>
+                    <input type="number" name="maxPrice" value="<%= query.maxPrice %>" placeholder="₹500+"
+                        class="w-full text-sm border-white/10 rounded-xl focus:ring-apple-blue focus:border-apple-blue py-2.5 px-3 bg-white/5 text-apple-dark shadow-inner transition-all focus:bg-white/10">
+                </div>
+            </div>
+            <button type="submit" class="w-full py-2.5 bg-apple-blue text-white text-xs font-bold rounded-xl hover:bg-apple-blue/90 transition-all shadow-lg shadow-apple-blue/10">
+                Apply Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="h-px bg-white/5"></div>
+
+    <!-- Sort By -->
+    <div>
+        <h3 class="text-sm font-bold text-apple-dark mb-4 uppercase tracking-wider">Sort By</h3>
+        <select name="sort" onchange="this.form.submit()" 
+            class="w-full text-sm border-white/10 rounded-xl focus:ring-apple-blue focus:border-apple-blue py-2.5 px-3 bg-white/5 text-apple-dark shadow-inner transition-all focus:bg-white/10">
+            <option value="newest" <%= query.sort === 'newest' ? 'selected' : '' %>>Newest Arrivals</option>
+            <option value="price_asc" <%= query.sort === 'price_asc' ? 'selected' : '' %>>Rate: Low to High</option>
+            <option value="price_desc" <%= query.sort === 'price_desc' ? 'selected' : '' %>>Rate: High to Low</option>
+            <option value="name_asc" <%= query.sort === 'name_asc' ? 'selected' : '' %>>Name: A-Z</option>
+            <option value="name_desc" <%= query.sort === 'name_desc' ? 'selected' : '' %>>Name: Z-A</option>
+        </select>
+    </div>
+
+    <!-- Clear All -->
+    <div class="pt-4">
+        <a href="/rental-place" class="flex items-center justify-center gap-2 text-sm text-apple-text-gray hover:text-red-500 transition-colors py-3 border border-dashed border-white/10 rounded-xl">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            Reset All Filters
+        </a>
+    </div>
+</form>
+
+<script>
+    function resetPrice() {
+        const form = document.getElementById('filterForm');
+        form.querySelector('input[name="minPrice"]').value = '';
+        form.querySelector('input[name="maxPrice"]').value = '';
+        form.submit();
+    }
+</script>

@@ -1,0 +1,315 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-24 min-h-[80vh]">
+    <div class="mb-10 flex flex-col md:flex-row justify-between items-end gap-6 relative">
+        <div class="absolute -top-10 -left-10 w-40 h-40 bg-apple-blue/5 rounded-full blur-3xl"></div>
+        
+        <div class="relative">
+            <a href="/profile/orders" class="text-[10px] font-bold text-apple-text-gray/50 hover:text-apple-blue flex items-center gap-2 mb-4 uppercase tracking-[0.2em] transition-colors group">
+                <i data-lucide="arrow-left" class="w-3 h-3 transition-transform group-hover:-translate-x-1"></i> Back to Orders
+            </a>
+            <h1 class="text-4xl font-bold text-apple-dark font-luxury flex items-center gap-4">
+                Order Details
+                <span class="inline-flex items-center px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border
+                    <%= order.orderStatus === 'Pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : '' %>
+                    <%= order.orderStatus === 'Shipped' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : '' %>
+                    <%= order.orderStatus === 'Delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' : '' %>
+                    <%= order.orderStatus === 'Cancelled' ? 'bg-red-500/10 text-red-500 border-red-500/20' : '' %>">
+                    <%= order.orderStatus %>
+                </span>
+            </h1>
+            <p class="text-apple-text-gray mt-2 text-sm uppercase tracking-widest font-medium opacity-60">Identification: <span class="text-apple-dark">#<%= order.orderID %></span> &bull; Placed on <%= order.createdAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></p>
+        </div>
+
+        <% if (order.orderStatus === 'Delivered') { %>
+            <a href="/profile/orders/<%= order._id %>/invoice" class="px-6 py-3 bg-apple-blue text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-xl shadow-apple-blue/20 hover:scale-105 active:scale-95 flex items-center gap-2">
+                <i data-lucide="scroll-text" class="w-4 h-4"></i> Official Invoice
+            </a>
+        <% } %>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        
+        <!-- Left: Items -->
+        <div class="lg:col-span-8 space-y-8">
+            <div class="glass-card overflow-hidden rounded-3xl border border-white/10 shadow-2xl relative">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-apple-blue/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                
+                <div class="px-8 py-6 border-b border-white/5 flex justify-between items-center relative">
+                    <h2 class="text-xl font-bold text-apple-dark font-luxury">Items (<%= order.items.length %>)</h2>
+                </div>
+                
+                <div class="divide-y divide-white/5 relative">
+                    <% order.items.forEach(item => { %>
+                        <div class="p-8 group transition-colors hover:bg-white/[0.02] relative overflow-hidden">
+                            <% if (item.itemStatus === 'Cancelled' || item.itemStatus === 'Returned') { %>
+                                <div class="absolute inset-0 bg-black/40 pointer-events-none backdrop-blur-[1px] z-10"></div>
+                            <% } %>
+                            
+                            <div class="relative flex flex-col sm:flex-row gap-8 z-20">
+                                <a href="/product/<%= item.product ? item.product._id : '#' %>" class="shrink-0">
+                                    <div class="w-28 h-40 bg-black/20 rounded-2xl overflow-hidden shadow-2xl border border-white/10 transition-transform duration-500 group-hover:scale-105">
+                                        <img src="<%= item.product && (item.product.coverImage || (item.product.images && item.product.images[0])) ? (item.product.coverImage || item.product.images[0]) : '/images/default-book.jpg' %>" 
+                                             class="w-full h-full object-cover">
+                                    </div>
+                                </a>
+
+                                <div class="flex-grow flex flex-col justify-between py-1">
+                                    <div>
+                                        <div class="flex justify-between items-start gap-4">
+                                            <a href="/product/<%= item.product ? item.product._id : '#' %>" class="text-xl font-bold text-apple-dark hover:text-apple-blue transition-colors line-clamp-2 leading-tight">
+                                                <%= item.product ? item.product.name : 'Unknown Product' %>
+                                            </a>
+                                            <div class="text-right shrink-0">
+                                                <p class="text-lg font-bold text-apple-blue">₹<%= item.price * item.quantity %></p>
+                                                <p class="text-[10px] uppercase tracking-widest text-apple-text-gray/40 mt-1 font-bold">₹<%= item.price %> per unit</p>
+                                            </div>
+                                        </div>
+
+                                        <% if (item.variant) { %>
+                                            <span class="inline-block mt-3 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-white/5 text-apple-text-gray/60 border border-white/5">Edition: <%= item.variant %></span>
+                                        <% } %>
+                                        
+                                        <div class="mt-6 flex flex-wrap items-center gap-4">
+                                            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border
+                                                <%= item.itemStatus === 'Pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : '' %>
+                                                <%= item.itemStatus === 'Shipped' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : '' %>
+                                                <%= item.itemStatus === 'Delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' : '' %>
+                                                <%= item.itemStatus === 'Cancelled' ? 'bg-red-500/10 text-red-500 border-red-500/20' : '' %>
+                                                <%= item.itemStatus === 'Returned' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : '' %>">
+                                                <%= item.itemStatus %>
+                                            </span>
+
+                                            <% if (item.itemStatus === 'Cancelled' && item.cancellationReason) { %>
+                                                <span class="text-[10px] text-red-500/60 font-bold uppercase tracking-widest flex items-center gap-2">
+                                                    <span class="w-1 h-1 bg-red-500 rounded-full"></span> <%= item.cancellationReason %>
+                                                </span>
+                                            <% } else if (item.itemStatus === 'Returned' && item.returnReason) { %>
+                                                <span class="text-[10px] text-orange-500/60 font-bold uppercase tracking-widest flex items-center gap-2">
+                                                    <span class="w-1 h-1 bg-orange-500 rounded-full"></span> <%= item.returnReason %>
+                                                </span>
+                                            <% } %>
+
+                                            <div class="flex-grow"></div>
+
+                                            <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Delivered') { %>
+                                                <% if (item.itemStatus !== 'Cancelled' && item.itemStatus !== 'Returned') { %>
+                                                    <button onclick="cancelItem('<%= order._id %>', '<%= item._id %>')" 
+                                                            class="text-[10px] font-bold text-red-500 uppercase tracking-widest hover:underline px-4 py-2 bg-red-500/5 rounded-xl transition-all border border-red-500/10">Withdraw Item</button>
+                                                <% } %>
+                                            <% } %>
+
+                                            <% if (order.orderStatus === 'Delivered' && item.itemStatus === 'Delivered') { %>
+                                                <button onclick="returnItem('<%= order._id %>', '<%= item._id %>')" 
+                                                        class="text-[10px] font-bold text-orange-500 uppercase tracking-widest hover:underline px-4 py-2 bg-orange-500/5 rounded-xl transition-all border border-orange-500/10 flex items-center gap-1.5">
+                                                    <i data-lucide="undo-2" class="w-3 h-3"></i> Request Return
+                                                </button>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Address & Summary -->
+        <div class="lg:col-span-4 space-y-8 lg:sticky lg:top-28">
+            <!-- Delivery Destination -->
+            <div class="glass-card p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+                <div class="absolute bottom-0 right-0 w-32 h-32 bg-apple-blue/5 rounded-full blur-3xl -mr-16 -mb-16"></div>
+                
+                <h3 class="text-base font-bold text-apple-dark mb-6 flex items-center gap-3 font-luxury uppercase tracking-widest relative">
+                    <i data-lucide="map-pin" class="w-5 h-5 text-apple-blue"></i> Shipping Address
+                </h3>
+                <div class="bg-black/20 p-6 rounded-2xl border border-white/5 relative z-10">
+                    <p class="font-bold text-apple-dark mb-2 text-lg"><%= order.shippingAddress.firstName %> <%= order.shippingAddress.lastName %></p>
+                    <p class="text-apple-text-gray/60 text-sm leading-relaxed mb-4">
+                        <%= order.shippingAddress.streetAddress %><br>
+                        <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.pinCode %><br>
+                        <%= order.shippingAddress.country %>
+                    </p>
+                    <div class="pt-4 border-t border-white/5 text-apple-dark text-sm font-bold flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-apple-blue/10 flex items-center justify-center">
+                            <i data-lucide="phone" class="w-4 h-4 text-apple-blue"></i>
+                        </div>
+                        <%= order.shippingAddress.phoneNumber %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction Summary -->
+            <div class="glass-card p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-32 h-32 bg-apple-blue/5 rounded-full blur-3xl -ml-16 -mt-16"></div>
+                
+                <h3 class="text-base font-bold text-apple-dark mb-6 flex items-center gap-3 font-luxury uppercase tracking-widest relative">
+                    <i data-lucide="credit-card" class="w-5 h-5 text-apple-blue"></i> Transaction Overview
+                </h3>
+                
+                <div class="space-y-4 text-sm relative z-10 mb-8 font-medium">
+                    <div class="flex justify-between items-center">
+                        <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Method</span>
+                        <span class="font-bold text-apple-dark"><%= order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod %></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Status</span>
+                        <span class="font-bold <%= order.paymentStatus === 'Success' ? 'text-green-500' : 'text-yellow-500' %>"><%= order.paymentStatus %></span>
+                    </div>
+                    <div class="h-px bg-white/5 my-6"></div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Subtotal</span>
+                        <span class="text-apple-dark">₹<%= order.totalAmount %></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Shipping</span>
+                        <span class="text-green-500 font-bold">Complimentary</span>
+                    </div>
+                </div>
+                
+                <div class="pt-8 border-t border-white/5 flex justify-between items-end relative z-10">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-widest text-apple-text-gray/40 mb-1 font-bold">Total Investment</p>
+                        <p class="text-3xl font-bold text-apple-blue leading-none">₹<%= order.totalAmount %></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    async function cancelItem(orderId, itemId) {
+        const { value: reason } = await Swal.fire({
+            title: 'Withdraw Item',
+            html: '<p class="text-xs text-apple-text-gray mb-4 uppercase tracking-widest">Please provide a reason for cancellation</p>',
+            input: 'textarea',
+            inputPlaceholder: 'Type your reason here...',
+            showCancelButton: true,
+            confirmButtonText: 'Withdraw Item',
+            cancelButtonText: 'Retain',
+            background: '#1C211E',
+            color: '#D1D1D1',
+            confirmButtonColor: '#ff3b30',
+            buttonsStyling: true,
+            customClass: {
+                popup: 'rounded-3xl border border-white/10 shadow-2xl backdrop-blur-xl',
+                input: 'bg-black/20 border border-white/10 rounded-xl text-apple-dark focus:border-apple-blue/50 text-sm'
+            }
+        });
+
+        if (reason !== undefined) {
+             try {
+                 const res = await fetch('/profile/orders/cancel', {
+                     method: 'PATCH',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify({ orderId, itemId, reason })
+                 });
+                 const data = await res.json();
+                 if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Withdrawn',
+                        text: data.message,
+                        background: '#1C211E',
+                        color: '#D1D1D1'
+                    }).then(() => window.location.reload());
+                 } else {
+                     Swal.fire({
+                        icon: 'error',
+                        title: 'Failed',
+                        text: data.message,
+                        background: '#1C211E',
+                        color: '#D1D1D1'
+                     });
+                 }
+             } catch (err) {
+                 Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Something went wrong.',
+                    background: '#1C211E',
+                    color: '#D1D1D1'
+                 });
+             }
+        }
+    }
+
+    async function returnItem(orderId, itemId) {
+        const { value: formValues } = await Swal.fire({
+            title: '↩ Request Return',
+            html: `
+                <p class="text-xs text-apple-text-gray mb-5 leading-relaxed">A return reason is <strong>mandatory</strong>. Please select a reason and optionally add more details.</p>
+                <select id="swal-reason-select" class="w-full mb-3 px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-sm text-apple-dark focus:outline-none focus:border-orange-500/50">
+                    <option value="">— Select a reason —</option>
+                    <option value="Damaged or defective item">Damaged or defective item</option>
+                    <option value="Wrong item delivered">Wrong item delivered</option>
+                    <option value="Item not as described">Item not as described</option>
+                    <option value="Changed my mind">Changed my mind</option>
+                    <option value="Quality not satisfactory">Quality not satisfactory</option>
+                    <option value="Other">Other</option>
+                </select>
+                <textarea id="swal-reason-text" placeholder="Additional details (optional)..." rows="3"
+                    class="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-sm text-apple-dark focus:outline-none focus:border-orange-500/50 resize-none"></textarea>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Submit Return Request',
+            cancelButtonText: 'Keep Item',
+            background: '#1C211E',
+            color: '#D1D1D1',
+            confirmButtonColor: '#f97316',
+            focusConfirm: false,
+            customClass: {
+                popup: 'rounded-3xl border border-white/10 shadow-2xl',
+                title: 'text-lg',
+            },
+            preConfirm: () => {
+                const select = document.getElementById('swal-reason-select').value;
+                const text = document.getElementById('swal-reason-text').value.trim();
+                if (!select) {
+                    Swal.showValidationMessage('⚠ Please select a return reason to continue.');
+                    return false;
+                }
+                return select + (text ? ` — ${text}` : '');
+            }
+        });
+
+        if (formValues) {
+             try {
+                 const res = await fetch('/profile/orders/return', {
+                     method: 'PATCH',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify({ orderId, itemId, reason: formValues })
+                 });
+                 const data = await res.json();
+                 if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Return Requested',
+                        text: data.message,
+                        background: '#1C211E',
+                        color: '#D1D1D1',
+                        confirmButtonColor: '#f97316'
+                    }).then(() => window.location.reload());
+                 } else {
+                     Swal.fire({
+                        icon: 'error',
+                        title: 'Failed',
+                        text: data.message,
+                        background: '#1C211E',
+                        color: '#D1D1D1'
+                     });
+                 }
+             } catch (err) {
+                 Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Something went wrong. Please try again.',
+                    background: '#1C211E',
+                    color: '#D1D1D1'
+                 });
+             }
+        }
+    }
+</script>

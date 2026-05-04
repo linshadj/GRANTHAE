@@ -10,7 +10,17 @@
     <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden">
         <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
             <h3 class="font-bold text-lg text-apple-dark">Categories List</h3>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
+                <!-- Search -->
+                <div class="relative items-center flex w-full sm:w-auto">
+                    <i data-lucide="search" class="absolute left-3 w-3.5 h-3.5 text-apple-text-gray"></i>
+                    <input id="searchInput" type="text" value="<%= searchQuery || '' %>" placeholder="Search Categories..."
+                        class="pl-10 pr-10 py-3 h-10 w-full sm:w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all hover:bg-white/10">
+                    <button id="clearSearchBtn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs font-semibold rounded-lg text-apple-text-gray hover:bg-white/10 transition-colors" title="Clear search">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
                 <!-- Filter Dropdown -->
                 <div class="relative" id="catFilterWrap">
                     <button onclick="document.getElementById('catFilterMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5 h-10 min-w-max whitespace-nowrap">
@@ -63,16 +73,9 @@
                         </a>
                     </div>
                 </div>
-
-                <div class="relative flex items-center">
-                    <i data-lucide="search" class="absolute left-3 w-3.5 h-3.5 text-apple-text-gray"></i>
-                    <input id="searchInput" type="text" value="<%= searchQuery || '' %>" placeholder="Search Categories..."
-                        class="pl-10 pr-10 py-3 text-xs h-10 w-64 bg-white/5 border border-white/5 rounded-lg focus:outline-none focus:ring-1 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray/50 transition-all hover:bg-white/10">
-                    <button id="clearSearchBtn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs font-semibold rounded-lg text-apple-text-gray hover:bg-white/10 transition-colors" title="Clear search">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
-                </div>
             </div>
+
+
         </div>
 
         <div class="overflow-x-auto">

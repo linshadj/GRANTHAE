@@ -1,4 +1,4 @@
-import { toggleBlockUserService, userDetails } from "../../service/admin/userService.js";
+import { toggleBlockUserService, userDetails, getUserById } from "../../service/admin/userService.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 
 
@@ -44,6 +44,17 @@ export const liveUsersSearch = async (req, res) => {
 
   } catch (error) {
     res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
+  }
+};
+
+export const viewUserDetail = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { user, addresses, orders } = await getUserById(userId);
+    res.render("admin/user-details", { user, addresses, orders, title: "User Details", layout: "layouts/admin-panel" });
+  } catch (error) {
+    console.error("Error in viewUserDetail:", error.message);
+    res.status(error.status || STATUS_CODES.NOT_FOUND).render("pages/error", { title: "Error", message: error.message });
   }
 };
 

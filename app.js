@@ -6,6 +6,7 @@ import expressLayouts from 'express-ejs-layouts'
 import userRoutes from './routes/userRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js'
+import { adminNotificationMiddleware } from './middlewares/adminNotificationMiddleware.js'
 
 import dotenv from 'dotenv'
 import { connectDb } from './config/dbConnect.js'
@@ -43,6 +44,8 @@ app.use(async (req, res, next) => {
     }
     next();
 });
+
+app.use(adminNotificationMiddleware);
 
 app.use(passport.initialize());
 app.use(passport.session());

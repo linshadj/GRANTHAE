@@ -13,17 +13,19 @@
         <div class="p-6 border-b border-white/5 flex flex-col lg:flex-row justify-between items-center gap-4">
             <h3 class="font-bold text-lg text-apple-dark">All Orders</h3>
             
-            <div class="flex flex-wrap gap-3">
+            <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
+
                 <!-- Search -->
-                <div class="relative flex items-center">
+                <div class="relative flex items-center w-full sm:w-auto">
                     <i data-lucide="search" class="absolute left-3 w-4 h-4 text-apple-text-gray"></i>
                     <input id="orderSearch" type="text" value="<%= searchQuery || '' %>"
                         placeholder="Search Order ID, Name..."
-                        class="pl-10 pr-10 py-2.5 h-10 w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all">
+                        class="pl-10 pr-10 py-2.5 h-10 w-full sm:w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all">
                     <button id="clearOrderSearch" class="absolute right-3 text-apple-text-gray hover:text-white <%= searchQuery ? '' : 'hidden' %>">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
+
 
                 <!-- Filter Dropdown -->
                 <div class="relative" id="orderFilterWrap">
@@ -270,6 +272,31 @@
 
     function openStatusModal(id, currentStatus) {
         modalOrderId.value = id;
+        
+        const statusOrder = {
+            'Pending': 1,
+            'Shipped': 2,
+            'Out for delivery': 3,
+            'Delivered': 4,
+            'Cancelled': 5
+        };
+        const currentLevel = statusOrder[currentStatus];
+
+        document.querySelectorAll('input[name="orderStatus"]').forEach(radio => {
+            const radioLevel = statusOrder[radio.value];
+            
+            if (currentStatus === 'Delivered' || currentStatus === 'Cancelled') {
+                radio.disabled = true;
+                radio.parentElement.classList.add('opacity-50', 'cursor-not-allowed');
+            } else if (radio.value !== 'Cancelled' && radioLevel < currentLevel) {
+                radio.disabled = true;
+                radio.parentElement.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                radio.disabled = false;
+                radio.parentElement.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+
         const radio = document.querySelector(`input[name="orderStatus"][value="${currentStatus}"]`);
         if (radio) radio.checked = true;
         

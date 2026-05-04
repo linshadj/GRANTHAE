@@ -1,0 +1,100 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-32">
+    <nav class="flex mb-8" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm font-medium text-apple-text-gray">
+            <li><a href="/home" class="hover:text-apple-dark transition-colors">Home</a></li>
+            <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+            <li><a href="/rental-place" class="hover:text-apple-dark transition-colors">Rentalplace</a></li>
+
+            <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+            <li class="text-apple-dark truncate"><%= rental.bookTitle %></li>
+        </ol>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+        <!-- Image Gallery -->
+        <div class="space-y-6">
+            <div class="aspect-[3/4] rounded-[40px] overflow-hidden bg-white/5 border border-white/10 shadow-2xl relative group">
+                <img id="mainImage" src="<%= rental.coverImage || rental.images[0] %>" alt="<%= rental.bookTitle %>" class="w-full h-full object-cover transition-transform duration-700">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-4">
+                <% rental.images.forEach((img, idx) => { %>
+                    <button onclick="document.getElementById('mainImage').src='<%= img %>'" 
+                        class="aspect-square rounded-2xl overflow-hidden border-2 border-white/10 hover:border-apple-blue transition-all bg-white/5">
+                        <img src="<%= img %>" class="w-full h-full object-cover">
+                    </button>
+                <% }) %>
+            </div>
+        </div>
+
+        <!-- Book Details -->
+        <div class="flex flex-col">
+            <div class="mb-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="px-3 py-1 bg-apple-blue/10 text-apple-blue rounded-lg text-xs font-bold uppercase tracking-wider">
+                        <%= rental.category ? rental.category.name : 'Uncategorized' %>
+                    </span>
+                    <span class="px-3 py-1 bg-green-500/10 text-green-500 rounded-lg text-xs font-bold uppercase tracking-wider">
+                        <%= rental.bookCondition %> Condition
+                    </span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold text-apple-dark leading-tight mb-2 font-serif"><%= rental.bookTitle %></h1>
+                <p class="text-xl text-apple-text-gray font-medium">by <%= rental.author %></p>
+            </div>
+
+            <!-- Rental Stats -->
+            <div class="grid grid-cols-3 gap-6 p-8 bg-apple-card border border-white/10 rounded-[32px] shadow-xl mb-8">
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-apple-text-gray/50 uppercase tracking-widest mb-1">Daily Rate</p>
+                    <p class="text-2xl font-black text-apple-dark">₹<%= rental.dailyRate %></p>
+                </div>
+                <div class="text-center border-x border-white/5">
+                    <p class="text-[10px] font-bold text-apple-text-gray/50 uppercase tracking-widest mb-1">Min Rental</p>
+                    <p class="text-2xl font-black text-apple-dark"><%= rental.minRentalDays %> <span class="text-xs font-normal">Days</span></p>
+                </div>
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-apple-text-gray/50 uppercase tracking-widest mb-1">Security Deposit</p>
+                    <p class="text-2xl font-black text-apple-dark">₹<%= rental.depositAmount %></p>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-8">
+                <h3 class="text-sm font-bold text-apple-dark uppercase tracking-widest mb-4">Description</h3>
+                <p class="text-apple-text-gray leading-relaxed whitespace-pre-line">
+                    <%= rental.description %>
+                </p>
+            </div>
+
+            <!-- Owner Info -->
+            <div class="flex items-center gap-4 p-6 bg-white/5 border border-white/10 rounded-3xl mb-8">
+                <div class="w-12 h-12 rounded-2xl bg-apple-blue/10 flex items-center justify-center">
+                    <i data-lucide="user" class="w-6 h-6 text-apple-blue"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-apple-text-gray font-bold uppercase tracking-widest">Listed By</p>
+                    <p class="text-apple-dark font-bold"><%= rental.owner.firstName %> <%= rental.owner.lastName %></p>
+                </div>
+                <div class="ml-auto">
+                    <div class="flex items-center gap-1 text-green-500 bg-green-500/10 px-3 py-1 rounded-full text-[10px] font-bold">
+                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                        Verified Owner
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action -->
+            <div class="mt-auto flex flex-col gap-4">
+                <button onclick="Swal.fire({title: 'Rental Booking Coming Soon', text: 'This feature is being finalized.', icon: 'info', background: '#1e2a22', color: '#E6CFA7'})" class="w-full py-5 bg-apple-blue text-white rounded-[24px] font-bold text-lg hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-apple-blue/30 flex items-center justify-center gap-3">
+                    <i data-lucide="calendar" class="w-6 h-6"></i>
+                    Book Rental Now
+                </button>
+                <div class="flex items-center justify-center gap-2 text-apple-text-gray text-xs font-medium">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-green-500"></i>
+                    GRANTHAE Rental Protection Guaranteed
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

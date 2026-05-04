@@ -1,4 +1,6 @@
 import userDb from "../../models/userDb.js";
+import addressDb from "../../models/addressDb.js";
+import orderDb from "../../models/orderDb.js";
 
 export const userDetails = async (page, searchQuery, sort, filter) => {
   const limit = 3;
@@ -77,4 +79,16 @@ export const toggleBlockUserService = async (userId, action) => {
   await user.save();
 
   return true
+};
+
+export const getUserById = async (userId) => {
+  const user = await userDb.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const [addresses, orders] = await Promise.all([
+    addressDb.find({ userId }),
+    orderDb.find({ user: userId }).populate('items.product', 'name coverImage').sort({ createdAt: -1 }).limit(10)
+  ]);
+  return { user, addresses, orders };
 };

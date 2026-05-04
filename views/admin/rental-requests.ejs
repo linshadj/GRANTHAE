@@ -1,0 +1,192 @@
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 class="text-2xl font-bold font-serif text-apple-dark">Rental Listing Requests</h2>
+        <div class="flex flex-wrap gap-2 justify-start sm:justify-end">
+            <a href="/admin/rental-requests" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all <%= selectedStatus === 'all' ? 'bg-apple-gold text-[#1a231e]' : 'bg-white/5 text-apple-text-gray hover:text-white' %>">All</a>
+            <a href="/admin/rental-requests?status=Pending" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all <%= selectedStatus === 'Pending' ? 'bg-apple-gold text-[#1a231e]' : 'bg-white/5 text-apple-text-gray hover:text-white' %>">Pending</a>
+            <a href="/admin/rental-requests?status=Approved" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all <%= selectedStatus === 'Approved' ? 'bg-apple-gold text-[#1a231e]' : 'bg-white/5 text-apple-text-gray hover:text-white' %>">Approved</a>
+        </div>
+    </div>
+
+
+    <div class="bg-apple-card border border-white/5 rounded-2xl overflow-x-auto shadow-sm">
+
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-white/5 text-apple-text-gray text-xs uppercase tracking-wider">
+                    <th class="px-6 py-4 font-bold">Book Info</th>
+                    <th class="px-6 py-4 font-bold">User / Owner</th>
+                    <th class="px-6 py-4 font-bold">Rental Terms</th>
+                    <th class="px-6 py-4 font-bold">Status</th>
+                    <th class="px-6 py-4 font-bold text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                <% if (requests.length > 0) { %>
+                    <% requests.forEach(request => { %>
+                        <tr class="hover:bg-white/[0.02] transition-colors group">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-16 rounded-lg overflow-hidden bg-white/5 border border-white/10 shrink-0">
+                                        <img src="<%= request.coverImage || request.images[0] %>" class="w-full h-full object-cover">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-apple-dark group-hover:text-apple-gold transition-colors"><%= request.bookTitle %></p>
+                                        <p class="text-xs text-apple-text-gray"><%= request.author %></p>
+                                        <p class="text-[10px] text-apple-text-gray/50 mt-1 uppercase tracking-tight"><%= request.category ? request.category.name : 'Uncategorized' %></p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="text-sm font-medium text-apple-dark"><%= request.owner.firstName %> <%= request.owner.lastName %></p>
+                                <p class="text-xs text-apple-text-gray"><%= request.owner.email %></p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="text-sm font-bold text-apple-dark">₹<%= request.dailyRate %>/day</p>
+                                <p class="text-xs text-apple-text-gray">Dep: ₹<%= request.depositAmount %></p>
+                                <p class="text-[10px] text-apple-text-gray/50 mt-1 uppercase">Min <%= request.minRentalDays %> Days</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <% if (request.status === 'Pending') { %>
+                                    <span class="px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-500 text-[10px] font-bold uppercase tracking-wider">Pending</span>
+                                <% } else if (request.status === 'Available' || request.status === 'Approved') { %>
+                                    <span class="px-2 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-bold uppercase tracking-wider">Live</span>
+                                <% } else if (request.status === 'Rejected') { %>
+                                    <span class="px-2 py-1 rounded-full bg-red-500/10 text-red-500 text-[10px] font-bold uppercase tracking-wider">Rejected</span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <% if (request.status === 'Pending') { %>
+                                        <button onclick="handleRequest('<%= request._id %>', 'Approved')" class="p-2 bg-green-500/10 text-green-500 hover:bg-green-500/20 rounded-lg transition-all" title="Approve">
+                                            <i data-lucide="check" class="w-4 h-4"></i>
+                                        </button>
+                                        <button onclick="rejectRequest('<%= request._id %>')" class="p-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg transition-all" title="Reject">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                    <% } %>
+                                    <button onclick="viewDetails('<%= JSON.stringify(request) %>')" class="p-2 bg-white/5 text-apple-text-gray hover:text-white rounded-lg transition-all" title="View Details">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-apple-text-gray italic">No rental requests found.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination (Simplified) -->
+    <% if (totalPages > 1) { %>
+        <div class="flex justify-center gap-2">
+            <% for(let i = 1; i <= totalPages; i++) { %>
+                <a href="/admin/rental-requests?page=<%= i %>&status=<%= selectedStatus %>" class="w-8 h-8 flex items-center justify-center rounded-lg <%= currentPage === i ? 'bg-apple-gold text-[#1a231e]' : 'bg-white/5 text-apple-text-gray hover:text-white' %> text-sm font-bold">
+                    <%= i %>
+                </a>
+            <% } %>
+        </div>
+    <% } %>
+</div>
+
+<script>
+    async function handleRequest(id, status, rejectionReason = '') {
+        const confirmText = status === 'Approved' ? 'Approve this listing?' : 'Reject this listing?';
+        const result = await Swal.fire({
+            title: confirmText,
+            text: status === 'Approved' ? 'It will be live in the Rentalplace.' : 'The user will be notified.',
+
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: status === 'Approved' ? '#10b981' : '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: status === 'Approved' ? 'Yes, Approve' : 'Yes, Reject',
+            background: '#1a231e',
+            color: '#E6CFA7'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`/admin/rental-requests/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status, rejectionReason })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire({ icon: 'success', title: 'Success', text: data.message, background: '#1a231e', color: '#E6CFA7' }).then(() => location.reload());
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: data.message, background: '#1a231e', color: '#E6CFA7' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong', background: '#1a231e', color: '#E6CFA7' });
+            }
+        }
+    }
+
+    async function rejectRequest(id) {
+        const { value: reason } = await Swal.fire({
+            title: 'Reject Listing',
+            input: 'textarea',
+            inputLabel: 'Reason for rejection',
+            inputPlaceholder: 'Enter reason here...',
+            showCancelButton: true,
+            background: '#1a231e',
+            color: '#E6CFA7',
+            confirmButtonColor: '#ef4444'
+        });
+
+        if (reason) {
+            handleRequest(id, 'Rejected', reason);
+        }
+    }
+
+    function viewDetails(requestStr) {
+        const request = JSON.parse(requestStr);
+        Swal.fire({
+            title: request.bookTitle,
+            html: `
+                <div class="text-left space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                    <img src="${request.coverImage}" class="w-full h-48 object-contain bg-black/20 rounded-xl mb-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-400 uppercase font-bold">Author</p>
+                            <p class="text-sm">${request.author}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 uppercase font-bold">Condition</p>
+                            <p class="text-sm">${request.bookCondition}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-bold">Description</p>
+                        <p class="text-sm italic text-gray-300">"${request.description}"</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 py-4 border-y border-white/5">
+                        <div class="text-center">
+                            <p class="text-[10px] text-gray-400 uppercase">Rate</p>
+                            <p class="font-bold">₹${request.dailyRate}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-[10px] text-gray-400 uppercase">Deposit</p>
+                            <p class="font-bold">₹${request.depositAmount}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-[10px] text-gray-400 uppercase">Min Days</p>
+                            <p class="font-bold">${request.minRentalDays}</p>
+                        </div>
+                    </div>
+                </div>
+            `,
+            width: '600px',
+            background: '#1a231e',
+            color: '#E6CFA7',
+            confirmButtonText: 'Close',
+            confirmButtonColor: '#E6CFA7'
+        });
+    }
+</script>

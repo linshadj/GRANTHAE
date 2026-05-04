@@ -1,0 +1,151 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-24">
+    <div class="mb-10 text-center md:text-left">
+        <h1 class="text-4xl font-bold text-apple-dark font-luxury">My Wishlist</h1>
+        <p class="text-apple-text-gray mt-2 text-lg">Books you've saved for later.</p>
+    </div>
+
+    <% if (!wishlistItems || wishlistItems.length === 0) { %>
+        <div class="glass-card py-32 px-8 text-center rounded-3xl w-full border border-white/50 shadow-xl">
+            <div class="w-24 h-24 bg-red-50 text-red-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-red-100">
+                <i data-lucide="heart" class="w-10 h-10"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-apple-dark mb-4">Your wishlist is empty</h2>
+            <p class="text-apple-text-gray mb-8 max-w-md mx-auto">You haven't added any favorite books yet. Explore our curated selection and find your next great read.</p>
+            <a href="/marketplace" class="btn-primary inline-flex shadow-lg shadow-apple-blue/20">Explore Collections</a>
+        </div>
+    <% } else { %>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <% wishlistItems.forEach((item) => { %>
+                <div class="glass-card p-5 sm:p-6 rounded-3xl flex flex-col relative transition-all duration-300 hover:shadow-premium-hover border border-white/50 group" id="wishlist-item-<%= item.productId %>-<%= item.variant || 'default' %>">
+                    
+                    <button class="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center bg-white/70 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full transition-colors shadow-sm backdrop-blur-md" title="Remove Item" onclick="removeWishlistItem('<%= item.productId %>', '<%= item.variant %>')">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- Image -->
+                    <a href="/product/<%= item.productId %>" class="relative aspect-[4/5] w-full bg-gray-100 rounded-2xl overflow-hidden mb-5 shrink-0 block group-hover/img:shadow-md transition-shadow">
+                        <img src="<%= item.coverImage || '/images/default-book.jpg' %>" alt="<%= item.productName %>" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        
+                        <% if (item.isBlocked || item.isDeleted) { %>
+                            <div class="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
+                                <span class="bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-md">Unavailable</span>
+                            </div>
+                        <% } else if (item.stock < 1) { %>
+                            <div class="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
+                                <span class="bg-gray-800 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-md">Out of Stock</span>
+                            </div>
+                        <% } %>
+                    </a>
+
+                    <!-- Details -->
+                    <div class="flex-grow flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-apple-text-gray mb-1 block"><%= item.brand || 'Book' %></span>
+                            <a href="/product/<%= item.productId %>" class="text-xl font-bold text-apple-dark hover:text-apple-blue transition-colors line-clamp-2 leading-tight mb-1">
+                                <%= item.productName %>
+                            </a>
+                            <p class="text-sm text-apple-text-gray mb-3"><%= item.author %></p>
+                            
+                            <% if (item.variant) { %>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 mb-2">
+                                    <%= item.variant %>
+                                </span>
+                            <% } %>
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-100/50 mt-auto flex items-center justify-between">
+                            <p class="text-xl font-bold text-apple-dark">₹<%= item.price %></p>
+                            
+                            <% if (item.isBlocked || item.isDeleted || item.stock < 1) { %>
+                                <button class="btn-secondary px-4 py-2 text-sm opacity-50 cursor-not-allowed bg-gray-100 border-transparent text-gray-400" disabled>
+                                    Unavailable
+                                </button>
+                            <% } else { %>
+                                <button onclick="moveToCart('<%= item.productId %>', '<%= item.variant %>')" class="btn-primary px-4 py-2 text-sm flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform shadow-md shadow-apple-blue/20">
+                                    <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> Add
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+</div>
+
+<script>
+    async function moveToCart(productId, variant) {
+        try {
+            // First add to cart
+            const res = await fetch('/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, variant: variant || '', quantity: 1 })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                // Remove from wishlist visually since backend will do it silently but we need UI update
+                const itemEl = document.getElementById(`wishlist-item-${productId}-${variant || 'default'}`);
+                if (itemEl) {
+                    itemEl.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => {
+                        itemEl.remove();
+                        // Optional: if list is empty, reload to show empty state
+                        if (document.querySelectorAll('[id^="wishlist-item-"]').length === 0) {
+                            window.location.reload();
+                        }
+                    }, 300);
+                }
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Moved to cart',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            } else {
+                 Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: data.message,
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function removeWishlistItem(productId, variant) {
+        try {
+            const res = await fetch('/wishlist/remove', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, variant: variant || '' })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                const itemEl = document.getElementById(`wishlist-item-${productId}-${variant || 'default'}`);
+                if (itemEl) {
+                    itemEl.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => {
+                        itemEl.remove();
+                        if (document.querySelectorAll('[id^="wishlist-item-"]').length === 0) {
+                            window.location.reload();
+                        }
+                    }, 300);
+                }
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+</script>

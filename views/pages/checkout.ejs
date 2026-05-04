@@ -1,0 +1,225 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-24 min-h-[80vh]">
+    <div class="mb-10 text-center md:text-left">
+        <h1 class="text-4xl font-bold text-apple-dark font-luxury">Checkout</h1>
+        <p class="text-apple-text-gray mt-2 text-lg">Securely complete your order.</p>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start">
+        
+        <!-- Left Column: Shipping & Payment -->
+        <div class="w-full lg:w-[65%] flex flex-col gap-10 lg:gap-16">
+            
+            <!-- Shipping Address Section -->
+            <div class="glass-card p-6 sm:p-10 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-apple-blue/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                
+                <div class="flex justify-between items-center mb-8 relative">
+                    <h2 class="text-2xl font-bold text-apple-dark flex items-center gap-3 font-luxury">
+                        <i data-lucide="map-pin" class="w-6 h-6 text-apple-blue"></i>
+                        Shipping Address
+                    </h2>
+                    <a href="/profile/edit" class="text-sm font-medium text-apple-blue hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/5">+ Add New</a>
+                </div>
+
+                <% if (addresses && addresses.length > 0) { %>
+                    <div class="flex flex-col gap-6 relative">
+                        <% addresses.forEach((addr, index) => { %>
+                            <label class="relative flex cursor-pointer rounded-2xl border border-white/5 bg-black/20 p-5 shadow-sm hover:border-apple-blue/50 focus:outline-none transition-all duration-300 has-[:checked]:border-apple-blue has-[:checked]:bg-apple-blue/5 group">
+                                <input type="radio" name="selectedAddress" value="<%= addr._id %>" class="sr-only peer" <%= index === 0 ? 'checked' : '' %>>
+                                <span class="flex flex-1">
+                                    <span class="flex flex-col">
+                                        <span class="block text-base font-bold text-apple-dark flex items-center gap-3 mb-1">
+                                            <%= addr.label || 'Address' %> 
+                                            <% if (addr.isDefault) { %>
+                                                <span class="bg-apple-blue/10 text-apple-blue text-[10px] uppercase tracking-widest px-2.5 py-0.5 rounded-full border border-apple-blue/20">Default</span>
+                                            <% } %>
+                                        </span>
+                                        <span class="text-apple-text-gray text-sm leading-relaxed opacity-80">
+                                            <%= addr.streetAddress %>, <%= addr.city %>, <%= addr.state %>, <%= addr.pinCode %>
+                                        </span>
+                                        <span class="mt-2 text-xs font-medium text-apple-text-gray/60 uppercase tracking-widest flex items-center gap-2">
+                                            <i data-lucide="phone" class="w-3.5 h-3.5"></i> <%= addr.phoneNumber %>
+                                        </span>
+                                    </span>
+                                </span>
+                                <!-- Check circle -->
+                                <div class="flex items-center justify-center ml-4 opacity-0 scale-50 peer-checked:opacity-100 peer-checked:scale-100 transition-all duration-300">
+                                    <i data-lucide="check-circle-2" class="w-6 h-6 text-apple-blue"></i>
+                                </div>
+                            </label>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-12 px-8 border-2 border-dashed border-white/5 rounded-3xl bg-black/10 relative">
+                        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5">
+                            <i data-lucide="home" class="w-8 h-8 text-apple-text-gray/30"></i>
+                        </div>
+                        <p class="text-apple-dark font-bold mb-2 font-luxury text-lg">No shipping address found</p>
+                        <p class="text-sm text-apple-text-gray/60 mb-6">You need an address to complete your order.</p>
+                        <a href="/profile/edit" class="btn-primary inline-flex items-center gap-2 py-3">Add New Address</a>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Payment Method Section -->
+            <div class="glass-card p-6 sm:p-10 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+                 <div class="absolute bottom-0 left-0 w-32 h-32 bg-apple-blue/5 rounded-full blur-3xl -ml-16 -mb-16"></div>
+                
+                <h2 class="text-2xl font-bold text-apple-dark mb-8 flex items-center gap-3 font-luxury relative">
+                    <i data-lucide="credit-card" class="w-6 h-6 text-apple-blue"></i>
+                    Payment Method
+                </h2>
+
+                <div class="flex flex-col gap-6 relative">
+                    <label class="relative flex cursor-pointer rounded-2xl border border-white/5 bg-black/20 p-5 shadow-sm hover:border-apple-blue/50 transition-all duration-300 has-[:checked]:border-apple-blue has-[:checked]:bg-apple-blue/5 group">
+                        <input type="radio" name="paymentMethod" value="COD" class="sr-only peer" checked>
+                        <div class="flex items-center gap-8 w-full">
+                            <div class="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-500 shrink-0 border border-green-500/20">
+                                <i data-lucide="banknote" class="w-6 h-6"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <span class="block text-base font-bold text-apple-dark mb-0.5">Cash on Delivery (COD)</span>
+                                <span class="block text-xs text-apple-text-gray/60">Pay with cash when your order is delivered.</span>
+                            </div>
+                            <div class="flex items-center justify-center opacity-0 scale-50 peer-checked:opacity-100 peer-checked:scale-100 transition-all duration-300">
+                                <i data-lucide="check-circle-2" class="w-6 h-6 text-apple-blue"></i>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Order Summary -->
+        <div class="w-full lg:w-[35%] lg:sticky lg:top-28">
+            <div class="glass-card p-8 rounded-3xl shadow-2xl border border-white/10 overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-apple-blue/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                
+                <h2 class="text-2xl font-bold text-apple-dark mb-8 font-luxury relative">Order Summary</h2>
+                
+                <!-- Items list summary -->
+                <div class="flex flex-col gap-5 mb-8 max-h-[350px] overflow-y-auto pr-3 custom-scrollbar relative">
+                    <% cartItems.forEach(item => { %>
+                        <div class="flex gap-8 items-start bg-white/5 p-3 rounded-2xl border border-white/5 transition-all hover:bg-white/10">
+                            <div class="w-16 h-20 bg-black/20 rounded-xl overflow-hidden shrink-0 border border-white/5 relative">
+                                <img src="<%= item.coverImage || '/images/default-book.jpg' %>" class="w-full h-full object-cover shadow-inner">
+                                <span class="absolute -top-1 -right-1 bg-apple-blue text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full z-10 shadow-lg border border-black/20"><%= item.quantity %></span>
+                            </div>
+                            <div class="flex-grow">
+                                <h4 class="text-sm font-bold text-apple-dark line-clamp-2 leading-snug"><%= item.productName %></h4>
+                                <% if (item.variant) { %> 
+                                    <p class="text-[10px] uppercase tracking-widest text-apple-text-gray/50 mt-1.5 flex items-center gap-1.5">
+                                        <span class="w-1 h-1 bg-apple-blue rounded-full"></span> <%= item.variant %>
+                                    </p>
+                                <% } %>
+                                <div class="mt-2 text-xs font-bold text-apple-blue">₹<%= item.itemTotal %></div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <div class="h-px bg-white/5 mb-8 relative"></div>
+
+                <!-- Calculations -->
+                <div class="flex flex-col gap-4 mb-8 relative">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-apple-text-gray/60 uppercase tracking-widest text-[10px] font-medium">Subtotal</span>
+                        <span class="font-bold text-apple-dark">₹<%= cartTotal %></span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-apple-text-gray/60 uppercase tracking-widest text-[10px] font-medium">Shipping</span>
+                        <span class="font-bold text-green-500 text-xs tracking-wider uppercase">Free</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-apple-text-gray/60 uppercase tracking-widest text-[10px] font-medium">Taxes</span>
+                        <span class="font-bold text-apple-dark">₹0</span>
+                    </div>
+                    <div class="pt-6 border-t border-white/5 flex justify-between items-end">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-widest text-apple-text-gray/40 mb-1">Total Payable</p>
+                            <p class="text-3xl font-bold text-apple-blue leading-none">₹<%= cartTotal %></p>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="place-order-btn" class="btn-primary w-full py-5 text-lg font-bold flex justify-center items-center gap-3 shadow-2xl relative group overflow-hidden" <%= (!addresses || addresses.length === 0) ? 'disabled' : '' %>>
+                    <span class="relative z-10 flex items-center gap-3">
+                        <i data-lucide="shield-check" class="w-5 h-5 transition-transform group-hover:scale-110"></i> 
+                        Complete Purchase
+                    </span>
+                    <div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                </button>
+                
+                <p class="mt-6 text-[10px] text-center text-apple-text-gray/30 uppercase tracking-[0.2em] font-medium flex items-center justify-center gap-3">
+                    <span class="w-1 h-1 bg-white/20 rounded-full"></span> Secure SSL Payment Processing <span class="w-1 h-1 bg-white/20 rounded-full"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('place-order-btn').addEventListener('click', async function() {
+        const selectedAddressEl = document.querySelector('input[name="selectedAddress"]:checked');
+        const paymentMethodEl = document.querySelector('input[name="paymentMethod"]:checked');
+
+        if (!selectedAddressEl) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Address Required',
+                text: 'Please select a shipping address for your order.',
+                confirmButtonColor: '#e6cfa7',
+                background: '#2c3b32',
+                color: '#e6cfa7'
+            });
+            return;
+        }
+
+        const addressId = selectedAddressEl.value;
+        const paymentMethod = paymentMethodEl.value;
+
+        // Show loading state
+        const originalContent = this.innerHTML;
+        this.innerHTML = `<span class="flex items-center gap-3"><svg class="animate-spin h-5 w-5 text-apple-text-gray" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span class="uppercase tracking-widest text-sm">Processing...</span></span>`;
+        this.disabled = true;
+
+        try {
+            const res = await fetch('/checkout/place-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ addressId, paymentMethod })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                // Redirect to success page
+                window.location.href = `/order-success/${data.orderId}`;
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Order Failed',
+                    text: data.message,
+                    confirmButtonColor: '#e6cfa7',
+                    background: '#2c3b32',
+                    color: '#e6cfa7'
+                });
+                this.innerHTML = originalContent;
+                this.disabled = false;
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'System Error',
+                text: 'Could not establish connection. Please try again.',
+                confirmButtonColor: '#e6cfa7',
+                background: '#2c3b32',
+                color: '#e6cfa7'
+            });
+            this.innerHTML = originalContent;
+            this.disabled = false;
+        }
+    });
+</script>

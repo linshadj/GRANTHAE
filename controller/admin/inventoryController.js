@@ -17,6 +17,8 @@ export const getInventoryPage = async (req, res, next) => {
             currentPage: inventoryData.currentPage,
             totalPages: inventoryData.totalPages,
             totalProducts: inventoryData.totalProducts,
+            totalLowStock: inventoryData.totalLowStock,
+            totalInStock: inventoryData.totalInStock,
             searchQuery: search,
             selectedSort: sort,
             selectedFilter: filter,
@@ -30,9 +32,9 @@ export const getInventoryPage = async (req, res, next) => {
 export const updateStock = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { stock } = req.body;
+        const { stock, variantName } = req.body;
 
-        await updateProductStock(id, parseInt(stock));
+        await updateProductStock(id, parseInt(stock), variantName);
 
         res.status(STATUS_CODES.OK).json({
             success: true,

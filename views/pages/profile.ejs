@@ -8,15 +8,13 @@
 
     <!-- Profile Card -->
     <div class="glass-card p-8 relative overflow-hidden">
-        <!-- Edit Button (Link to separate page) -->
         <div class="flex flex-col md:flex-row gap-8 items-start">
             <!-- Avatar -->
             <div class="flex-shrink-0 text-center space-y-4">
                 <div class="relative">
-                        <div class="w-24 h-24 bg-[#1C2A3A] rounded-full relative overflow-hidden group shadow-lg">
-                            <img id="avatarPreview" src="<%= user.avatar %>" class="w-full h-full object-cover">
-                        </div>
-    
+                    <div class="w-24 h-24 bg-[#1C2A3A] rounded-full relative overflow-hidden group shadow-lg border border-white/10">
+                        <img id="avatarPreview" src="<%= user.avatar %>" class="w-full h-full object-cover">
+                    </div>
                 </div>
             </div>
 
@@ -25,101 +23,84 @@
                 <!-- Action Buttons -->
                 <div class="flex justify-end gap-3 relative z-30">
                     <a href="/profile/edit"
-                        class="text-sm font-medium text-apple-blue hover:text-apple-dark transition-colors flex items-center gap-2">
-                        <i data-lucide="edit-2" class="w-4 h-4"></i> Edit Profile
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-apple-gold/10 text-apple-gold border border-apple-gold/20 hover:bg-apple-gold/20 transition-all text-xs font-bold uppercase tracking-widest shadow-sm hover:shadow-apple-gold/10">
+                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Edit Profile
                     </a>
                 </div>
-                <!-- VIEW MODE ONLY -->
+
+
+                
                 <div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                         <div>
-                            <span
-                                class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">First
-                                Name</span>
-                            <p class="text-apple-dark font-medium text-lg">
-                                <%= user.firstName %>
-                            </p>
+                            <span class="block text-[10px] font-bold text-apple-text-gray/50 uppercase tracking-[0.2em] mb-2 leading-none">First Name</span>
+                            <p class="text-apple-dark font-bold text-xl"><%= user.firstName %></p>
                         </div>
                         <div>
-                            <span
-                                class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">Last
-                                Name</span>
-                            <p class="text-apple-dark font-medium text-lg">
-                                <%= user.lastName %>
-                            </p>
+                            <span class="block text-[10px] font-bold text-apple-text-gray/50 uppercase tracking-[0.2em] mb-2 leading-none">Last Name</span>
+                            <p class="text-apple-dark font-bold text-xl"><%= user.lastName %></p>
                         </div>
                     </div>
-                    <div class="mb-6">
-                        <span class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">Email
-                            Address</span>
-                        <p class="text-apple-dark font-medium text-lg">
-                            <%= user.email %>
-                        </p>
+                    <div class="mb-8">
+                        <span class="block text-[10px] font-bold text-apple-text-gray/50 uppercase tracking-[0.2em] mb-2 leading-none">Identity Address</span>
+                        <p class="text-apple-dark font-bold text-xl"><%= user.email %></p>
                     </div>
                     <div>
-                        <span
-                            class="block text-xs font-bold text-apple-text-gray uppercase tracking-wider mb-1">Bio</span>
-                        <p class="text-apple-text-gray italic">
-                            <%= user.bio || "No bio added yet." %>
+                        <span class="block text-[10px] font-bold text-apple-text-gray/50 uppercase tracking-[0.2em] mb-2 leading-none">Personal Bio</span>
+                        <p class="text-apple-text-gray italic leading-relaxed text-sm">
+                            <%= user.bio || "Not added" %>
                         </p>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Addresses Section -->
-                <div class="pt-6 border-t border-white/10 relative z-20">
-                    <h3 class="text-sm font-bold text-apple-text-gray uppercase tracking-wider mb-4">Saved Addresses
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="address-grid">
-                        <!-- Address Card 1 -->
-                        <% addresses.forEach((address)=> { %>
-                            <div onclick="openViewAddressModal('<%= address._id %>', '<%= address.label %>', '<%= address.streetAddress %>, <%= address.city %>, <%= address.state %>, <%= address.country %> <%= address.pinCode %>', '<%= address.phoneNumber %>', <%= address.isDefault %>)"
-                                class="bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer hover:border-apple-gold/50 transition-colors group relative z-20">
-                                <div class="flex justify-between items-start mb-2">
-                                    <% if(address.isDefault) { %>
-                                        <div class="flex items-center gap-2">
-                                            <span
-                                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-apple-gold/20 text-apple-gold uppercase tracking-wider">
-                                                <%= address.label %>
-                                            </span>
-                                            <span
-                                                class="text-[10px] font-bold text-apple-gold uppercase tracking-wider flex items-center gap-1">
-                                                <i data-lucide="check-circle" class="w-3 h-3"></i> Default
-                                            </span>
-                                        </div>
-                                        <% } else { %>
-                                            <span
-                                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-apple-text-gray/20 text-apple-text-gray uppercase tracking-wider"><%= address.label %></span>
-                                            <% } %>
-                                                <i data-lucide="maximize-2"
-                                                    class="w-4 h-4 text-apple-text-gray opacity-0 group-hover:opacity-100 transition-opacity"></i>
-                                </div>
-                                <p class="text-apple-dark text-sm leading-relaxed">
-                                    <%= address.streetAddress %>,<br>
-                                        <%= address.city %>,<br>
-                                            <%= address.state %>, <%= address.country %>
-                                                    <%= address.pinCode %>
-                                </p>
-                                <p class="text-xs text-apple-text-gray mt-2">
-                                    <%= address.phoneNumber %>
-                                </p>
-                            </div>
-                            <% }) %>
-
-                                <!-- E((mpty State (Hidden initially) -->
-                                <% if(addresses.length===0) { %>
-                                    <div
-                                        class="flex flex-col items-center justify-center w-full mx-auto py-16 text-center">
-                                        <div
-                                            class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 border border-white/10">
-                                            <i data-lucide="map-pin-off" class="w-8 h-8 text-apple-text-gray/50"></i>
-                                        </div>
-                                        <h4 class="text-apple-text-gray font-bold mb-1">No saved addresses</h4>
-                                        <p class="text-apple-text-gray text-sm">You haven't added any addresses yet.</p>
-                                    </div>
-                                    <% } %>
+    <!-- Addresses Section -->
+    <div class="glass-card p-8 relative overflow-hidden">
+        <div class="flex justify-between items-center mb-8 relative z-20">
+            <h3 class="text-sm font-bold text-apple-text-gray uppercase tracking-[0.2em]">Saved Addresses</h3>
+            <button onclick="window.location.href='/profile/edit'" class="text-[10px] font-bold text-apple-blue uppercase tracking-widest hover:underline">Add New</button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-20" id="address-grid">
+            <% addresses.forEach((address)=> { %>
+                <div onclick="openViewAddressModal('<%= address._id %>', '<%= address.label %>', '<%= address.streetAddress %>, <%= address.city %>, <%= address.state %>, <%= address.country %> <%= address.pinCode %>', '<%= address.phoneNumber %>', <%= address.isDefault %>)"
+                    class="bg-white/5 border border-white/10 rounded-2xl p-6 cursor-pointer hover:border-apple-blue/50 transition-all group backdrop-blur-md">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest <%= address.isDefault ? 'bg-apple-blue/20 text-apple-blue border border-apple-blue/10' : 'bg-white/5 text-apple-text-gray/50 border border-white/5' %>">
+                                <%= address.label %>
+                            </span>
+                            <% if(address.isDefault) { %>
+                                <span class="text-[10px] font-bold text-apple-blue uppercase tracking-widest flex items-center gap-1.5 opacity-60">
+                                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Primary
+                                </span>
+                            <% } %>
+                        </div>
+                        <i data-lucide="arrow-up-right" class="w-4 h-4 text-apple-text-gray opacity-0 group-hover:opacity-100 transition-opacity"></i>
                     </div>
-
+                    <p class="text-apple-dark text-sm font-bold leading-relaxed mb-4">
+                        <%= address.streetAddress %><br>
+                        <span class="text-apple-text-gray/60 font-medium"><%= address.city %>, <%= address.state %></span>
+                    </p>
+                    <p class="text-[10px] font-bold text-apple-text-gray/40 uppercase tracking-widest"><%= address.phoneNumber %></p>
                 </div>
+            <% }) %>
+
+            <% if(addresses.length===0) { %>
+                <div class="flex flex-col items-center justify-center py-12 text-center bg-white/5 rounded-2xl border border-dashed border-white/10 col-span-2">
+                    <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                        <i data-lucide="map-pin" class="w-6 h-6 text-apple-text-gray/20"></i>
+                    </div>
+                    <p class="text-apple-text-gray/50 text-xs font-bold uppercase tracking-widest">No Addresses recorded</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    </div>
+</div>
             </div>
         </div>
     </div>

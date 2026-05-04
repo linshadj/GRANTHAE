@@ -33,6 +33,65 @@
 
                     <script>
                         lucide.createIcons();
+
+                        async function addToWishlistGlobal(productId, variant = '', btn = null) {
+                            try {
+                                // If btn is not passed, try to find it if it was called via event
+                                if (!btn && window.event) btn = window.event.currentTarget;
+
+                                const res = await fetch('/wishlist/add', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ productId, variant })
+                                });
+                                const data = await res.json();
+                                
+                                if (data.success) {
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'top-end',
+                                        icon: data.action === 'added' ? 'success' : 'info',
+                                        title: data.message,
+                                        showConfirmButton: false,
+                                        timer: 3000
+                                    });
+
+                                    // Toggle UI state if btn is available
+                                    if (btn) {
+                                        const icon = btn.querySelector('i[data-lucide="heart"]');
+                                        if (data.action === 'added') {
+                                            btn.classList.add('text-red-500');
+                                            if (icon) icon.classList.add('fill-current');
+                                            // Handle text if present (for product details page)
+                                            const textNode = Array.from(btn.childNodes).find(n => n.nodeType === 3 && n.textContent.trim().length > 1);
+                                            if (textNode) textNode.textContent = ' Wishlisted';
+                                        } else {
+                                            btn.classList.remove('text-red-500');
+                                            if (icon) icon.classList.remove('fill-current');
+                                            const textNode = Array.from(btn.childNodes).find(n => n.nodeType === 3 && n.textContent.trim().length > 1);
+                                            if (textNode) textNode.textContent = ' Wishlist';
+                                        }
+                                    }
+
+                                    if(typeof lucide !== 'undefined') lucide.createIcons();
+                                } else {
+                                    if (res.status === 401 || (data.message && (data.message.toLowerCase().includes('login') || data.message.toLowerCase().includes('unauthorized')))) {
+                                        window.location.href = '/sign-in';
+                                    } else {
+                                        Swal.fire({
+                                            toast: true,
+                                            position: 'top-end',
+                                            icon: 'error',
+                                            title: data.message || 'Something went wrong',
+                                            showConfirmButton: false,
+                                            timer: 3000
+                                        });
+                                    }
+                                }
+                            } catch (err) {
+                                console.error(err);
+                            }
+                        }
                     </script>
 </body>
 

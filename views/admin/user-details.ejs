@@ -1,189 +1,237 @@
-<div class="space-y-6">
+<div class="space-y-8">
     <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
-            <div
-                class="w-16 h-16 rounded-full bg-apple-blue/10 flex items-center justify-center text-xl font-bold text-apple-blue">
-                JD
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold text-apple-dark">John Doe</h1>
-                <div class="flex items-center gap-2 mt-1">
-                    <span
-                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-500/10 text-blue-400">Member</span>
-                    <span
-                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400">Active</span>
-                    <span class="text-xs text-apple-text-gray">• Joined Oct 24, 2024</span>
-                </div>
-            </div>
-        </div>
-        <div class="flex gap-2">
-            <button
-                class="px-4 py-2 bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors text-sm font-semibold border border-white/5 flex items-center gap-2">
-                <i data-lucide="edit-3" class="w-4 h-4"></i> Edit
-            </button>
-            <button
-                class="px-4 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors text-sm font-semibold border border-red-500/10 flex items-center gap-2">
-                <i data-lucide="ban" class="w-4 h-4"></i> Block
-            </button>
-        </div>
+    <div class="flex items-center gap-4">
+        <a href="/admin/users" class="p-2 bg-white/5 text-apple-text-gray hover:bg-white/10 rounded-lg transition-colors border border-white/5" title="Back to Users">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <h2 class="text-2xl font-bold text-apple-dark">User Profile Details</h2>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-apple-card p-4 rounded-2xl border border-white/5 shadow-sm">
-            <p class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">Total Rentals</p>
-            <div class="mt-2 flex items-baseline gap-2">
-                <h3 class="text-2xl font-bold text-apple-dark font-serif">24</h3>
-            </div>
-        </div>
-        <div class="bg-apple-card p-4 rounded-2xl border border-white/5 shadow-sm">
-            <p class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">Active Rentals</p>
-            <div class="mt-2 flex items-baseline gap-2">
-                <h3 class="text-2xl font-bold text-apple-dark font-serif">3</h3>
-                <span class="text-xs text-apple-text-gray font-medium">Books in hand</span>
-            </div>
-        </div>
-        <div class="bg-apple-card p-4 rounded-2xl border border-white/5 shadow-sm">
-            <p class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">Wallet Balance</p>
-            <div class="mt-2 flex items-baseline gap-2">
-                <h3 class="text-2xl font-bold text-apple-dark font-serif">₹125.50</h3>
-            </div>
-        </div>
-        <div class="bg-apple-card p-4 rounded-2xl border border-white/5 shadow-sm">
-            <p class="text-xs font-bold text-apple-text-gray uppercase tracking-wider">Total Spent</p>
-            <div class="mt-2 flex items-baseline gap-2">
-                <h3 class="text-2xl font-bold text-apple-dark font-serif">₹450.00</h3>
-            </div>
-        </div>
-    </div>
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Profile Info -->
+        <!-- Left Column: User Card + Overview -->
         <div class="lg:col-span-1 space-y-6">
-            <div class="bg-apple-card p-6 rounded-2xl border border-white/5 shadow-sm">
-                <h3 class="font-bold text-lg text-apple-dark mb-4">Contact Info</h3>
-                <div class="space-y-4">
-                    <div class="flex items-start gap-3">
-                        <div class="p-2 bg-white/5 rounded-lg text-apple-text-gray">
-                            <i data-lucide="mail" class="w-4 h-4"></i>
+            <div class="bg-apple-card rounded-2xl border border-white/5 p-8 text-center shadow-premium flex flex-col items-center">
+                <div class="w-32 h-32 rounded-full bg-apple-gold/10 border-2 border-white/5 overflow-hidden flex items-center justify-center mb-6 shadow-xl ring-4 ring-white/5">
+                    <% if (user.avatar) { %>
+                        <img src="<%= user.avatar %>" class="w-full h-full object-cover">
+                    <% } else { %>
+                        <div class="w-full h-full bg-apple-gold/10 flex items-center justify-center text-apple-gold font-bold text-4xl">
+                            <%= user.firstName.charAt(0).toUpperCase() %>
                         </div>
-                        <div>
-                            <span class="block text-xs text-apple-text-gray uppercase tracking-wider">Email</span>
-                            <span class="text-sm font-medium text-apple-dark">john.doe@example.com</span>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <div class="p-2 bg-white/5 rounded-lg text-apple-text-gray">
-                            <i data-lucide="phone" class="w-4 h-4"></i>
-                        </div>
-                        <div>
-                            <span class="block text-xs text-apple-text-gray uppercase tracking-wider">Phone</span>
-                            <span class="text-sm font-medium text-apple-dark">+1 (555) 123-4567</span>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <div class="p-2 bg-white/5 rounded-lg text-apple-text-gray">
-                            <i data-lucide="map-pin" class="w-4 h-4"></i>
-                        </div>
-                        <div>
-                            <span class="block text-xs text-apple-text-gray uppercase tracking-wider">Address</span>
-                            <span class="text-sm font-medium text-apple-dark">123 Library lane,<br>Booktown, BK
-                                90210</span>
-                        </div>
-                    </div>
+                    <% } %>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-1"><%= user.firstName %> <%= user.lastName %></h3>
+                <p class="text-apple-text-gray mb-6"><%= user.email %></p>
+
+                <div class="flex flex-wrap justify-center gap-2 mb-8">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-apple-gold/10 text-apple-gold border border-apple-gold/20 uppercase tracking-widest">
+                        <%= user.role %>
+                    </span>
+                    <% if (user.isBlocked) { %>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500 border border-red-500/20 uppercase tracking-widest">Blocked</span>
+                    <% } else { %>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-green-500/10 text-green-500 border border-green-500/20 uppercase tracking-widest">Active</span>
+                    <% } %>
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-white/5">
-                    <h3 class="font-bold text-lg text-apple-dark mb-2">About</h3>
-                    <p class="text-sm text-apple-text-gray leading-relaxed">
-                        Avid reader and book collector. Loves science fiction and history. Always returns books on time
-                        and active in the community.
-                    </p>
+                <div class="w-full pt-8 border-t border-white/5">
+                    <button onclick="toggleBlockById('<%= user._id %>', <%= user.isBlocked %>)"
+                        class="w-full py-3 rounded-xl font-bold text-sm transition-all <%= user.isBlocked ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/20' : 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/20' %>">
+                        <%= user.isBlocked ? 'Unblock Account' : 'Block Account' %>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Account Overview -->
+            <div class="bg-apple-card rounded-2xl border border-white/5 p-6 shadow-sm">
+                <h4 class="font-bold text-apple-dark mb-4 text-sm uppercase tracking-widest">Account Overview</h4>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-apple-text-gray text-xs">Customer Since</span>
+                        <span class="text-white text-xs font-medium"><%= new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-apple-text-gray text-xs">Total Orders</span>
+                        <span class="text-white text-xs font-medium"><%= orders.length %></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-apple-text-gray text-xs">Saved Addresses</span>
+                        <span class="text-white text-xs font-medium"><%= addresses.length %></span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tabs & History -->
-        <div class="lg:col-span-2">
-            <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden min-h-[500px]">
-                <!-- Tab Headers -->
-                <div class="flex border-b border-white/5">
-                    <button
-                        class="flex-1 px-6 py-4 text-sm font-bold text-apple-dark border-b-2 border-apple-gold bg-white/5">
-                        Rental History
-                    </button>
-                    <button
-                        class="flex-1 px-6 py-4 text-sm font-semibold text-apple-text-gray hover:text-apple-dark hover:bg-white/5 transition-colors">
-                        Transactions
-                    </button>
-                    <button
-                        class="flex-1 px-6 py-4 text-sm font-semibold text-apple-text-gray hover:text-apple-dark hover:bg-white/5 transition-colors">
-                        Activity Log
-                    </button>
-                </div>
+        <!-- Right Column -->
+        <div class="lg:col-span-2 space-y-6">
 
-                <!-- Tab Content: Rentals (Active) -->
-                <div class="p-0">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-white/5 text-apple-text-gray uppercase text-xs font-bold tracking-wider">
-                                <tr>
-                                    <th class="px-6 py-4">Book</th>
-                                    <th class="px-6 py-4">Date</th>
-                                    <th class="px-6 py-4">Due</th>
-                                    <th class="px-6 py-4">Status</th>
-                                    <th class="px-6 py-4 text-right">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-white/5">
-                                <tr class="group hover:bg-white/5 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-apple-dark">The Psychology of Money</td>
-                                    <td class="px-6 py-4 text-apple-text-gray">Feb 15, 2026</td>
-                                    <td class="px-6 py-4 text-apple-text-gray">Feb 22, 2026</td>
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400">Active</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right font-medium text-apple-dark">₹2.00</td>
-                                </tr>
-                                <tr class="group hover:bg-white/5 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-apple-dark">Atomic Habits</td>
-                                    <td class="px-6 py-4 text-apple-text-gray">Jan 20, 2026</td>
-                                    <td class="px-6 py-4 text-apple-text-gray">Jan 27, 2026</td>
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-500/10 text-blue-400">Returned</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right font-medium text-apple-dark">₹3.00</td>
-                                </tr>
-                                <tr class="group hover:bg-white/5 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-apple-dark">Deep Work</td>
-                                    <td class="px-6 py-4 text-apple-text-gray">Jan 10, 2026</td>
-                                    <td class="px-6 py-4 text-apple-text-gray">Jan 17, 2026</td>
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-500/10 text-red-400">Overdue
-                                            (Returned)</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right font-medium text-apple-dark">₹2.00</td>
-                                </tr>
-                            </tbody>
-                        </table>
+            <!-- Personal Information -->
+            <div class="bg-apple-card rounded-2xl border border-white/5 p-8 shadow-sm">
+                <h4 class="text-lg font-bold text-white mb-6 border-b border-white/5 pb-4 flex items-center gap-2">
+                    <i data-lucide="user" class="w-5 h-5 text-apple-gold"></i> Personal Information
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <p class="text-[10px] text-apple-text-gray uppercase tracking-widest font-bold mb-1">First Name</p>
+                        <p class="text-white font-medium"><%= user.firstName %></p>
                     </div>
-                </div>
-
-                <!-- Footer / Pagination for Table -->
-                <div class="p-4 border-t border-white/5 flex items-center justify-between">
-                    <span class="text-xs text-apple-text-gray">Showing 3 of 24 rentals</span>
-                    <div class="flex gap-1">
-                        <button class="px-2 py-1 text-xs bg-white/5 rounded hover:bg-white/10 text-apple-text-gray"
-                            disabled>Prev</button>
-                        <button
-                            class="px-2 py-1 text-xs bg-white/5 rounded hover:bg-white/10 text-apple-text-gray">Next</button>
+                    <div>
+                        <p class="text-[10px] text-apple-text-gray uppercase tracking-widest font-bold mb-1">Last Name</p>
+                        <p class="text-white font-medium"><%= user.lastName %></p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-[10px] text-apple-text-gray uppercase tracking-widest font-bold mb-1">Email Address</p>
+                        <p class="text-white font-medium"><%= user.email %></p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-[10px] text-apple-text-gray uppercase tracking-widest font-bold mb-1">Bio</p>
+                        <p class="text-apple-text-gray text-sm leading-relaxed italic"><%= user.bio || 'Not added' %></p>
                     </div>
                 </div>
             </div>
+
+            <!-- Saved Addresses (above Order History) -->
+            <div class="bg-apple-card rounded-2xl border border-white/5 p-8 shadow-sm">
+                <h4 class="text-lg font-bold text-white mb-6 border-b border-white/5 pb-4 flex items-center gap-2">
+                    <i data-lucide="map-pin" class="w-5 h-5 text-apple-gold"></i> Saved Addresses
+                </h4>
+                <% if (addresses && addresses.length > 0) { %>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <% addresses.forEach(address => { %>
+                            <div class="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-white/20 transition-colors">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest <%= address.isDefault ? 'bg-apple-gold/10 text-apple-gold border border-apple-gold/20' : 'bg-white/5 text-apple-text-gray border border-white/5' %>">
+                                        <%= address.label %>
+                                    </span>
+                                    <% if (address.isDefault) { %>
+                                        <span class="text-[10px] font-bold text-apple-gold flex items-center gap-1">
+                                            <i data-lucide="shield-check" class="w-3 h-3"></i> Primary
+                                        </span>
+                                    <% } %>
+                                </div>
+                                <p class="text-white text-sm font-bold leading-relaxed"><%= address.streetAddress %></p>
+                                <p class="text-apple-text-gray text-xs mt-1"><%= address.city %>, <%= address.state %> — <%= address.pinCode %></p>
+                                <p class="text-apple-text-gray text-xs"><%= address.country %></p>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="flex flex-col items-center justify-center py-10 text-center">
+                        <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mb-4">
+                            <i data-lucide="map-pin" class="w-7 h-7 text-apple-text-gray/30"></i>
+                        </div>
+                        <p class="text-apple-text-gray/50 text-sm">No saved addresses</p>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Order History (3 most recent) -->
+            <div class="bg-apple-card rounded-2xl border border-white/5 p-8 shadow-sm">
+                <h4 class="text-lg font-bold text-white mb-6 border-b border-white/5 pb-4 flex items-center gap-2">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 text-apple-gold"></i> Recent Orders
+                    <% if (orders.length > 0) { %>
+                        <span class="ml-auto text-[10px] font-bold text-apple-text-gray bg-white/5 px-2 py-1 rounded-full"><%= orders.length %> total</span>
+                    <% } %>
+                </h4>
+                <% if (orders && orders.length > 0) { %>
+                    <div class="space-y-3">
+                        <% orders.slice(0, 3).forEach(order => { %>
+                            <div class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex -space-x-2">
+                                        <% order.items.slice(0, 3).forEach(item => { %>
+                                            <div class="w-10 h-10 rounded-lg overflow-hidden border-2 border-apple-card bg-white/10 flex-shrink-0">
+                                                <% if (item.product && item.product.coverImage) { %>
+                                                    <img src="<%= item.product.coverImage %>" class="w-full h-full object-cover">
+                                                <% } else { %>
+                                                    <div class="w-full h-full flex items-center justify-center text-apple-text-gray/30">
+                                                        <i data-lucide="book" class="w-4 h-4"></i>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        <% }) %>
+                                        <% if (order.items.length > 3) { %>
+                                            <div class="w-10 h-10 rounded-lg border-2 border-apple-card bg-white/10 flex items-center justify-center text-[10px] font-bold text-apple-text-gray">
+                                                +<%= order.items.length - 3 %>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                    <div>
+                                        <p class="text-white text-sm font-bold">#<%= order.orderID %></p>
+                                        <p class="text-apple-text-gray text-[10px] mt-0.5"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %> · <%= order.items.length %> item<%= order.items.length > 1 ? 's' : '' %></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right">
+                                        <p class="text-white text-sm font-bold">₹<%= order.totalAmount %></p>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider
+                                            <% if (order.orderStatus === 'Delivered') { %>text-green-500
+                                            <% } else if (order.orderStatus === 'Cancelled') { %>text-red-500
+                                            <% } else if (order.orderStatus === 'Pending') { %>text-yellow-500
+                                            <% } else { %>text-apple-blue<% } %>">
+                                            <%= order.orderStatus %>
+                                        </span>
+                                    </div>
+                                    <a href="/admin/orders/view/<%= order._id %>" class="p-2 bg-white/5 text-apple-gold hover:bg-white/10 rounded-lg transition-colors border border-white/5" title="View Order">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+
+                    <% if (orders.length > 3) { %>
+                        <div class="mt-5 pt-5 border-t border-white/5 text-center">
+                            <a href="/admin/orders?userId=<%= user._id %>"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 text-apple-gold hover:bg-white/10 rounded-xl text-sm font-bold transition-all">
+                                <i data-lucide="list" class="w-4 h-4"></i>
+                                Show All <%= orders.length %> Orders
+                            </a>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="flex flex-col items-center justify-center py-10 text-center">
+                        <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mb-4">
+                            <i data-lucide="shopping-bag" class="w-7 h-7 text-apple-text-gray/30"></i>
+                        </div>
+                        <p class="text-apple-text-gray/50 text-sm">No orders placed yet</p>
+                    </div>
+                <% } %>
+            </div>
+
         </div>
     </div>
 </div>
+
+<script>
+    window.toggleBlockById = async (id, isCurrentlyBlocked) => {
+        const action = isCurrentlyBlocked ? 'unblock' : 'block';
+        const actionText = isCurrentlyBlocked ? 'Unblock' : 'Block';
+        const color = isCurrentlyBlocked ? '#22c55e' : '#ef4444';
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you want to ${actionText.toLowerCase()} this user?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: color,
+            background: '#1e2a22',
+            color: '#E6CFA7',
+            confirmButtonText: `Yes, ${actionText}`
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`/admin/users/toggle-block/${id}/${action}`, { method: 'PATCH' });
+                    const data = await res.json();
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: data.message, background: '#1e2a22', color: '#E6CFA7' });
+                    }
+                } catch(e) { console.error(e); }
+            }
+        });
+    };
+</script>
