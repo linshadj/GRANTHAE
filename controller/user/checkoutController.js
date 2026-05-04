@@ -1,4 +1,6 @@
 import * as checkoutService from "../../service/user/checkoutService.js";
+import mongoose from "mongoose";
+import orderDb from "../../models/orderDb.js";
 
 export const getCheckoutPage = async (req, res) => {
     try {
@@ -37,7 +39,7 @@ export const placeOrder = async (req, res) => {
         res.status(200).json({ 
             success: true, 
             message: "Order placed successfully!",
-            orderId: newOrder._id
+            orderId: newOrder.orderID
         });
     } catch (error) {
         console.error("Place Order Error:", error);
@@ -48,12 +50,30 @@ export const placeOrder = async (req, res) => {
 export const orderSuccessPage = async (req, res) => {
     try {
         const { orderId } = req.params;
+        const userId = req.user._id;
+        const lookup = [{ orderID: orderId }];
+
+        if (mongoose.isValidObjectId(orderId)) {
+            lookup.push({ _id: orderId });
+        }
+
+        const order = await orderDb.findOne({
+            user: userId,
+            $or: lookup
+        });
+
+        if (!order) {
+            return res.redirect('/profile/orders');
+        }
+
         res.render("pages/order-success", {
-            title: "Order Successful | GRANTHAE",
+            title: `Order ${order.orderID} Successful | GRANTHAE`,
             user: req.user,
-            orderId
+            orderId: order.orderID,
+            orderDetailsId: order._id
         });
     } catch (error) {
-        res.redirect('/home');
+        console.error("Order Success Page Error:", error);
+        res.redirect('/profile/orders');
     }
 };

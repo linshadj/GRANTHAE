@@ -10,6 +10,7 @@ const getCartData = async (userId) => {
             const product = item.product;
             let price = product.price;
             let stock = 0;
+            const isCategoryUnavailable = product.category && (product.category.isBlocked || product.category.isDeleted);
 
             if (item.variant && product.variants && product.variants.length > 0) {
                 const variantData = product.variants.find(v => v.name === item.variant);
@@ -41,7 +42,8 @@ const getCartData = async (userId) => {
                 itemTotal: itemTotal,
                 stock: stock,
                 isBlocked: product.isBlocked,
-                isDeleted: product.isDeleted
+                isDeleted: product.isDeleted,
+                isCategoryUnavailable
             };
         });
     }

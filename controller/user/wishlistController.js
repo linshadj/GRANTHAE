@@ -9,15 +9,17 @@ export const getWishlistPage = async (req, res) => {
             const product = item.product;
             let price = product.price;
             let stock = 0;
+            const hasVariants = product.variants && product.variants.length > 0;
+            const needsVariantSelection = hasVariants && !item.variant;
 
             // Handle variants if requested
-            if (item.variant && product.variants && product.variants.length > 0) {
+            if (item.variant && hasVariants) {
                 const variantData = product.variants.find(v => v.name === item.variant);
                 if (variantData) {
                     if (variantData.priceOverride) price = variantData.priceOverride;
                     stock = variantData.stock;
                 }
-            } else if (product.variants && product.variants.length > 0) {
+            } else if (hasVariants) {
                 // If no specific variant is in wishlist, show total stock of all variants
                 stock = product.variants.reduce((acc, v) => acc + v.stock, 0);
             } else {
@@ -34,6 +36,8 @@ export const getWishlistPage = async (req, res) => {
                 variant: item.variant,
                 price: price,
                 stock: stock,
+                hasVariants,
+                needsVariantSelection,
                 isBlocked: product.isBlocked,
                 isDeleted: product.isDeleted
             };

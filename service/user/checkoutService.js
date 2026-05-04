@@ -5,7 +5,10 @@ import addressDb from "../../models/addressDb.js";
 import crypto from "crypto";
 
 export const getCheckoutData = async (userId) => {
-    const cart = await cartDb.findOne({ user: userId }).populate('items.product');
+    const cart = await cartDb.findOne({ user: userId }).populate({
+        path: 'items.product',
+        populate: { path: 'category' }
+    });
     
     if (!cart || cart.items.length === 0) {
         throw new Error("Cart is empty");
@@ -19,6 +22,9 @@ export const getCheckoutData = async (userId) => {
         
         if (product.isBlocked || product.isDeleted) {
             throw new Error(`Product "${product.name}" is no longer available.`);
+        }
+        if (product.category && (product.category.isBlocked || product.category.isDeleted)) {
+            throw new Error(`Product "${product.name}" is no longer available because its category is disabled.`);
         }
 
         let availableStock = 0;
@@ -75,7 +81,10 @@ export const placeOrder = async (userId, addressId, paymentMethod) => {
         throw new Error("Invalid address selected.");
     }
 
-    const cart = await cartDb.findOne({ user: userId }).populate('items.product');
+    const cart = await cartDb.findOne({ user: userId }).populate({
+        path: 'items.product',
+        populate: { path: 'category' }
+    });
     if (!cart || cart.items.length === 0) {
         throw new Error("Cart is empty.");
     }
@@ -85,10 +94,13 @@ export const placeOrder = async (userId, addressId, paymentMethod) => {
 
     // Verify stock one last time and build order items
     for (let item of cart.items) {
-        const product = await Product.findById(item.product._id);
+        const product = await Product.findById(item.product._id).populate('category');
         
         if (!product || product.isBlocked || product.isDeleted) {
              throw new Error(`Product "${product?.name || 'Unknown'}" is unavailable.`);
+        }
+        if (product.category && (product.category.isBlocked || product.category.isDeleted)) {
+             throw new Error(`Product "${product.name}" is unavailable because its category is disabled.`);
         }
 
         let availableStock = 0;

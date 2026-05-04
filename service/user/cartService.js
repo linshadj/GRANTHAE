@@ -5,7 +5,10 @@ import { Product } from "../../models/productDb.js";
 const maxQuantityPerItem = 10;
 
 export const getCart = async (userId) => {
-    let cart = await cartDb.findOne({ user: userId }).populate('items.product');
+    let cart = await cartDb.findOne({ user: userId }).populate({
+        path: 'items.product',
+        populate: { path: 'category' }
+    });
     if (!cart) {
         cart = await cartDb.create({ user: userId, items: [] });
     }
@@ -14,9 +17,14 @@ export const getCart = async (userId) => {
 
 export const addToCart = async (userId, productId, variant = "", quantity = 1) => {
     // Prevent adding blocked/unlisted/deleted products
-    const product = await Product.findOne({ _id: productId, isBlocked: false, isDeleted: false });
+    const product = await Product.findOne({ _id: productId, isBlocked: false, isDeleted: false }).populate('category');
     if (!product) {
         throw new Error("Product is unavailable or blocked.");
+    }
+
+    // Check if the product's category is blocked
+    if (product.category && (product.category.isBlocked || product.category.isDeleted)) {
+        throw new Error("Product category is disabled.");
     }
 
     // Check stock validation using variants
@@ -82,8 +90,11 @@ export const updateCartQuantity = async (userId, productId, variant = "", action
     if (itemIndex === -1) throw new Error("Item not in cart");
 
     
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).populate('category');
     if (!product || product.isBlocked || product.isDeleted) throw new Error("Product unavailable.");
+    if (product.category && (product.category.isBlocked || product.category.isDeleted)) {
+        throw new Error("Product category is disabled.");
+    }
     
     let availableStock = 0;
     const productVariant = product.variants.find(v => v.name === variant);

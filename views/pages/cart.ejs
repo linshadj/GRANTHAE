@@ -18,12 +18,12 @@
             <!-- Cart Items -->
             <div class="w-full lg:w-[65%] space-y-6">
                 <% cartItems.forEach((item, index) => { %>
-                    <div class="glass-card p-5 sm:p-6 rounded-3xl flex flex-col sm:flex-row gap-6 relative transition-all duration-500 hover:shadow-premium-hover <%= item.isBlocked || item.isDeleted || item.stock < 1 ? 'opacity-60' : '' %>" id="cart-item-container-<%= item.productId %>-<%= item.variant || 'default' %>">
+                    <div class="glass-card p-5 sm:p-6 rounded-3xl flex flex-col sm:flex-row gap-6 relative transition-all duration-500 hover:shadow-premium-hover <%= item.isBlocked || item.isDeleted || item.isCategoryUnavailable || item.stock < 1 ? 'opacity-60' : '' %>" id="cart-item-container-<%= item.productId %>-<%= item.variant || 'default' %>">
                         <div class="flex flex-col sm:flex-row gap-6 w-full">
                             <!-- Image -->
                             <div class="w-20 h-28 shrink-0 bg-white/5 rounded-xl overflow-hidden relative border border-white/10 flex items-center justify-center p-2">
                                 <img src="<%= item.coverImage || '/images/default-book.jpg' %>" alt="<%= item.productName %>" class="max-w-full max-h-full object-contain drop-shadow-md">
-                                <% if (item.isBlocked || item.isDeleted) { %>
+                                <% if (item.isBlocked || item.isDeleted || item.isCategoryUnavailable) { %>
                                     <div class="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center p-4">
                                         <span class="bg-red-500/90 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg text-center">Unavailable</span>
                                     </div>
@@ -66,16 +66,16 @@
 
                                 <div class="flex flex-wrap items-center justify-between gap-6 mt-6 relative z-10">
                                     <div class="flex items-center gap-4 bg-black/20 border border-white/10 rounded-full p-1.5 shadow-inner relative z-20">
-                                        <button class="relative z-30 w-8 h-8 flex items-center justify-center rounded-full bg-apple-card text-apple-dark hover:bg-apple-blue/20 hover:text-apple-blue transition-all duration-300 shadow-sm qty-btn <%= (item.isBlocked || item.isDeleted) ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                                        <button class="relative z-30 w-8 h-8 flex items-center justify-center rounded-full bg-apple-card text-apple-dark hover:bg-apple-blue/20 hover:text-apple-blue transition-all duration-300 shadow-sm qty-btn <%= (item.isBlocked || item.isDeleted || item.isCategoryUnavailable) ? 'opacity-50 cursor-not-allowed' : '' %>" 
                                                 onclick="updateCartQty('<%= item.productId %>', '<%= item.variant || '' %>', 'decrement')" 
-                                                <%= item.isBlocked || item.isDeleted ? 'disabled' : '' %>
+                                                <%= item.isBlocked || item.isDeleted || item.isCategoryUnavailable ? 'disabled' : '' %>
                                                 aria-label="Decrease quantity">
                                             <i data-lucide="minus" class="w-4 h-4"></i>
                                         </button>
                                         <span class="w-8 text-center font-bold text-apple-dark text-base qty-display" id="qty-<%= item.productId %>-<%= item.variant || 'default' %>"><%= item.quantity %></span>
-                                        <button class="relative z-30 w-8 h-8 flex items-center justify-center rounded-full bg-apple-card text-apple-dark hover:bg-apple-blue/20 hover:text-apple-blue transition-all duration-300 shadow-sm qty-btn <%= (item.isBlocked || item.isDeleted || item.quantity >= 10 || item.quantity >= item.stock) ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                                        <button class="relative z-30 w-8 h-8 flex items-center justify-center rounded-full bg-apple-card text-apple-dark hover:bg-apple-blue/20 hover:text-apple-blue transition-all duration-300 shadow-sm qty-btn <%= (item.isBlocked || item.isDeleted || item.isCategoryUnavailable || item.quantity >= 10 || item.quantity >= item.stock) ? 'opacity-50 cursor-not-allowed' : '' %>" 
                                                 onclick="updateCartQty('<%= item.productId %>', '<%= item.variant || '' %>', 'increment')" 
-                                                <%= (item.isBlocked || item.isDeleted || item.quantity >= 10 || item.quantity >= item.stock) ? 'disabled' : '' %>
+                                                <%= (item.isBlocked || item.isDeleted || item.isCategoryUnavailable || item.quantity >= 10 || item.quantity >= item.stock) ? 'disabled' : '' %>
                                                 aria-label="Increase quantity"
                                                 id="inc-btn-<%= item.productId %>-<%= item.variant || 'default' %>">
                                             <i data-lucide="plus" class="w-4 h-4"></i>
@@ -125,7 +125,7 @@
                     </div>
 
                     <% 
-                        const hasUnavailableItems = cartItems.some(i => i.isBlocked || i.isDeleted || i.stock < 1);
+                        const hasUnavailableItems = cartItems.some(i => i.isBlocked || i.isDeleted || i.isCategoryUnavailable || i.stock < 1);
                     %>
 
                     <div id="unavailable-warning" class="<%= hasUnavailableItems ? '' : 'hidden' %> mb-6 p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-200 text-xs flex gap-3 animate-fade-in">

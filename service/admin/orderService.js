@@ -1,5 +1,7 @@
 import orderDb from "../../models/orderDb.js";
 
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export const orderDetails = async (page = 1, search = "", sort = "newest", filter = "all", userId = null) => {
     const limit = 10;
     const skip = (page - 1) * limit;
@@ -12,11 +14,29 @@ export const orderDetails = async (page = 1, search = "", sort = "newest", filte
     }
 
     // Search by orderID or user name (needs population)
-    if (search) {
+    const normalizedSearch = search.trim();
+    if (normalizedSearch) {
+        const searchPattern = escapeRegex(normalizedSearch).replace(/\s+/g, "\\s+");
+
         query.$or = [
-            { orderID: { $regex: search, $options: "i" } },
-            { "shippingAddress.firstName": { $regex: search, $options: "i" } },
-            { "shippingAddress.lastName": { $regex: search, $options: "i" } }
+            { orderID: { $regex: searchPattern, $options: "i" } },
+            { "shippingAddress.firstName": { $regex: searchPattern, $options: "i" } },
+            { "shippingAddress.lastName": { $regex: searchPattern, $options: "i" } },
+            {
+                $expr: {
+                    $regexMatch: {
+                        input: {
+                            $concat: [
+                                { $ifNull: ["$shippingAddress.firstName", ""] },
+                                " ",
+                                { $ifNull: ["$shippingAddress.lastName", ""] }
+                            ]
+                        },
+                        regex: searchPattern,
+                        options: "i"
+                    }
+                }
+            }
         ];
     }
 

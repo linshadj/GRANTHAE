@@ -15,7 +15,7 @@
         </div>
     <% } else { %>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            <% wishlistItems.forEach((item) => { %>
+            <% wishlistItems.forEach(item => { %>
                 <div class="glass-card p-5 sm:p-6 rounded-3xl flex flex-col relative transition-all duration-300 hover:shadow-premium-hover border border-white/50 group" id="wishlist-item-<%= item.productId %>-<%= item.variant || 'default' %>">
                     
                     <button class="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center bg-white/70 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full transition-colors shadow-sm backdrop-blur-md" title="Remove Item" onclick="removeWishlistItem('<%= item.productId %>', '<%= item.variant %>')">
@@ -50,6 +50,10 @@
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 mb-2">
                                     <%= item.variant %>
                                 </span>
+                            <% } else if (item.needsVariantSelection) { %>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 mb-2">
+                                    Choose option
+                                </span>
                             <% } %>
                         </div>
 
@@ -60,6 +64,10 @@
                                 <button class="btn-secondary px-4 py-2 text-sm opacity-50 cursor-not-allowed bg-gray-100 border-transparent text-gray-400" disabled>
                                     Unavailable
                                 </button>
+                            <% } else if (item.needsVariantSelection) { %>
+                                <a href="/product/<%= item.productId %>" class="btn-primary px-4 py-2 text-sm flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform shadow-md shadow-apple-blue/20">
+                                    <i data-lucide="settings-2" class="w-3.5 h-3.5"></i> Options
+                                </a>
                             <% } else { %>
                                 <button onclick="moveToCart('<%= item.productId %>', '<%= item.variant %>')" class="btn-primary px-4 py-2 text-sm flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform shadow-md shadow-apple-blue/20">
                                     <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> Add
@@ -107,7 +115,12 @@
                     timer: 3000
                 });
             } else {
-                 Swal.fire({
+                if ((data.message || '').toLowerCase().includes('select a product option')) {
+                    window.location.href = `/product/${productId}`;
+                    return;
+                }
+
+                Swal.fire({
                     toast: true,
                     position: 'top-end',
                     icon: 'error',
