@@ -26,7 +26,7 @@ import { upload, uploadRental } from "../middlewares/multerUpload.js";
 import { changeEmail, changePassword, viewSettings } from "../controller/user/settingsController.js";
 import { listProducts, productDetails } from "../controller/user/shopController.js";
 import { getCartPage, addToCart, updateQuantity, removeFromCart } from "../controller/user/cartController.js";
-import { getListRentalBookPage, submitRentalListing, rentalPlacePage, rentalDetailsPage, getMyListingsPage } from "../controller/user/rentalController.js";
+import { getListRentalBookPage, submitRentalListing, rentalPlacePage, rentalDetailsPage, getMyListingsPage, getRentalRequestsPage } from "../controller/user/rentalController.js";
 
 
 const router = express.Router();
@@ -113,6 +113,7 @@ router.get("/password-changed", passwordChanged);
 import { listOrdersPage, orderDetailsPage, cancelProduct, returnProduct, downloadInvoice } from "../controller/user/orderController.js";
 router.get("/profile", isAuth, viewProfile);
 router.get("/profile/my-listings", isAuth, getMyListingsPage);
+router.get("/profile/my-listings/rental-requests", isAuth, getRentalRequestsPage);
 
 
 router.get("/profile/orders", isAuth, listOrdersPage);

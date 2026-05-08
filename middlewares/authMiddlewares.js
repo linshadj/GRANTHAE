@@ -28,6 +28,7 @@ export const isAuth = async (req, res, next) => {
   if (req.session.user) {
     const user = await userDb.findById(req.session.user);
     if (!user.isBlocked) {
+      req.user = user;
       return next();
     }
   }

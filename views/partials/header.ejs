@@ -43,7 +43,7 @@
                     </a>
 
                     <!-- Search -->
-                    <button
+                    <button id="navbar-search-btn" type="button" aria-label="Search books" aria-controls="navbar-search-panel" aria-expanded="false"
                         class="p-2 text-apple-dark/70 hover:text-apple-dark transition-colors rounded-full hover:bg-white/10">
                         <i data-lucide="search" class="w-4 h-4"></i>
                     </button>
@@ -122,6 +122,25 @@
                 </div>
             </div>
         </div>
+
+        <!-- Navbar Search -->
+        <div id="navbar-search-panel"
+            class="absolute top-full left-0 right-0 mt-2 mx-4 p-3 bg-apple-card/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 ease-in-out transform origin-top opacity-0 -translate-y-4 pointer-events-none invisible">
+            <form action="/marketplace" method="GET" id="navbar-search-form" class="relative group">
+                <button type="submit" aria-label="Search"
+                    class="absolute left-4 top-1/2 -translate-y-1/2 p-1 text-apple-text-gray group-focus-within:text-apple-blue transition-colors">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                </button>
+                <input id="navbar-search-input" type="text" name="search"
+                    value="<%= path === '/marketplace' && typeof query !== 'undefined' ? (query.search || '') : '' %>"
+                    placeholder="Search books by title or author..."
+                    class="w-full pl-12 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-apple-dark placeholder-apple-text-gray focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue outline-none transition-all">
+                <button id="navbar-search-close" type="button" aria-label="Close search"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-apple-text-gray hover:text-apple-dark hover:bg-white/10 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </form>
+        </div>
     </nav>
 </div>
 
@@ -131,6 +150,11 @@
 <script>
     const mobileBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
+    const searchBtn = document.getElementById('navbar-search-btn');
+    const searchPanel = document.getElementById('navbar-search-panel');
+    const searchInput = document.getElementById('navbar-search-input');
+    const searchClose = document.getElementById('navbar-search-close');
+    const searchForm = document.getElementById('navbar-search-form');
 
     if (mobileBtn && mobileMenu) {
         mobileBtn.addEventListener('click', () => {
@@ -138,6 +162,7 @@
 
             if (isClosed) {
                 // Open
+                closeNavbarSearch();
                 mobileMenu.classList.remove('invisible', 'opacity-0', '-translate-y-4', 'pointer-events-none');
                 mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
             } else {
@@ -152,6 +177,65 @@
             if (!mobileBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
                 mobileMenu.classList.add('invisible', 'opacity-0', '-translate-y-4', 'pointer-events-none');
                 mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            }
+        });
+    }
+
+    function openNavbarSearch() {
+        if (!searchPanel || !searchBtn || !searchInput) return;
+
+        if (mobileMenu) {
+            mobileMenu.classList.add('invisible', 'opacity-0', '-translate-y-4', 'pointer-events-none');
+            mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+        }
+
+        searchPanel.classList.remove('invisible', 'opacity-0', '-translate-y-4', 'pointer-events-none');
+        searchPanel.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+        searchBtn.setAttribute('aria-expanded', 'true');
+        setTimeout(() => searchInput.focus(), 120);
+    }
+
+    function closeNavbarSearch() {
+        if (!searchPanel || !searchBtn) return;
+
+        searchPanel.classList.add('invisible', 'opacity-0', '-translate-y-4', 'pointer-events-none');
+        searchPanel.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+        searchBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    if (searchBtn && searchPanel) {
+        searchBtn.addEventListener('click', () => {
+            const isClosed = searchPanel.classList.contains('invisible');
+            if (isClosed) {
+                openNavbarSearch();
+            } else {
+                closeNavbarSearch();
+            }
+        });
+
+        if (searchClose) {
+            searchClose.addEventListener('click', closeNavbarSearch);
+        }
+
+        if (searchForm && searchInput) {
+            searchForm.addEventListener('submit', (event) => {
+                searchInput.value = searchInput.value.trim();
+                if (!searchInput.value.trim()) {
+                    event.preventDefault();
+                    window.location.href = '/marketplace';
+                }
+            });
+        }
+
+        document.addEventListener('click', (event) => {
+            if (!searchBtn.contains(event.target) && !searchPanel.contains(event.target)) {
+                closeNavbarSearch();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeNavbarSearch();
             }
         });
     }

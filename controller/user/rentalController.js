@@ -37,6 +37,7 @@ export const submitRentalListing = async (req, res, next) => {
             });
         }
 
+        const userId = req.user?._id || req.session.user;
         uploadedImages = await uploadImagesToCloudinary(req.files, "rentals");
         const images = uploadedImages.map(image => image.url);
         
@@ -49,7 +50,7 @@ export const submitRentalListing = async (req, res, next) => {
         }
 
         const rentalData = {
-            owner: req.user._id,
+            owner: userId,
             bookTitle,
             author,
             isbn,
@@ -69,7 +70,7 @@ export const submitRentalListing = async (req, res, next) => {
         res.status(STATUS_CODES.CREATED).json({ 
             success: true, 
             message: "Listing request submitted successfully. It will be live once approved by admin.", 
-            redirectUrl: "/profile" // Or to a specific 'My Rentals' page if we create one
+            redirectUrl: "/profile/my-listings"
         });
     } catch (error) {
         await deleteCloudinaryUploads(uploadedImages);
@@ -120,7 +121,8 @@ export const rentalDetailsPage = async (req, res, next) => {
 
 export const getMyListingsPage = async (req, res, next) => {
     try {
-        const listings = await Rental.find({ owner: req.user._id, isDeleted: false })
+        const userId = req.user?._id || req.session.user;
+        const listings = await Rental.find({ owner: userId, isDeleted: false })
             .populate('category')
             .sort({ createdAt: -1 });
 
@@ -129,6 +131,33 @@ export const getMyListingsPage = async (req, res, next) => {
             title: 'My Listings',
             listings,
             path: '/profile/my-listings'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getRentalRequestsPage = async (req, res, next) => {
+    try {
+        const userId = req.user?._id || req.session.user;
+        const listings = await Rental.find({ owner: userId, isDeleted: false })
+            .populate('category')
+            .sort({ createdAt: -1 });
+
+        const availableListings = listings.filter((listing) =>
+            ["Available", "Approved"].includes(listing.status)
+        );
+
+        // Renter request records are not modeled yet; keep this page wired for that collection.
+        const incomingRequests = [];
+
+        res.render('pages/rental-requests', {
+            layout: 'layouts/user-panel',
+            title: 'Incoming Rental Requests',
+            listings,
+            availableListings,
+            incomingRequests,
+            path: '/profile/my-listings/rental-requests'
         });
     } catch (error) {
         next(error);
