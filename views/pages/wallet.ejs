@@ -32,15 +32,18 @@
 %>
 
 <div class="max-w-4xl mx-auto space-y-8">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div class="min-w-0 flex-1">
             <h1 class="text-2xl font-bold text-apple-dark">My Wallet</h1>
             <p class="text-apple-text-gray">Manage funds and wallet transactions.</p>
         </div>
-        <a href="/wallet/add-funds"
-            class="bg-apple-dark text-white px-6 py-2.5 rounded-full font-medium shadow-lg hover:bg-black transition-colors flex items-center justify-center gap-2">
-            <i data-lucide="plus" class="w-4 h-4"></i> Add Funds
-        </a>
+        <div class="flex w-full justify-end sm:ml-auto sm:w-auto">
+            <a href="/wallet/add-funds"
+                class="btn-primary inline-flex items-center justify-center gap-2 px-6 py-3 font-bold shadow-lg shadow-apple-gold/20">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Add Funds</span>
+            </a>
+        </div>
     </div>
 
     <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-apple-dark to-gray-800 text-white p-8 shadow-2xl">
