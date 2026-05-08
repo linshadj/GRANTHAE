@@ -158,8 +158,14 @@
                     <div class="h-px bg-white/5 my-6"></div>
                     <div class="flex justify-between items-center">
                         <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Subtotal</span>
-                        <span class="text-apple-dark">₹<%= order.totalAmount %></span>
+                        <span class="text-apple-dark">₹<%= order.subtotalAmount || (order.totalAmount + (order.discountAmount || 0)) %></span>
                     </div>
+                    <% if (order.discountAmount && order.discountAmount > 0) { %>
+                        <div class="flex justify-between items-center">
+                            <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Coupon <%= order.couponCode ? `(${order.couponCode})` : '' %></span>
+                            <span class="text-green-500 font-bold">-₹<%= order.discountAmount %></span>
+                        </div>
+                    <% } %>
                     <div class="flex justify-between items-center">
                         <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Shipping</span>
                         <span class="text-green-500 font-bold">Complimentary</span>

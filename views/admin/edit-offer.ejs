@@ -1,0 +1,297 @@
+<%
+    const isEdit = mode === 'edit';
+    const data = offer || {};
+    const dateValue = (date, fallback = '') => date ? new Date(date).toISOString().slice(0, 10) : fallback;
+    const today = new Date().toISOString().slice(0, 10);
+    const defaultEndDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const selectedCategoryIds = (data.categories || []).map(id => id.toString());
+    const selectedProductIds = (data.products || []).map(id => id.toString());
+    const selectedAppliesTo = data.appliesTo || 'all';
+%>
+
+<div class="max-w-5xl mx-auto space-y-8 pb-12">
+    <div class="flex items-center justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-apple-dark"><%= isEdit ? 'Edit Offer' : 'Create Offer' %></h2>
+            <p class="text-apple-text-gray text-sm mt-1">Configure promotional discounts and the catalog scope they apply to.</p>
+        </div>
+        <a href="/admin/offers" class="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-apple-text-gray hover:text-white transition-all text-sm flex items-center gap-2">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to List
+        </a>
+    </div>
+
+    <form id="offerForm" class="space-y-8">
+        <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden p-6 space-y-6">
+            <div class="flex items-center gap-3 border-b border-white/5 pb-4">
+                <div class="p-2 bg-blue-500/10 rounded-lg">
+                    <i data-lucide="percent" class="w-5 h-5 text-blue-400"></i>
+                </div>
+                <h3 class="font-bold text-lg text-apple-dark">Offer Details</h3>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Offer Title</label>
+                <input type="text" id="title" value="<%= data.title || '' %>" placeholder="Summer Reading Sale"
+                    class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:ring-1 focus:ring-apple-gold/50 transition-all">
+                <span id="titleError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Description</label>
+                <textarea id="description" rows="3" placeholder="Short offer description"
+                    class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:ring-1 focus:ring-apple-gold/50 transition-all resize-none"><%= data.description || '' %></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Discount Type</label>
+                    <select id="discountType" class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:ring-1 focus:ring-apple-gold/50 transition-all">
+                        <option value="percentage" <%= data.discountType !== 'fixed' ? 'selected' : '' %>>Percentage</option>
+                        <option value="fixed" <%= data.discountType === 'fixed' ? 'selected' : '' %>>Fixed Amount</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Discount Value</label>
+                    <input type="number" id="discountValue" min="0" step="0.01" value="<%= data.discountValue || '' %>"
+                        class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:ring-1 focus:ring-apple-gold/50 transition-all">
+                    <span id="discountValueError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Start Date</label>
+                    <input type="date" id="startDate" value="<%= dateValue(data.startDate, today) %>"
+                        class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:ring-1 focus:ring-apple-gold/50 transition-all">
+                    <span id="startDateError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">End Date</label>
+                    <input type="date" id="endDate" value="<%= dateValue(data.endDate, defaultEndDate) %>"
+                        class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:ring-1 focus:ring-apple-gold/50 transition-all">
+                    <span id="endDateError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden p-6 space-y-6">
+            <div class="flex items-center gap-3 border-b border-white/5 pb-4">
+                <div class="p-2 bg-purple-500/10 rounded-lg">
+                    <i data-lucide="scan-search" class="w-5 h-5 text-purple-400"></i>
+                </div>
+                <h3 class="font-bold text-lg text-apple-dark">Applicability</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <label class="relative flex items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer has-[:checked]:border-apple-gold has-[:checked]:bg-apple-gold/10 transition-all">
+                    <input type="radio" name="appliesTo" value="all" <%= selectedAppliesTo === 'all' ? 'checked' : '' %> class="text-apple-gold focus:ring-apple-gold">
+                    <span class="text-sm font-bold text-apple-dark">All Products</span>
+                </label>
+                <label class="relative flex items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer has-[:checked]:border-apple-gold has-[:checked]:bg-apple-gold/10 transition-all">
+                    <input type="radio" name="appliesTo" value="categories" <%= selectedAppliesTo === 'categories' ? 'checked' : '' %> class="text-apple-gold focus:ring-apple-gold">
+                    <span class="text-sm font-bold text-apple-dark">Selected Categories</span>
+                </label>
+                <label class="relative flex items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer has-[:checked]:border-apple-gold has-[:checked]:bg-apple-gold/10 transition-all">
+                    <input type="radio" name="appliesTo" value="products" <%= selectedAppliesTo === 'products' ? 'checked' : '' %> class="text-apple-gold focus:ring-apple-gold">
+                    <span class="text-sm font-bold text-apple-dark">Selected Products</span>
+                </label>
+            </div>
+
+            <div id="categorySelector" class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest">Categories</label>
+                    <span id="categoriesError" class="error-msg text-red-500 text-[10px] hidden"></span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
+                    <% if (categories.length === 0) { %>
+                        <p class="text-sm text-apple-text-gray col-span-full">No categories available.</p>
+                    <% } else { %>
+                        <% categories.forEach(category => { %>
+                            <label class="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition-all">
+                                <input type="checkbox" name="categories" value="<%= category._id %>" <%= selectedCategoryIds.includes(category._id.toString()) ? 'checked' : '' %> class="rounded text-apple-gold focus:ring-apple-gold">
+                                <span class="text-sm text-apple-dark"><%= category.name %></span>
+                            </label>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </div>
+
+            <div id="productSelector" class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest">Products</label>
+                    <span id="productsError" class="error-msg text-red-500 text-[10px] hidden"></span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                    <% if (products.length === 0) { %>
+                        <p class="text-sm text-apple-text-gray col-span-full">No products available.</p>
+                    <% } else { %>
+                        <% products.forEach(product => { %>
+                            <label class="flex items-start gap-3 p-3 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition-all">
+                                <input type="checkbox" name="products" value="<%= product._id %>" <%= selectedProductIds.includes(product._id.toString()) ? 'checked' : '' %> class="mt-1 rounded text-apple-gold focus:ring-apple-gold">
+                                <span class="flex flex-col">
+                                    <span class="text-sm font-bold text-apple-dark"><%= product.name %></span>
+                                    <span class="text-[10px] text-apple-text-gray"><%= product.author || 'Unknown author' %></span>
+                                </span>
+                            </label>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl">
+                <div>
+                    <p class="text-sm font-bold text-apple-dark">Active Status</p>
+                    <p class="text-[10px] text-apple-text-gray">Inactive offers are hidden from promotional workflows.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="isActive" <%= data.isActive === false ? '' : 'checked' %> class="sr-only peer">
+                    <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-apple-text-gray after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500 peer-checked:after:bg-white"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-6 border-t border-white/5">
+            <a href="/admin/offers" class="px-6 py-2.5 rounded-xl border border-white/5 text-apple-text-gray font-bold text-sm hover:bg-white/5 transition-all">
+                Discard
+            </a>
+            <button type="submit" id="offerSubmitBtn" class="px-8 py-2.5 rounded-xl bg-apple-gold text-[#1a231e] font-bold text-sm hover:bg-yellow-600 transition-all shadow-lg shadow-apple-gold/20 flex items-center gap-2">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <%= isEdit ? 'Update Offer' : 'Save Offer' %>
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('offerForm');
+    const submitBtn = document.getElementById('offerSubmitBtn');
+    const categorySelector = document.getElementById('categorySelector');
+    const productSelector = document.getElementById('productSelector');
+
+    function getAppliesTo() {
+        return document.querySelector('input[name="appliesTo"]:checked').value;
+    }
+
+    function syncApplicabilitySections() {
+        const appliesTo = getAppliesTo();
+        categorySelector.classList.toggle('hidden', appliesTo !== 'categories');
+        productSelector.classList.toggle('hidden', appliesTo !== 'products');
+    }
+
+    document.querySelectorAll('input[name="appliesTo"]').forEach(input => {
+        input.addEventListener('change', syncApplicabilitySections);
+    });
+    syncApplicabilitySections();
+
+    function setError(id, message) {
+        const errorEl = document.getElementById(`${id}Error`);
+        const inputEl = document.getElementById(id);
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.classList.toggle('hidden', !message);
+        }
+        if (inputEl) inputEl.classList.toggle('border-red-500', Boolean(message));
+    }
+
+    function checkedValues(name) {
+        return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(input => input.value);
+    }
+
+    function validateForm() {
+        let isValid = true;
+        document.querySelectorAll('.error-msg').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('input, textarea, select').forEach(el => el.classList.remove('border-red-500'));
+
+        if (!document.getElementById('title').value.trim()) {
+            setError('title', 'Offer title is required.');
+            isValid = false;
+        }
+
+        const discountType = document.getElementById('discountType').value;
+        const discountValue = Number(document.getElementById('discountValue').value);
+        if (discountValue <= 0) {
+            setError('discountValue', 'Discount value must be greater than zero.');
+            isValid = false;
+        } else if (discountType === 'percentage' && discountValue > 100) {
+            setError('discountValue', 'Percentage discount cannot exceed 100%.');
+            isValid = false;
+        }
+
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        if (!startDate) {
+            setError('startDate', 'Start date is required.');
+            isValid = false;
+        }
+        if (!endDate) {
+            setError('endDate', 'End date is required.');
+            isValid = false;
+        }
+        if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+            setError('endDate', 'End date cannot be before start date.');
+            isValid = false;
+        }
+
+        const appliesTo = getAppliesTo();
+        if (appliesTo === 'categories' && checkedValues('categories').length === 0) {
+            setError('categories', 'Choose at least one category.');
+            isValid = false;
+        }
+        if (appliesTo === 'products' && checkedValues('products').length === 0) {
+            setError('products', 'Choose at least one product.');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!validateForm()) {
+            Swal.fire({ icon: 'error', title: 'Validation Failed', text: 'Please check the highlighted fields.', background: '#1e2a22', color: '#E6CFA7' });
+            return;
+        }
+
+        const appliesTo = getAppliesTo();
+        const payload = {
+            title: document.getElementById('title').value.trim(),
+            description: document.getElementById('description').value.trim(),
+            discountType: document.getElementById('discountType').value,
+            discountValue: Number(document.getElementById('discountValue').value),
+            appliesTo,
+            categories: appliesTo === 'categories' ? checkedValues('categories') : [],
+            products: appliesTo === 'products' ? checkedValues('products') : [],
+            startDate: document.getElementById('startDate').value,
+            endDate: document.getElementById('endDate').value,
+            isActive: document.getElementById('isActive').checked
+        };
+
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Saving...';
+        submitBtn.disabled = true;
+
+        try {
+            const res = await fetch('<%= isEdit ? `/admin/offers/edit/${data._id}` : '/admin/offers/add' %>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.success) {
+                Swal.fire({ icon: 'success', title: 'Saved', text: result.message, background: '#1e2a22', color: '#E6CFA7' }).then(() => {
+                    window.location.href = result.redirectUrl || '/admin/offers';
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: result.message, background: '#1e2a22', color: '#E6CFA7' });
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                lucide.createIcons();
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong', background: '#1e2a22', color: '#E6CFA7' });
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            lucide.createIcons();
+        }
+    });
+</script>

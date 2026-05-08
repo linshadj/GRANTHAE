@@ -22,24 +22,11 @@ import {
 } from "../controller/user/googleAuthController.js";
 import { ifAuth, isAuth, otpVerify, resetPassAuth } from "../middlewares/authMiddlewares.js";
 import { addNewAddress, deleteAddress, editAddress, editProfile, setDefaultAddress, viewEditProfile, viewProfile } from "../controller/user/profileController.js";
-import { upload } from "../middlewares/multerUpload.js";
+import { upload, uploadRental } from "../middlewares/multerUpload.js";
 import { changeEmail, changePassword, viewSettings } from "../controller/user/settingsController.js";
 import { listProducts, productDetails } from "../controller/user/shopController.js";
 import { getCartPage, addToCart, updateQuantity, removeFromCart } from "../controller/user/cartController.js";
 import { getListRentalBookPage, submitRentalListing, rentalPlacePage, rentalDetailsPage, getMyListingsPage } from "../controller/user/rentalController.js";
-
-import multer from "multer";
-
-// Multer setup for Rentals
-const rentalStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "public/uploads/rentals");
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
-    }
-});
-const uploadRental = multer({ storage: rentalStorage });
 
 
 const router = express.Router();
@@ -71,8 +58,9 @@ router.patch("/cart/update", isAuth, updateQuantity);
 router.delete("/cart/remove", isAuth, removeFromCart);
 
 // Checkout
-import { getCheckoutPage, placeOrder, orderSuccessPage } from "../controller/user/checkoutController.js";
+import { applyCoupon, getCheckoutPage, placeOrder, orderSuccessPage } from "../controller/user/checkoutController.js";
 router.get("/checkout", isAuth, getCheckoutPage);
+router.post("/checkout/apply-coupon", isAuth, applyCoupon);
 router.post("/checkout/place-order", isAuth, placeOrder);
 router.get("/order-success/:orderId", isAuth, orderSuccessPage);
 
@@ -81,6 +69,12 @@ import { getWishlistPage, addToWishlist, removeFromWishlist } from "../controlle
 router.get("/wishlist", isAuth, getWishlistPage);
 router.post("/wishlist/add", isAuth, addToWishlist);
 router.delete("/wishlist/remove", isAuth, removeFromWishlist);
+
+// Wallet
+import { getWalletPage, getAddFundsPage, addFunds } from "../controller/user/walletController.js";
+router.get("/wallet", isAuth, getWalletPage);
+router.get("/wallet/add-funds", isAuth, getAddFundsPage);
+router.post("/wallet/add-funds", isAuth, addFunds);
 
 // Sign In
 router.route("/sign-in")

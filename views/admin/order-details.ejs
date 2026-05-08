@@ -85,8 +85,16 @@
                         <tfoot class="bg-white/5">
                             <tr>
                                 <td colspan="3" class="px-6 py-4 text-right font-bold text-apple-text-gray">Subtotal</td>
-                                <td class="px-6 py-4 text-right text-white font-bold text-lg">₹<%= order.totalAmount.toLocaleString() %></td>
+                                <td class="px-6 py-4 text-right text-white font-bold text-lg">₹<%= (order.subtotalAmount || (order.totalAmount + (order.discountAmount || 0))).toLocaleString() %></td>
                             </tr>
+                            <% if (order.discountAmount && order.discountAmount > 0) { %>
+                                <tr>
+                                    <td colspan="3" class="px-6 py-4 text-right font-bold text-apple-text-gray">
+                                        Coupon Discount <%= order.couponCode ? `(${order.couponCode})` : '' %>
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-green-400 font-bold">-₹<%= order.discountAmount.toLocaleString() %></td>
+                                </tr>
+                            <% } %>
                             <tr>
                                 <td colspan="3" class="px-6 py-4 text-right font-bold text-apple-text-gray">Shipping</td>
                                 <td class="px-6 py-4 text-right text-green-400 font-bold">FREE</td>

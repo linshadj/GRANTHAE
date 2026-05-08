@@ -42,9 +42,15 @@ export const cancelOrderItem = async (userId, orderId, itemId, reason) => {
     item.itemStatus = 'Cancelled';
     item.cancellationReason = reason || 'User request';
 
-    // Subtract item cost from total amount
-    order.totalAmount -= (item.quantity * item.price);
-    if (order.totalAmount < 0) order.totalAmount = 0;
+    const itemAmount = item.quantity * item.price;
+    if (order.subtotalAmount > 0) {
+        order.subtotalAmount -= itemAmount;
+        if (order.subtotalAmount < 0) order.subtotalAmount = 0;
+        order.totalAmount = Math.max(0, order.subtotalAmount - (order.discountAmount || 0));
+    } else {
+        order.totalAmount -= itemAmount;
+        if (order.totalAmount < 0) order.totalAmount = 0;
+    }
 
     // Increment stock
     if (item.variant) {
@@ -89,9 +95,15 @@ export const returnOrderItem = async (userId, orderId, itemId, reason) => {
     item.itemStatus = 'Returned';
     item.returnReason = reason;
 
-    // Subtract item cost from total amount
-    order.totalAmount -= (item.quantity * item.price);
-    if (order.totalAmount < 0) order.totalAmount = 0;
+    const itemAmount = item.quantity * item.price;
+    if (order.subtotalAmount > 0) {
+        order.subtotalAmount -= itemAmount;
+        if (order.subtotalAmount < 0) order.subtotalAmount = 0;
+        order.totalAmount = Math.max(0, order.subtotalAmount - (order.discountAmount || 0));
+    } else {
+        order.totalAmount -= itemAmount;
+        if (order.totalAmount < 0) order.totalAmount = 0;
+    }
 
     // Increment stock
     if (item.variant) {
@@ -193,7 +205,16 @@ export const generateInvoicePDF = async (userId, orderId) => {
             y += 15;
 
             // Total
+            const subtotal = order.subtotalAmount || (order.totalAmount + (order.discountAmount || 0));
             doc.font('Helvetica-Bold');
+            doc.text('Subtotal:', 350, y);
+            doc.text(`Rs ${subtotal}`, 450, y, { width: 50, align: 'right' });
+            if (order.discountAmount && order.discountAmount > 0) {
+                y += 18;
+                doc.text(`Coupon Discount${order.couponCode ? ` (${order.couponCode})` : ''}:`, 300, y, { width: 150, align: 'right' });
+                doc.text(`-Rs ${order.discountAmount}`, 450, y, { width: 50, align: 'right' });
+            }
+            y += 18;
             doc.text('Total Amount:', 350, y);
             doc.text(`Rs ${order.totalAmount}`, 450, y, { width: 50, align: 'right' });
             doc.font('Helvetica');

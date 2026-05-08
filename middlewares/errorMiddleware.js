@@ -16,7 +16,8 @@ const errorHandler = (err, req, res, next) => {
     res.status(statusCode);
 
     // If it's an API request, return JSON
-    if (req.xhr || req.headers.accept?.includes('application/json') || req.path.startsWith('/api')) {
+    const isMultipartRequest = req.headers['content-type']?.includes('multipart/form-data');
+    if (req.xhr || req.headers.accept?.includes('application/json') || req.path.startsWith('/api') || isMultipartRequest) {
         return res.json({
             success: false,
             message: err.message,

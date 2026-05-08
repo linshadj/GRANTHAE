@@ -3,6 +3,7 @@ import { Rental } from "../../models/rentalDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 
 import * as rentalService from "../../service/user/rentalService.js";
+import { deleteCloudinaryUploads, uploadImagesToCloudinary } from "../../utils/cloudinaryUploader.js";
 
 export const getListRentalBookPage = async (req, res, next) => {
     try {
@@ -20,6 +21,8 @@ export const getListRentalBookPage = async (req, res, next) => {
 };
 
 export const submitRentalListing = async (req, res, next) => {
+    let uploadedImages = [];
+
     try {
         const { 
             bookTitle, author, isbn, description, 
@@ -34,7 +37,8 @@ export const submitRentalListing = async (req, res, next) => {
             });
         }
 
-        const images = req.files.map(file => `/uploads/rentals/${file.filename}`);
+        uploadedImages = await uploadImagesToCloudinary(req.files, "rentals");
+        const images = uploadedImages.map(image => image.url);
         
         let coverImage = "";
         const idx = parseInt(coverImageIndex);
@@ -68,6 +72,7 @@ export const submitRentalListing = async (req, res, next) => {
             redirectUrl: "/profile" // Or to a specific 'My Rentals' page if we create one
         });
     } catch (error) {
+        await deleteCloudinaryUploads(uploadedImages);
         next(error);
     }
 };
@@ -129,4 +134,3 @@ export const getMyListingsPage = async (req, res, next) => {
         next(error);
     }
 };
-

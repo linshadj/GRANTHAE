@@ -8,30 +8,9 @@ import { addProduct, editProduct, getAddProductPage, getEditProductPage, livePro
 import { liveOrdersSearch, ordersPage, updateOrderStatus, viewOrderDetail } from "../controller/admin/orderController.js";
 import { getInventoryPage, updateStock } from "../controller/admin/inventoryController.js";
 import { getRentalRequestsPage, handleRentalRequest } from "../controller/admin/rentalRequestController.js";
-import multer from "multer";
-
-
-// Multer setup for Products
-const productStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "public/uploads/products");
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
-    }
-});
-const uploadProduct = multer({ storage: productStorage });
-
-// Multer setup for Categories
-const categoryStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "public/uploads/categories");
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
-    }
-});
-const uploadCategory = multer({ storage: categoryStorage });
+import { uploadCategory, uploadProduct } from "../middlewares/multerUpload.js";
+import { addCoupon, couponsPage, editCoupon, getAddCouponPage, getEditCouponPage, toggleCouponStatus } from "../controller/admin/couponController.js";
+import { addOffer, editOffer, getAddOfferPage, getEditOfferPage, offersPage, toggleOfferStatus } from "../controller/admin/offerController.js";
 
 const router = express.Router();
 
@@ -62,6 +41,22 @@ router.get("/categories/edit/:id", isAdmin, getEditCategoryPage);
 router.post("/categories/edit/:id", isAdmin, uploadCategory.single("coverImage"), editCategory);
 router.patch("/categories/toggle-status/:id/:action", isAdmin, toggleCategoryStatus);
 router.get("/categories/live", isAdmin, liveCategoriesSearch);
+
+// Offers
+router.get("/offers", isAdmin, offersPage);
+router.get("/offers/add", isAdmin, getAddOfferPage);
+router.post("/offers/add", isAdmin, addOffer);
+router.get("/offers/edit/:id", isAdmin, getEditOfferPage);
+router.post("/offers/edit/:id", isAdmin, editOffer);
+router.patch("/offers/toggle-status/:id/:action", isAdmin, toggleOfferStatus);
+
+// Coupons
+router.get("/coupons", isAdmin, couponsPage);
+router.get("/coupons/add", isAdmin, getAddCouponPage);
+router.post("/coupons/add", isAdmin, addCoupon);
+router.get("/coupons/edit/:id", isAdmin, getEditCouponPage);
+router.post("/coupons/edit/:id", isAdmin, editCoupon);
+router.patch("/coupons/toggle-status/:id/:action", isAdmin, toggleCouponStatus);
 
 // Products
 router.get("/products", isAdmin, productsPage);

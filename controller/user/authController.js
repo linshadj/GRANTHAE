@@ -12,6 +12,7 @@ import { updateEmail } from "../../service/user/settingsService.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 import { Product } from "../../models/productDb.js";
 import { Category } from "../../models/categoryDb.js";
+import { normalizeEmail } from "../../utils/validator.js";
 
 
 export const signIn = async (req, res) => {
@@ -25,7 +26,7 @@ export const signUp = (req, res) => {
 export const signInData = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const body = { email, password };
+    const body = { email: normalizeEmail(email), password };
     const user = await signInVerify(body);
     req.session.user = user._id;
 
@@ -39,7 +40,12 @@ export const signInData = async (req, res) => {
 export const signupData = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
-    const body = { firstName, lastName, email, password };
+    const body = {
+      firstName: firstName?.trim(),
+      lastName: lastName?.trim(),
+      email: normalizeEmail(email),
+      password,
+    };
     const validateUser = await signupVerify(body);
     req.session.tempUser = body;
     req.session.otpRequested = true
@@ -126,7 +132,7 @@ export const forgotPassword = (req, res) => {
 
 export const forgotPassData = async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     req.session.tempUser = null;
     req.session.forgotPassEmail = email;

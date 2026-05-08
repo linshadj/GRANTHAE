@@ -9,6 +9,7 @@ import {
   updateProfile,
 } from "../../service/user/profileService.js";
 import * as orderService from "../../service/user/orderService.js";
+import { deleteCloudinaryUploads, uploadImageToCloudinary } from "../../utils/cloudinaryUploader.js";
 
 export const viewProfile = async (req, res) => {
   try {
@@ -50,12 +51,15 @@ export const viewEditProfile = async (req, res) => {
 };
 
 export const editProfile = async (req, res) => {
+  let uploadedAvatar = null;
+
   try {
     const userId = req.session.user;
     const { firstName, lastName, bio } = req.body;
     const updateData = { firstName, lastName, bio };
     if (req.file) {
-      updateData.avatar = `/images/avatars/${req.file.filename}`;
+      uploadedAvatar = await uploadImageToCloudinary(req.file, "avatars");
+      updateData.avatar = uploadedAvatar.url;
     }
     const updatedUser = await updateProfile(updateData, userId);
 
@@ -72,6 +76,9 @@ export const editProfile = async (req, res) => {
       redirectUrl: `/profile?status=success&message=${encodeURIComponent("Profile successfully updated")}`,
     });
   } catch (err) {
+    if (uploadedAvatar) {
+      await deleteCloudinaryUploads([uploadedAvatar]);
+    }
     console.error("Error in editProfile:", err.message);
     return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,

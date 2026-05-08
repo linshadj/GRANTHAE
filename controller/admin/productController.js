@@ -1,6 +1,7 @@
 import { Product } from "../../models/productDb.js";
 import { Category } from "../../models/categoryDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
+import { deleteCloudinaryUploads, uploadImagesToCloudinary } from "../../utils/cloudinaryUploader.js";
 
 export const productsPage = async (req, res, next) => {
     try {
@@ -71,6 +72,8 @@ export const getAddProductPage = async (req, res, next) => {
 };
 
 export const addProduct = async (req, res, next) => {
+    let uploadedImages = [];
+
     try {
         const { name, author, isbn, description, price, category, featured, coverImageIndex, brand, highlights } = req.body;
         
@@ -92,7 +95,8 @@ export const addProduct = async (req, res, next) => {
             return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: "A minimum of 3 images are required." });
         }
 
-        const images = req.files.map(file => `/uploads/products/${file.filename}`);
+        uploadedImages = await uploadImagesToCloudinary(req.files, "products");
+        const images = uploadedImages.map(image => image.url);
         
         let coverImage = "";
         const idx = parseInt(coverImageIndex);
@@ -121,6 +125,7 @@ export const addProduct = async (req, res, next) => {
 
         res.status(STATUS_CODES.CREATED).json({ success: true, message: "Product added successfully", redirectUrl: "/admin/products" });
     } catch (error) {
+        await deleteCloudinaryUploads(uploadedImages);
         next(error);
     }
 };
@@ -146,6 +151,8 @@ export const getEditProductPage = async (req, res, next) => {
 };
 
 export const editProduct = async (req, res, next) => {
+    let uploadedImages = [];
+
     try {
         const { id } = req.params;
         const { name, author, isbn, description, price, category, featured, coverImageIndex, brand, highlights } = req.body;
@@ -171,12 +178,16 @@ export const editProduct = async (req, res, next) => {
         // Remove empty strings if any
         parsedExistingImages = parsedExistingImages.filter(img => img && img.trim() !== "");
 
-        const newImages = req.files ? req.files.map(file => `/uploads/products/${file.filename}`) : [];
-        const totalImages = [...parsedExistingImages, ...newImages];
-        
-        if (totalImages.length < 3) {
+        const newFiles = req.files || [];
+        const totalImageCount = parsedExistingImages.length + newFiles.length;
+
+        if (totalImageCount < 3) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: "A minimum of 3 images are required." });
         }
+
+        uploadedImages = newFiles.length ? await uploadImagesToCloudinary(newFiles, "products") : [];
+        const newImages = uploadedImages.map(image => image.url);
+        const totalImages = [...parsedExistingImages, ...newImages];
         
         let finalCoverImage = "";
         const idx = parseInt(coverImageIndex);
@@ -207,6 +218,7 @@ export const editProduct = async (req, res, next) => {
 
         res.status(STATUS_CODES.OK).json({ success: true, message: "Product updated successfully", redirectUrl: "/admin/products" });
     } catch (error) {
+        await deleteCloudinaryUploads(uploadedImages);
         next(error);
     }
 };

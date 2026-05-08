@@ -28,13 +28,13 @@ export const getCheckoutPage = async (req, res) => {
 export const placeOrder = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { addressId, paymentMethod } = req.body;
+        const { addressId, paymentMethod, couponCode } = req.body;
 
         if (!addressId) {
             return res.status(400).json({ success: false, message: "Please select a shipping address." });
         }
 
-        const newOrder = await checkoutService.placeOrder(userId, addressId, paymentMethod);
+        const newOrder = await checkoutService.placeOrder(userId, addressId, paymentMethod, couponCode);
 
         res.status(200).json({ 
             success: true, 
@@ -43,6 +43,27 @@ export const placeOrder = async (req, res) => {
         });
     } catch (error) {
         console.error("Place Order Error:", error);
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+export const applyCoupon = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { couponCode } = req.body;
+        if (!couponCode || !couponCode.trim()) {
+            return res.status(400).json({ success: false, message: "Enter a coupon code." });
+        }
+
+        const couponData = await checkoutService.applyCouponToCheckout(userId, couponCode);
+
+        res.status(200).json({
+            success: true,
+            message: "Coupon applied successfully.",
+            ...couponData
+        });
+    } catch (error) {
+        console.error("Apply Coupon Error:", error);
         res.status(400).json({ success: false, message: error.message });
     }
 };

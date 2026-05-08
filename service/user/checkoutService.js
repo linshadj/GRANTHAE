@@ -2,6 +2,7 @@ import cartDb from "../../models/cartDb.js";
 import { Product } from "../../models/productDb.js";
 import orderDb from "../../models/orderDb.js";
 import addressDb from "../../models/addressDb.js";
+import { Coupon } from "../../models/couponDb.js";
 import crypto from "crypto";
 
 export const getCheckoutData = async (userId) => {
@@ -71,7 +72,70 @@ const generateOrderID = () => {
     return 'ORD' + crypto.randomBytes(4).toString('hex').toUpperCase();
 };
 
-export const placeOrder = async (userId, addressId, paymentMethod) => {
+const roundCurrency = (amount) => Math.round(amount * 100) / 100;
+
+const getCouponUsageForUser = (coupon, userId) => {
+    const usage = coupon.usedBy.find(entry => entry.user.toString() === userId.toString());
+    return usage ? usage.count : 0;
+};
+
+const calculateCouponDiscount = (coupon, subtotal) => {
+    let discountAmount = coupon.discountType === "percentage"
+        ? subtotal * (coupon.discountValue / 100)
+        : coupon.discountValue;
+
+    if (coupon.discountType === "percentage" && coupon.maxDiscountAmount > 0) {
+        discountAmount = Math.min(discountAmount, coupon.maxDiscountAmount);
+    }
+
+    return roundCurrency(Math.min(discountAmount, subtotal));
+};
+
+const validateCoupon = async (userId, couponCode, subtotal) => {
+    const normalizedCode = String(couponCode || "").trim().toUpperCase();
+    if (!normalizedCode) {
+        return { coupon: null, discountAmount: 0, finalTotal: subtotal };
+    }
+
+    const coupon = await Coupon.findOne({ code: normalizedCode, isDeleted: false });
+    if (!coupon) throw new Error("Invalid coupon code.");
+
+    const now = new Date();
+    if (!coupon.isActive) throw new Error("This coupon is not active.");
+    if (coupon.startDate > now) throw new Error("This coupon is not active yet.");
+    if (coupon.expiresAt < now) throw new Error("This coupon has expired.");
+    if (coupon.usageLimit > 0 && coupon.usedCount >= coupon.usageLimit) throw new Error("This coupon has reached its usage limit.");
+    if (subtotal < coupon.minPurchaseAmount) {
+        throw new Error(`This coupon requires a minimum order value of ₹${coupon.minPurchaseAmount}.`);
+    }
+
+    const userUsage = getCouponUsageForUser(coupon, userId);
+    if (coupon.usageLimitPerUser > 0 && userUsage >= coupon.usageLimitPerUser) {
+        throw new Error("You have already used this coupon.");
+    }
+
+    const discountAmount = calculateCouponDiscount(coupon, subtotal);
+
+    return {
+        coupon,
+        discountAmount,
+        finalTotal: roundCurrency(subtotal - discountAmount),
+    };
+};
+
+export const applyCouponToCheckout = async (userId, couponCode) => {
+    const checkoutData = await getCheckoutData(userId);
+    const discountData = await validateCoupon(userId, couponCode, checkoutData.cartTotal);
+
+    return {
+        couponCode: discountData.coupon?.code || "",
+        discountAmount: discountData.discountAmount,
+        subtotal: checkoutData.cartTotal,
+        totalAmount: discountData.finalTotal,
+    };
+};
+
+export const placeOrder = async (userId, addressId, paymentMethod, couponCode = "") => {
     if (paymentMethod !== 'COD') {
         throw new Error("Only Cash on Delivery is supported right now.");
     }
@@ -89,7 +153,7 @@ export const placeOrder = async (userId, addressId, paymentMethod) => {
         throw new Error("Cart is empty.");
     }
 
-    let totalAmount = 0;
+    let subtotalAmount = 0;
     const orderItems = [];
 
     // Verify stock one last time and build order items
@@ -118,7 +182,7 @@ export const placeOrder = async (userId, addressId, paymentMethod) => {
              throw new Error(`Insufficient stock for "${product.name}". Only ${availableStock} left.`);
         }
 
-        totalAmount += (price * item.quantity);
+        subtotalAmount += (price * item.quantity);
         orderItems.push({
             product: product._id,
             variant: item.variant,
@@ -127,6 +191,9 @@ export const placeOrder = async (userId, addressId, paymentMethod) => {
             itemStatus: 'Pending'
         });
     }
+
+    const discountData = await validateCoupon(userId, couponCode, subtotalAmount);
+    const totalAmount = discountData.finalTotal;
 
     // Deduct stock
     for (let item of cart.items) {
@@ -156,11 +223,25 @@ export const placeOrder = async (userId, addressId, paymentMethod) => {
             pinCode: address.pinCode,
             country: address.country
         },
+        subtotalAmount,
+        discountAmount: discountData.discountAmount,
+        couponCode: discountData.coupon?.code || "",
         totalAmount: totalAmount,
         paymentMethod: paymentMethod,
         paymentStatus: 'Pending',
         orderStatus: 'Pending'
     });
+
+    if (discountData.coupon) {
+        const userUsage = discountData.coupon.usedBy.find(entry => entry.user.toString() === userId.toString());
+        if (userUsage) {
+            userUsage.count += 1;
+        } else {
+            discountData.coupon.usedBy.push({ user: userId, count: 1 });
+        }
+        discountData.coupon.usedCount += 1;
+        await discountData.coupon.save();
+    }
 
     // Clear cart
     cart.items = [];

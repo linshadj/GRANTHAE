@@ -1,0 +1,140 @@
+<%
+    const formatAmount = (amount) => Number(amount || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+    const formatDate = (date) => new Date(date).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+    const sourceLabels = {
+        add_funds: 'Wallet Top-up',
+        order_payment: 'Order Payment',
+        order_refund: 'Order Refund',
+        rental_income: 'Rental Income',
+        adjustment: 'Adjustment'
+    };
+    const sourceSubtitles = {
+        add_funds: 'Added from user wallet',
+        order_payment: 'Paid from wallet balance',
+        order_refund: 'Returned to wallet',
+        rental_income: 'Rental listing earnings',
+        adjustment: 'Account adjustment'
+    };
+    const iconBySource = {
+        add_funds: 'arrow-down-left',
+        order_payment: 'shopping-cart',
+        order_refund: 'rotate-ccw',
+        rental_income: 'book-open',
+        adjustment: 'badge-indian-rupee'
+    };
+%>
+
+<div class="max-w-4xl mx-auto space-y-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-apple-dark">My Wallet</h1>
+            <p class="text-apple-text-gray">Manage funds and wallet transactions.</p>
+        </div>
+        <a href="/wallet/add-funds"
+            class="bg-apple-dark text-white px-6 py-2.5 rounded-full font-medium shadow-lg hover:bg-black transition-colors flex items-center justify-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add Funds
+        </a>
+    </div>
+
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-apple-dark to-gray-800 text-white p-8 shadow-2xl">
+        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white/5 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-apple-gold/10 blur-3xl"></div>
+
+        <div class="relative z-10 flex flex-col h-full justify-between min-h-[180px]">
+            <div class="flex justify-between items-start gap-4">
+                <div>
+                    <p class="text-white/60 text-sm font-medium uppercase tracking-wider">Total Balance</p>
+                    <p class="text-4xl font-bold mt-1">&#8377;<%= formatAmount(wallet.balance) %></p>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md">
+                    <i data-lucide="wallet" class="w-6 h-6 text-white"></i>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-end gap-4 mt-8">
+                <div class="space-y-1">
+                    <p class="text-white/40 text-xs uppercase tracking-wide">Account Holder</p>
+                    <p class="text-lg font-medium tracking-wide"><%= user.firstName %> <%= user.lastName %></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-white/40 text-xs uppercase tracking-wide">Wallet</p>
+                    <div class="flex items-center gap-1 text-green-400">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i>
+                        <span class="text-sm font-medium">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex justify-between items-center">
+            <h3 class="font-bold text-lg text-apple-dark">Transaction History</h3>
+            <span class="text-sm text-apple-text-gray"><%= transactions.length %> entries</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-white/5 text-apple-text-gray uppercase text-xs font-semibold">
+                    <tr>
+                        <th class="px-6 py-4">Transaction</th>
+                        <th class="px-6 py-4">Date</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <% if (!transactions || transactions.length === 0) { %>
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-apple-text-gray">
+                                <div class="flex flex-col items-center gap-3">
+                                    <div class="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center">
+                                        <i data-lucide="wallet-cards" class="w-7 h-7 opacity-40"></i>
+                                    </div>
+                                    <p>No wallet transactions yet.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } else { %>
+                        <% transactions.forEach(transaction => { %>
+                            <%
+                                const isCredit = transaction.type === 'credit';
+                                const iconClass = isCredit ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600';
+                                const amountClass = isCredit ? 'text-green-600' : 'text-red-500';
+                                const amountPrefix = isCredit ? '+' : '-';
+                            %>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full <%= iconClass %> flex items-center justify-center">
+                                            <i data-lucide="<%= iconBySource[transaction.source] || 'receipt' %>" class="w-5 h-5"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-white"><%= sourceLabels[transaction.source] || transaction.description %></p>
+                                            <p class="text-xs text-gray-400"><%= transaction.description || sourceSubtitles[transaction.source] || transaction.transactionId %></p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-apple-text-gray"><%= formatDate(transaction.createdAt) %></td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 capitalize">
+                                        <%= transaction.status %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right font-medium <%= amountClass %>">
+                                    <%= amountPrefix %>&#8377;<%= formatAmount(transaction.amount) %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

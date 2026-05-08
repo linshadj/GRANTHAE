@@ -1,0 +1,138 @@
+<%
+    const formatAmount = (amount) => Number(amount || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+%>
+
+<div class="max-w-2xl mx-auto space-y-8 relative">
+    <a href="/wallet"
+        class="absolute -left-12 top-0 p-2 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors hidden lg:flex">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+    </a>
+
+    <div class="text-center">
+        <h1 class="text-3xl font-bold text-apple-dark mb-2">Add Funds</h1>
+        <p class="text-apple-text-gray">Top up wallet balance instantly.</p>
+    </div>
+
+    <div class="glass-card p-6 flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-apple-text-gray uppercase tracking-wider">Current Balance</p>
+            <p class="text-3xl font-bold text-apple-dark mt-1">&#8377;<%= formatAmount(wallet.balance) %></p>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-apple-gold/10 flex items-center justify-center text-apple-gold">
+            <i data-lucide="wallet" class="w-6 h-6"></i>
+        </div>
+    </div>
+
+    <form action="/wallet/add-funds" method="POST" class="space-y-8" id="addFundsForm">
+        <div>
+            <h3 class="text-lg font-bold text-apple-dark mb-4">Select Amount</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+                <% [100, 500, 1000, 2000, 5000].forEach(amount => { %>
+                    <button type="button" data-amount="<%= amount %>"
+                        class="amount-btn py-4 rounded-xl border border-gray-200 bg-white hover:border-apple-gold hover:text-apple-gold transition-all text-lg font-bold text-apple-dark">
+                        &#8377;<%= amount.toLocaleString('en-IN') %>
+                    </button>
+                <% }) %>
+                <div class="relative min-h-[58px]">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">&#8377;</span>
+                    <input type="number" id="custom-amount" placeholder="Custom" min="1" max="100000" step="0.01"
+                        class="w-full h-full pl-8 pr-4 rounded-xl border border-gray-200 bg-white focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none text-lg font-bold text-apple-dark transition-all">
+                </div>
+            </div>
+
+            <input type="hidden" name="amount" id="selected-amount" required>
+            <p class="text-xs text-apple-text-gray">Limit: &#8377;1 to &#8377;1,00,000 per top-up.</p>
+        </div>
+
+        <div>
+            <h3 class="text-lg font-bold text-apple-dark mb-4">Payment Method</h3>
+            <div class="space-y-3">
+                <label class="flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white cursor-pointer hover:border-gray-300 transition-all">
+                    <input type="radio" name="paymentMethod" value="card" checked
+                        class="w-5 h-5 text-apple-black border-gray-300 focus:ring-apple-black">
+                    <div class="flex items-center gap-3 flex-1">
+                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i data-lucide="credit-card" class="w-5 h-5 text-gray-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-apple-dark">Credit/Debit Card</p>
+                            <p class="text-xs text-gray-500">Demo payment confirmation</p>
+                        </div>
+                    </div>
+                </label>
+
+                <label class="flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white cursor-pointer hover:border-gray-300 transition-all">
+                    <input type="radio" name="paymentMethod" value="upi"
+                        class="w-5 h-5 text-apple-black border-gray-300 focus:ring-apple-black">
+                    <div class="flex items-center gap-3 flex-1">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                            <i data-lucide="smartphone" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-apple-dark">UPI</p>
+                            <p class="text-xs text-gray-500">Instant wallet top-up</p>
+                        </div>
+                    </div>
+                </label>
+
+                <label class="flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white cursor-pointer hover:border-gray-300 transition-all">
+                    <input type="radio" name="paymentMethod" value="net_banking"
+                        class="w-5 h-5 text-apple-black border-gray-300 focus:ring-apple-black">
+                    <div class="flex items-center gap-3 flex-1">
+                        <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+                            <i data-lucide="landmark" class="w-5 h-5 text-green-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-apple-dark">Net Banking</p>
+                            <p class="text-xs text-gray-500">Secure bank transfer</p>
+                        </div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="w-full btn-primary py-4 text-lg shadow-xl shadow-apple-gold/20">
+            Confirm Payment
+        </button>
+    </form>
+</div>
+
+<script>
+    const selectedAmount = document.getElementById('selected-amount');
+    const customAmount = document.getElementById('custom-amount');
+    const amountButtons = document.querySelectorAll('.amount-btn');
+    const addFundsForm = document.getElementById('addFundsForm');
+
+    amountButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            selectedAmount.value = button.dataset.amount;
+            customAmount.value = '';
+
+            amountButtons.forEach(btn => {
+                btn.classList.remove('border-apple-gold', 'text-apple-gold', 'bg-orange-50');
+                btn.classList.add('border-gray-200', 'bg-white', 'text-apple-dark');
+            });
+
+            button.classList.remove('border-gray-200', 'bg-white', 'text-apple-dark');
+            button.classList.add('border-apple-gold', 'text-apple-gold', 'bg-orange-50');
+        });
+    });
+
+    customAmount.addEventListener('input', () => {
+        selectedAmount.value = customAmount.value;
+        amountButtons.forEach(btn => {
+            btn.classList.remove('border-apple-gold', 'text-apple-gold', 'bg-orange-50');
+            btn.classList.add('border-gray-200', 'bg-white', 'text-apple-dark');
+        });
+    });
+
+    addFundsForm.addEventListener('submit', (event) => {
+        if (!selectedAmount.value || Number(selectedAmount.value) <= 0) {
+            event.preventDefault();
+            showToast('warning', 'Select or enter an amount.');
+        }
+    });
+</script>

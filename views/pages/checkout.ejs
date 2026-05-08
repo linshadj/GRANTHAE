@@ -135,10 +135,27 @@
                         <span class="text-apple-text-gray/60 uppercase tracking-widest text-[10px] font-medium">Taxes</span>
                         <span class="font-bold text-apple-dark">₹0</span>
                     </div>
+                    <div class="rounded-2xl bg-white/5 border border-white/5 p-3 space-y-3">
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <i data-lucide="ticket" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray/60"></i>
+                                <input id="coupon-code-input" type="text" placeholder="Coupon code"
+                                    class="w-full h-11 pl-10 pr-3 rounded-xl bg-black/20 border border-white/5 text-sm text-apple-dark uppercase font-mono tracking-wider placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-apple-text-gray/40 focus:outline-none focus:ring-2 focus:ring-apple-blue/30">
+                            </div>
+                            <button id="apply-coupon-btn" type="button" class="h-11 px-4 rounded-xl bg-white/10 border border-white/5 text-xs font-bold text-apple-dark hover:bg-white/15 transition-all">
+                                Apply
+                            </button>
+                        </div>
+                        <p id="coupon-message" class="hidden text-[10px] font-bold"></p>
+                    </div>
+                    <div id="coupon-discount-row" class="hidden justify-between items-center text-sm">
+                        <span class="text-apple-text-gray/60 uppercase tracking-widest text-[10px] font-medium">Coupon Discount</span>
+                        <span id="coupon-discount-amount" class="font-bold text-green-500">-₹0</span>
+                    </div>
                     <div class="pt-6 border-t border-white/5 flex justify-between items-end">
                         <div>
                             <p class="text-[10px] uppercase tracking-widest text-apple-text-gray/40 mb-1">Total Payable</p>
-                            <p class="text-3xl font-bold text-apple-blue leading-none">₹<%= cartTotal %></p>
+                            <p id="checkout-total-amount" class="text-3xl font-bold text-apple-blue leading-none">₹<%= cartTotal %></p>
                         </div>
                     </div>
                 </div>
@@ -160,6 +177,82 @@
 </div>
 
 <script>
+    const cartTotal = Number('<%= cartTotal %>');
+    let appliedCouponCode = '';
+    const couponInput = document.getElementById('coupon-code-input');
+    const applyCouponBtn = document.getElementById('apply-coupon-btn');
+    const couponMessage = document.getElementById('coupon-message');
+    const couponDiscountRow = document.getElementById('coupon-discount-row');
+    const couponDiscountAmount = document.getElementById('coupon-discount-amount');
+    const checkoutTotalAmount = document.getElementById('checkout-total-amount');
+
+    function formatCurrency(amount) {
+        return `₹${Number(amount).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+    }
+
+    function setCouponMessage(message, isSuccess = false) {
+        couponMessage.textContent = message;
+        couponMessage.classList.remove('hidden', 'text-red-400', 'text-green-500');
+        couponMessage.classList.add(isSuccess ? 'text-green-500' : 'text-red-400');
+    }
+
+    if (couponInput) {
+        couponInput.addEventListener('input', () => {
+            couponInput.value = couponInput.value.toUpperCase().replace(/\s+/g, '');
+            if (!couponInput.value || (appliedCouponCode && couponInput.value !== appliedCouponCode)) {
+                appliedCouponCode = '';
+                couponMessage.classList.add('hidden');
+                couponDiscountRow.classList.add('hidden');
+                couponDiscountRow.classList.remove('flex');
+                checkoutTotalAmount.textContent = formatCurrency(cartTotal);
+            }
+        });
+    }
+
+    if (applyCouponBtn) {
+        applyCouponBtn.addEventListener('click', async () => {
+            const couponCode = couponInput.value.trim();
+            if (!couponCode) {
+                setCouponMessage('Enter a coupon code.');
+                return;
+            }
+
+            const originalText = applyCouponBtn.textContent;
+            applyCouponBtn.textContent = 'Checking...';
+            applyCouponBtn.disabled = true;
+
+            try {
+                const res = await fetch('/checkout/apply-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ couponCode })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    appliedCouponCode = data.couponCode;
+                    couponDiscountAmount.textContent = `-${formatCurrency(data.discountAmount)}`;
+                    couponDiscountRow.classList.remove('hidden');
+                    couponDiscountRow.classList.add('flex');
+                    checkoutTotalAmount.textContent = formatCurrency(data.totalAmount);
+                    setCouponMessage(`${data.couponCode} applied.`, true);
+                } else {
+                    appliedCouponCode = '';
+                    couponDiscountRow.classList.add('hidden');
+                    couponDiscountRow.classList.remove('flex');
+                    checkoutTotalAmount.textContent = formatCurrency(cartTotal);
+                    setCouponMessage(data.message || 'Coupon could not be applied.');
+                }
+            } catch (error) {
+                appliedCouponCode = '';
+                setCouponMessage('Could not apply coupon. Please try again.');
+            } finally {
+                applyCouponBtn.textContent = originalText;
+                applyCouponBtn.disabled = false;
+            }
+        });
+    }
+
     document.getElementById('place-order-btn').addEventListener('click', async function() {
         const selectedAddressEl = document.querySelector('input[name="selectedAddress"]:checked');
         const paymentMethodEl = document.querySelector('input[name="paymentMethod"]:checked');
@@ -188,7 +281,7 @@
             const res = await fetch('/checkout/place-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ addressId, paymentMethod })
+                body: JSON.stringify({ addressId, paymentMethod, couponCode: appliedCouponCode })
             });
 
             const data = await res.json();
