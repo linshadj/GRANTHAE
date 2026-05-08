@@ -8,22 +8,19 @@ export const otpVerify = (req, res, next) => {
   return next();
 };
 
-export const resetPassAuth = async (req, res, next) => {
-  if (req.session.canResetPass) {  // ...existing code...
-  const order = await Order.findById(req.params.id);
-  if (!order) {
-    return res.redirect(`/admin/orders?status=error&message=${encodeURIComponent("Order not found")}`);
-  }
-  
-  order.status = "Delivered";
-  order.orderStatus = "Delivered"; // keep both fields in sync if the app uses either
-  order.isDelivered = true;
-  order.deliveredAt = new Date();
-  
-  await order.save();
-  // ...existing code...
+export const resetPassAuth = (req, res, next) => {
+  if (req.session?.canResetPass) {
     return next();
   }
+
+  if (req.method !== "GET") {
+    return res.status(403).json({
+      success: false,
+      message: "Session expired. Please redo the password reset process.",
+      redirectUrl: "/forgot-password",
+    });
+  }
+
   return res.redirect("/forgot-password");
 };
 
