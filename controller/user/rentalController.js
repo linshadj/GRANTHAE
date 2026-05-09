@@ -3,6 +3,7 @@ import { Rental } from "../../models/rentalDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 
 import * as rentalService from "../../service/user/rentalService.js";
+import * as walletService from "../../service/user/walletService.js";
 import { deleteCloudinaryUploads, uploadImagesToCloudinary } from "../../utils/cloudinaryUploader.js";
 
 export const getListRentalBookPage = async (req, res, next) => {
@@ -82,6 +83,7 @@ export const rentalPlacePage = async (req, res, next) => {
     try {
         const result = await rentalService.getApprovedRentals(req.query);
         const categories = await Category.find({ isDeleted: false, isBlocked: false });
+        const currentUser = req.user || res.locals.user || null;
         
         res.render('pages/rental-place', {
             layout: 'layouts/main',
@@ -92,7 +94,7 @@ export const rentalPlacePage = async (req, res, next) => {
             totalPages: result.totalPages,
             currentPage: result.currentPage,
             categories,
-            user: req.user,
+            user: currentUser,
             path: '/rental-place',
             query: req.query
         });
@@ -107,11 +109,18 @@ export const rentalDetailsPage = async (req, res, next) => {
         if (!rental) {
             return res.redirect('/rental-place');
         }
+
+        const userId = req.user?._id || req.session?.user;
+        const wallet = userId ? await walletService.getWallet(userId) : null;
+        const currentUser = req.user || res.locals.user || null;
+
         res.render('pages/rental-details', {
             layout: 'layouts/main',
             title: rental.bookTitle,
             rental,
-            user: req.user,
+            wallet,
+            isLoggedIn: Boolean(userId),
+            user: currentUser,
             path: '/rental-place'
         });
     } catch (error) {

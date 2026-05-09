@@ -52,8 +52,9 @@ export const productDetails = async (req, res) => {
             : await getRelatedProducts(product.category._id, product._id);
 
         let isInWishlist = false;
-        if (req.user) {
-            const wishlist = await wishlistDb.findOne({ user: req.user._id, "items.product": id });
+        const userId = req.user?._id || req.session?.user;
+        if (userId) {
+            const wishlist = await wishlistDb.findOne({ user: userId, "items.product": id });
             if (wishlist) isInWishlist = true;
         }
 
