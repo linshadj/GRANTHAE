@@ -9,8 +9,16 @@
         return acc;
     }, { total: 0 });
 
-    const pendingRequests = requestCounts.Pending || requestCounts.pending || 0;
-    const approvedRequests = requestCounts.Approved || requestCounts.approved || 0;
+    const pendingRequests = requestCounts.Requested || 0;
+    const activeRequests = requestCounts.Active || 0;
+    const returnRequests = requestCounts["Return Requested"] || 0;
+    const requestStatusClass = (status) => {
+        if (status === "Requested") return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+        if (status === "Active") return "bg-green-500/10 text-green-500 border-green-500/20";
+        if (status === "Returned") return "bg-apple-blue/10 text-apple-blue border-apple-blue/20";
+        if (status === "Return Requested") return "bg-orange-500/10 text-orange-500 border-orange-500/20";
+        return "bg-red-500/10 text-red-500 border-red-500/20";
+    };
 %>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-8">
@@ -51,12 +59,12 @@
             <p class="text-3xl font-bold text-apple-dark mt-2"><%= requestCounts.total %></p>
         </div>
         <div class="bg-apple-card border border-white/10 rounded-2xl p-5 shadow-sm">
-            <p class="text-xs uppercase tracking-widest text-apple-text-gray font-bold">Pending</p>
+            <p class="text-xs uppercase tracking-widest text-apple-text-gray font-bold">Pending Approval</p>
             <p class="text-3xl font-bold text-yellow-500 mt-2"><%= pendingRequests %></p>
         </div>
         <div class="bg-apple-card border border-white/10 rounded-2xl p-5 shadow-sm">
-            <p class="text-xs uppercase tracking-widest text-apple-text-gray font-bold">Approved</p>
-            <p class="text-3xl font-bold text-green-500 mt-2"><%= approvedRequests %></p>
+            <p class="text-xs uppercase tracking-widest text-apple-text-gray font-bold">Active</p>
+            <p class="text-3xl font-bold text-green-500 mt-2"><%= activeRequests %></p>
         </div>
         <div class="bg-apple-card border border-white/10 rounded-2xl p-5 shadow-sm">
             <p class="text-xs uppercase tracking-widest text-apple-text-gray font-bold">Live Books</p>
@@ -64,16 +72,6 @@
         </div>
     </div>
 
-    <div class="inline-flex p-1 bg-white/5 border border-white/10 rounded-2xl w-full sm:w-auto">
-        <a href="/profile/my-listings"
-            class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-apple-text-gray hover:text-apple-dark hover:bg-white/5 font-bold text-sm text-center transition-colors">
-            Listings
-        </a>
-        <a href="/profile/my-listings/rental-requests"
-            class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-apple-gold text-[#1a231e] font-bold text-sm text-center shadow-lg shadow-apple-gold/10">
-            Incoming Requests
-        </a>
-    </div>
 
     <% if (incomingRequests.length > 0) { %>
         <div class="bg-apple-card border border-white/10 rounded-3xl overflow-hidden shadow-lg">
@@ -85,30 +83,50 @@
                             <th class="px-6 py-4 font-bold">Renter</th>
                             <th class="px-6 py-4 font-bold">Rental Window</th>
                             <th class="px-6 py-4 font-bold">Amount</th>
-                            <th class="px-6 py-4 font-bold text-right">Status</th>
+                            <th class="px-6 py-4 font-bold text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
                         <% incomingRequests.forEach(request => { %>
                             <tr class="hover:bg-white/[0.02] transition-colors">
                                 <td class="px-6 py-4">
-                                    <p class="font-bold text-apple-dark"><%= request.bookTitle || request.listing?.bookTitle || 'Rental Book' %></p>
-                                    <p class="text-xs text-apple-text-gray"><%= request.author || request.listing?.author || '' %></p>
+                                    <p class="font-bold text-apple-dark"><%= request.rental?.bookTitle || 'Rental Book' %></p>
+                                    <p class="text-xs text-apple-text-gray"><%= request.rental?.author || '' %></p>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <p class="font-medium text-apple-dark"><%= request.renterName || request.renter?.firstName || 'Reader' %></p>
-                                    <p class="text-xs text-apple-text-gray"><%= request.renterEmail || request.renter?.email || '' %></p>
+                                    <p class="font-medium text-apple-dark"><%= request.renter ? `${request.renter.firstName || ''} ${request.renter.lastName || ''}`.trim() : 'Reader' %></p>
+                                    <p class="text-xs text-apple-text-gray"><%= request.renter?.email || '' %></p>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-apple-text-gray">
-                                    <%= request.startDate || 'Requested' %> <%= request.endDate ? 'to ' + request.endDate : '' %>
+                                    <%= new Date(request.startDate).toLocaleDateString('en-IN') %> to <%= new Date(request.endDate).toLocaleDateString('en-IN') %>
+                                    <% if (request.returnTrackingId) { %>
+                                        <p class="text-[10px] uppercase tracking-widest mt-1">Tracking: <%= request.returnTrackingId %></p>
+                                    <% } %>
                                 </td>
                                 <td class="px-6 py-4 font-bold text-apple-dark">
-                                    &#8377;<%= formatAmount(request.totalAmount || request.amount || 0) %>
+                                    &#8377;<%= formatAmount(request.totalAmount || 0) %>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <span class="inline-flex px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-xs font-bold uppercase tracking-wider">
-                                        <%= request.status || 'Pending' %>
-                                    </span>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <span class="inline-flex px-3 py-1 rounded-full <%= requestStatusClass(request.status) %> border text-xs font-bold uppercase tracking-wider">
+                                            <%= request.status %>
+                                        </span>
+                                        <% if (request.status === 'Requested') { %>
+                                            <button type="button" onclick="confirmRentalRequest('<%= request._id %>')"
+                                                class="px-3 py-1.5 rounded-lg bg-green-500/10 text-green-500 border border-green-500/20 text-xs font-bold hover:bg-green-500/15 transition-colors">
+                                                Confirm
+                                            </button>
+                                            <button type="button" onclick="rejectRentalRequest('<%= request._id %>')"
+                                                class="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-bold hover:bg-red-500/15 transition-colors">
+                                                Decline
+                                            </button>
+                                        <% } else if (request.status === 'Return Requested') { %>
+                                            <button type="button" onclick="completeRentalReturn('<%= request._id %>')"
+                                                class="px-3 py-1.5 rounded-lg bg-green-500/10 text-green-500 border border-green-500/20 text-xs font-bold hover:bg-green-500/15 transition-colors">
+                                                Confirm Return
+                                            </button>
+                                        <% } %>
+                                    </div>
                                 </td>
                             </tr>
                         <% }) %>
@@ -168,3 +186,107 @@
         </section>
     <% } %>
 </div>
+
+<script>
+    async function confirmRentalRequest(rentalOrderId) {
+        const result = await Swal.fire({
+            title: 'Confirm Rental?',
+            text: 'This will capture payment from the renter wallet and mark your book as rented.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm Rental',
+            background: '#1e2a22',
+            color: '#E6CFA7',
+            confirmButtonColor: '#E6CFA7'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch(`/profile/rentals/${rentalOrderId}/confirm`, { method: 'PATCH' });
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('success', data.message || 'Rental confirmed.');
+                setTimeout(() => window.location.reload(), 900);
+                return;
+            }
+
+            Swal.fire({ icon: 'error', title: 'Failed', text: data.message || 'Could not confirm rental request.' });
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Could not confirm rental request.' });
+        }
+    }
+
+    async function rejectRentalRequest(rentalOrderId) {
+        const result = await Swal.fire({
+            title: 'Decline Request?',
+            input: 'textarea',
+            inputPlaceholder: 'Reason for declining...',
+            inputAttributes: { maxlength: 300 },
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Decline',
+            background: '#1e2a22',
+            color: '#E6CFA7',
+            confirmButtonColor: '#ef4444'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch(`/profile/rentals/${rentalOrderId}/reject`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: result.value || '' })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('success', data.message || 'Rental request declined.');
+                setTimeout(() => window.location.reload(), 900);
+                return;
+            }
+
+            Swal.fire({ icon: 'error', title: 'Failed', text: data.message || 'Could not decline rental request.' });
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Could not decline rental request.' });
+        }
+    }
+
+    async function completeRentalReturn(rentalOrderId) {
+        const result = await Swal.fire({
+            title: 'Confirm Return?',
+            text: 'This will refund the security deposit to the renter wallet and make the book available again.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm Return',
+            background: '#1e2a22',
+            color: '#E6CFA7',
+            confirmButtonColor: '#E6CFA7'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch(`/profile/rentals/${rentalOrderId}/return/complete`, { method: 'PATCH' });
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Return Confirmed',
+                    text: data.message,
+                    background: '#1e2a22',
+                    color: '#E6CFA7',
+                    confirmButtonColor: '#E6CFA7'
+                }).then(() => window.location.reload());
+                return;
+            }
+
+            Swal.fire({ icon: 'error', title: 'Failed', text: data.message || 'Could not confirm return.' });
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Could not confirm return.' });
+        }
+    }
+</script>

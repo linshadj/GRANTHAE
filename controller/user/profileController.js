@@ -8,13 +8,65 @@ import {
   setDefaultAddressService,
   updateProfile,
 } from "../../service/user/profileService.js";
-import * as orderService from "../../service/user/orderService.js";
 import { getWallet } from "../../service/user/walletService.js";
 import orderDb from "../../models/orderDb.js";
 import wishlistDb from "../../models/wishlistDb.js";
+import { Rental } from "../../models/rentalDb.js";
 import { deleteCloudinaryUploads, uploadImageToCloudinary } from "../../utils/cloudinaryUploader.js";
 
-export const viewProfile = async (req, res) => {
+export const viewDashboard = async (req, res, next) => {
+  try {
+    const user = await userDb.findById(req.session.user);
+
+    const [
+      orderCount,
+      activeOrders,
+      pendingReturnRequests,
+      wallet,
+      wishlist,
+      listingCount,
+      pendingListings,
+      recentOrders,
+      recentListings,
+    ] = await Promise.all([
+      orderDb.countDocuments({ user: user._id }),
+      orderDb.countDocuments({ user: user._id, orderStatus: { $in: ["Pending", "Shipped", "Out for delivery"] } }),
+      orderDb.countDocuments({
+        user: user._id,
+        items: { $elemMatch: { itemStatus: "Return Requested", returnRequestStatus: "Pending" } },
+      }),
+      getWallet(user._id),
+      wishlistDb.findOne({ user: user._id }).select("items"),
+      Rental.countDocuments({ owner: user._id, isDeleted: false }),
+      Rental.countDocuments({ owner: user._id, isDeleted: false, status: "Pending" }),
+      orderDb.find({ user: user._id }).sort({ createdAt: -1 }).limit(5),
+      Rental.find({ owner: user._id, isDeleted: false }).populate("category").sort({ createdAt: -1 }).limit(5),
+    ]);
+
+    res.render("pages/dashboard", {
+      user,
+      dashboard: {
+        orderCount,
+        activeOrders,
+        pendingReturnRequests,
+        walletBalance: wallet.balance || 0,
+        wishlistCount: wishlist?.items?.length || 0,
+        listingCount,
+        pendingListings,
+      },
+      recentOrders,
+      recentListings,
+      title: "Dashboard",
+      layout: "layouts/user-panel",
+      path: "/dashboard",
+    });
+  } catch (err) {
+    console.log("err in viewDashboard", err.message);
+    next(err);
+  }
+};
+
+export const viewProfile = async (req, res, next) => {
   try {
     const user = await userDb.findById(req.session.user);
     const addresses = await addressDb
@@ -23,32 +75,16 @@ export const viewProfile = async (req, res) => {
       })
       .sort({ isDefault: -1, createdAt: -1 });
 
-    const [orderCount, activeOrders, pendingReturnRequests, wallet, wishlist] = await Promise.all([
-      orderDb.countDocuments({ user: user._id }),
-      orderDb.countDocuments({ user: user._id, orderStatus: { $in: ["Pending", "Shipped", "Out for delivery"] } }),
-      orderDb.countDocuments({
-        user: user._id,
-        items: { $elemMatch: { itemStatus: "Return Requested", returnRequestStatus: "Pending" } }
-      }),
-      getWallet(user._id),
-      wishlistDb.findOne({ user: user._id }).select("items")
-    ]);
-
     res.render("pages/profile", {
       user,
       addresses,
-      dashboard: {
-        orderCount,
-        activeOrders,
-        pendingReturnRequests,
-        walletBalance: wallet.balance || 0,
-        wishlistCount: wishlist?.items?.length || 0,
-      },
       title: "Profile",
       layout: "layouts/user-panel",
+      path: "/profile",
     });
   } catch (err) {
     console.log("err in viewProfile", err.message);
+    next(err);
   }
 };
 

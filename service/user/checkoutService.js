@@ -156,6 +156,40 @@ const applyCouponUsageForOrder = async (order) => {
     await applyCouponUsage(coupon, order.user);
 };
 
+export const getAvailableCouponsForCheckout = async (userId, subtotal = 0) => {
+    const now = new Date();
+    const coupons = await Coupon.find({
+        isDeleted: false,
+        isActive: true,
+        startDate: { $lte: now },
+        expiresAt: { $gte: now }
+    }).sort({ discountValue: -1, expiresAt: 1 }).limit(12);
+
+    return coupons
+        .filter((coupon) => {
+            if (coupon.usageLimit > 0 && coupon.usedCount >= coupon.usageLimit) return false;
+            const userUsage = getCouponUsageForUser(coupon, userId);
+            return !(coupon.usageLimitPerUser > 0 && userUsage >= coupon.usageLimitPerUser);
+        })
+        .map((coupon) => {
+            const isApplicable = Number(subtotal || 0) >= Number(coupon.minPurchaseAmount || 0);
+            const discountAmount = isApplicable ? calculateCouponDiscount(coupon, subtotal) : 0;
+
+            return {
+                _id: coupon._id,
+                code: coupon.code,
+                description: coupon.description,
+                discountType: coupon.discountType,
+                discountValue: coupon.discountValue,
+                minPurchaseAmount: coupon.minPurchaseAmount || 0,
+                maxDiscountAmount: coupon.maxDiscountAmount || 0,
+                expiresAt: coupon.expiresAt,
+                discountAmount,
+                isApplicable
+            };
+        });
+};
+
 const normalizePaymentMethod = (paymentMethod) => {
     if (paymentMethod === "Online") return "Razorpay";
     return paymentMethod;

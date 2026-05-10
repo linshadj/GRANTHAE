@@ -200,6 +200,10 @@ export const updateOrderStatusService = async (orderId, status) => {
     }
 
     order.orderStatus = status;
+    if (status === 'Delivered' && order.paymentMethod === 'COD' && order.paymentStatus === 'Pending') {
+        order.paymentStatus = 'Success';
+        order.paidAt = new Date();
+    }
     await order.save();
     return order;
 };

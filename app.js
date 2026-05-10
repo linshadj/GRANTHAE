@@ -3,6 +3,7 @@ import path from 'path'
 import {fileURLToPath} from 'url'
 import session from 'express-session'
 import expressLayouts from 'express-ejs-layouts'
+import mongoose from 'mongoose'
 import userRoutes from './routes/userRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js'
@@ -32,7 +33,7 @@ app.use(session({
 app.use(async (req, res, next) => {
     res.locals.path = req.path;
     try {
-        if (req.session.user) {
+        if (req.session.user && mongoose.connection.readyState === 1) {
             const user = await userDb.findById(req.session.user);
             res.locals.user = user;
         } else {
@@ -72,7 +73,12 @@ app.use('/admin', adminRoutes)
 app.use(notFound)
 app.use(errorHandler)
 
-await connectDb()
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+try {
+  await connectDb()
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+} catch (error) {
+  console.error("Server startup aborted. Fix the MongoDB connection and restart the app.");
+  process.exit(1);
+}

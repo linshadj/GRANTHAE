@@ -1,164 +1,313 @@
 <%
-    const formatDate = (date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const formatDate = (date) => new Date(date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
     const formatAmount = (amount) => Number(amount || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
-    const getDisplayStatus = (order) => order.orderStatus === 'Cancelled' ? 'Cancelled' : order.paymentStatus === 'Failed' ? 'Failed' : order.orderStatus;
+    const activeFilters = typeof filters !== 'undefined' ? filters : { search: searchQuery || '', status: 'all', startDate: '', endDate: '', sort: 'newest', page: 1 };
+    const activeType = orderType === 'rents' ? 'rents' : 'purchases';
+    const pageData = pagination || { total: 0, totalPages: 1, currentPage: 1, limit: 8 };
+    const purchaseStatuses = ['Pending', 'Shipped', 'Out for delivery', 'Delivered', 'Returned', 'Cancelled', 'Failed'];
+    const rentStatuses = ['Requested', 'Active', 'Rejected', 'Return Requested', 'Returned', 'Cancelled'];
+    const statusOptions = activeType === 'rents' ? rentStatuses : purchaseStatuses;
+    const hasActiveFilters = Boolean(
+        activeFilters.search ||
+        (activeFilters.status && activeFilters.status !== 'all') ||
+        activeFilters.startDate ||
+        activeFilters.endDate ||
+        (activeFilters.sort && activeFilters.sort !== 'newest')
+    );
+    const buildUrl = (overrides = {}) => {
+        const params = new URLSearchParams();
+        const values = {
+            type: activeType,
+            search: activeFilters.search || '',
+            status: activeFilters.status || 'all',
+            startDate: activeFilters.startDate || '',
+            endDate: activeFilters.endDate || '',
+            sort: activeFilters.sort || 'newest',
+            page: pageData.currentPage || 1,
+            ...overrides
+        };
+        Object.entries(values).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && String(value) !== '') params.set(key, value);
+        });
+        return `/profile/orders?${params.toString()}`;
+    };
+    const getPurchaseStatus = (order) => order.orderStatus === 'Cancelled' ? 'Cancelled' : order.paymentStatus === 'Failed' ? 'Failed' : order.orderStatus;
     const getStatusClass = (status) => {
-        if (status === 'Delivered') return 'bg-green-500/10 text-green-400 border-green-500/20';
-        if (status === 'Shipped') return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-        if (status === 'Out for delivery') return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
-        if (status === 'Cancelled' || status === 'Failed') return 'bg-red-500/10 text-red-400 border-red-500/20';
-        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
-    };
-    const getActionLabel = (order, displayStatus) => {
-        if (displayStatus === 'Failed' && order.paymentMethod === 'Razorpay') return 'Retry Payment';
-        if (displayStatus === 'Delivered') return 'View Details';
-        if (displayStatus === 'Shipped' || displayStatus === 'Out for delivery') return 'Track Order';
-        return 'View Details';
-    };
-    const getActionHref = (order, displayStatus) => {
-        if (displayStatus === 'Failed' && order.paymentMethod === 'Razorpay') return `/payment-failure/${order._id}`;
-        return `/profile/orders/${order._id}`;
+        if (status === 'Delivered' || status === 'Active' || status === 'Returned') return 'bg-green-500/10 text-green-500 border-green-500/20';
+        if (status === 'Shipped') return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+        if (status === 'Out for delivery' || status === 'Return Requested') return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
+        if (status === 'Cancelled' || status === 'Failed' || status === 'Rejected') return 'bg-red-500/10 text-red-500 border-red-500/20';
+        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
     };
 %>
 
 <div class="space-y-8">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 id="page-title" class="text-2xl font-bold text-apple-dark">Order History</h1>
-            <p class="text-apple-text-gray/80 text-sm">Track purchased books, payments, and returns.</p>
+            <h1 class="text-2xl font-bold text-apple-dark">My Orders</h1>
+            <p class="text-apple-text-gray/80 text-sm">Track marketplace purchases and rented books in one place.</p>
         </div>
 
-        <div class="bg-white/5 p-1 rounded-xl border border-white/10 flex items-center w-max">
-            <a href="/profile/orders"
-                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 bg-apple-card shadow-sm text-apple-dark">
-                My Orders
-            </a>
-            <a href="/profile/my-listings"
-                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 text-apple-text-gray hover:text-apple-dark">
-                My Listings
-            </a>
-            <a href="/profile/my-listings/rental-requests"
-                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 text-apple-text-gray hover:text-apple-dark">
-                Rentals
-            </a>
-        </div>
-
-        <a href="/marketplace" class="btn-secondary hidden md:flex items-center gap-2 text-xs">
-            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-            Browse More
+        <a href="<%= activeType === 'rents' ? '/rental-place' : '/marketplace' %>" class="btn-secondary hidden md:flex items-center gap-2 text-xs">
+            <i data-lucide="<%= activeType === 'rents' ? 'book-open' : 'shopping-bag' %>" class="w-4 h-4"></i>
+            <%= activeType === 'rents' ? 'Rent More' : 'Browse More' %>
         </a>
     </div>
 
     <div class="glass-card overflow-hidden">
-        <div class="px-6 py-4 border-b border-white/5 flex flex-col lg:flex-row justify-between lg:items-center gap-4 bg-green-50/5">
-            <h3 class="font-semibold text-apple-dark flex items-center gap-2">
-                <i data-lucide="shopping-bag" class="w-4 h-4 text-green-600"></i>
-                Purchased Books
-            </h3>
+        <div class="px-6 py-4 border-b border-white/5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white/[0.02]">
+            <div class="inline-flex p-1 rounded-2xl bg-black/10 border border-white/10 w-full sm:w-auto">
+                <a href="<%= buildUrl({ type: 'purchases', status: 'all', page: 1 }) %>"
+                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all <%= activeType === 'purchases' ? 'bg-apple-blue text-white shadow-lg shadow-apple-blue/20' : 'text-apple-text-gray hover:text-apple-dark hover:bg-white/5' %>">
+                    <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                    Purchases
+                </a>
+                <a href="<%= buildUrl({ type: 'rents', status: 'all', page: 1 }) %>"
+                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all <%= activeType === 'rents' ? 'bg-apple-blue text-white shadow-lg shadow-apple-blue/20' : 'text-apple-text-gray hover:text-apple-dark hover:bg-white/5' %>">
+                    <i data-lucide="book-open-check" class="w-4 h-4"></i>
+                    Rents
+                </a>
+            </div>
 
-            <form action="/profile/orders" method="GET" class="relative w-full lg:w-80 group">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray/50 group-focus-within:text-apple-blue transition-colors"></i>
-                <input type="text" name="search" value="<%= searchQuery || '' %>" placeholder="Search order ID..."
-                    class="w-full h-10 pl-10 pr-10 rounded-xl bg-white/5 border border-white/10 text-sm text-apple-dark placeholder:text-apple-text-gray/50 focus:outline-none focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue/50 transition-all">
-                <% if (searchQuery) { %>
-                    <a href="/profile/orders" class="absolute right-3 top-1/2 -translate-y-1/2 text-apple-text-gray/50 hover:text-red-500 transition-colors">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </a>
-                <% } %>
-            </form>
+            <p class="text-xs text-apple-text-gray">
+                <span class="font-bold text-apple-dark"><%= pageData.total || 0 %></span>
+                <%= activeType === 'rents' ? 'rent record' : 'purchase order' %><%= Number(pageData.total || 0) === 1 ? '' : 's' %>
+            </p>
         </div>
 
-        <% if (orders && orders.length > 0) { %>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="text-xs text-apple-text-gray uppercase bg-white/5">
-                        <tr>
-                            <th class="px-6 py-3 font-medium min-w-[260px]">Book Info</th>
-                            <th class="px-6 py-3 font-medium whitespace-nowrap">Date</th>
-                            <th class="px-6 py-3 font-medium whitespace-nowrap">Status</th>
-                            <th class="px-6 py-3 font-medium whitespace-nowrap">Payment</th>
-                            <th class="px-6 py-3 font-medium whitespace-nowrap">Total</th>
-                            <th class="px-6 py-3 font-medium text-right whitespace-nowrap">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-white/5">
-                        <% orders.forEach(order => { %>
-                            <%
-                                const displayStatus = getDisplayStatus(order);
-                                const firstItem = order.items && order.items.length > 0 ? order.items[0] : null;
-                                const product = firstItem ? firstItem.product : null;
-                                const coverImage = product && (product.coverImage || (product.images && product.images[0])) ? (product.coverImage || product.images[0]) : '/images/default-book.jpg';
-                                const itemCount = order.items ? order.items.reduce((total, item) => total + Number(item.quantity || 0), 0) : 0;
-                            %>
-                            <tr class="hover:bg-white/5 transition-colors">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <img src="<%= coverImage %>" class="w-10 h-14 object-cover rounded shadow-sm border border-white/10" alt="<%= product ? product.name : 'Book' %>">
-                                        <div class="min-w-0">
-                                            <div class="font-medium text-apple-dark line-clamp-1">
-                                                <%= product ? product.name : 'Unknown Product' %>
-                                            </div>
-                                            <div class="text-xs text-apple-text-gray mt-0.5">
-                                                <%= product && product.author ? product.author : `Order #${order.orderID}` %>
-                                            </div>
-                                            <div class="text-[10px] text-apple-text-gray/60 mt-1 uppercase tracking-wider">
-                                                <%= itemCount %> item<%= itemCount === 1 ? '' : 's' %>
-                                                <% if (order.items && order.items.length > 1) { %>
-                                                    &middot; <%= order.items.length - 1 %> more title<%= order.items.length - 1 === 1 ? '' : 's' %>
-                                                <% } %>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-apple-text-gray whitespace-nowrap">
-                                    <%= formatDate(order.createdAt) %>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border <%= getStatusClass(displayStatus) %>">
-                                        <%= displayStatus %>
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-apple-dark font-medium">
-                                        <%= order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod %>
-                                    </div>
-                                    <div class="text-[10px] uppercase tracking-wider <%= order.paymentStatus === 'Success' ? 'text-green-500' : order.paymentStatus === 'Failed' ? 'text-red-500' : 'text-yellow-500' %>">
-                                        <%= order.paymentStatus %>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 font-medium text-apple-dark whitespace-nowrap">
-                                    ₹<%= formatAmount(order.totalAmount) %>
-                                </td>
-                                <td class="px-6 py-4 text-right whitespace-nowrap">
-                                    <a href="<%= getActionHref(order, displayStatus) %>" class="text-sm text-apple-blue hover:underline">
-                                        <%= getActionLabel(order, displayStatus) %>
-                                    </a>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            </div>
-        <% } else { %>
-            <div class="p-10 sm:p-14 text-center text-apple-text-gray text-sm">
-                <div class="w-16 h-16 bg-white/5 text-apple-text-gray/30 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-white/10">
-                    <i data-lucide="package" class="w-8 h-8"></i>
+        <form action="/profile/orders" method="GET" class="px-6 py-5 border-b border-white/5 bg-white/[0.02]">
+            <input type="hidden" name="type" value="<%= activeType %>">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+                <div class="lg:col-span-2">
+                    <label class="block text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest mb-2">Search</label>
+                    <div class="relative group">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray/50 group-focus-within:text-apple-blue transition-colors"></i>
+                        <input type="text" name="search" value="<%= activeFilters.search || '' %>" placeholder="<%= activeType === 'rents' ? 'Search rental code or book...' : 'Search order ID...' %>"
+                            class="w-full h-11 pl-10 pr-3 rounded-xl bg-white/5 border border-white/10 text-sm text-apple-dark placeholder:text-apple-text-gray/50 focus:outline-none focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue/50 transition-all">
+                    </div>
                 </div>
-                <% if (searchQuery) { %>
-                    <h2 class="text-xl font-bold text-apple-dark mb-2">No matching orders</h2>
-                    <p class="mb-6">No orders matched "<%= searchQuery %>".</p>
-                    <a href="/profile/orders" class="btn-secondary inline-flex items-center gap-2 px-6 py-3">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                        Clear Search
-                    </a>
-                <% } else { %>
-                    <h2 class="text-xl font-bold text-apple-dark mb-2">No orders yet</h2>
-                    <p class="mb-6">Your purchased books will appear here.</p>
-                    <a href="/marketplace" class="btn-primary inline-flex items-center gap-2 px-6 py-3">
-                        <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-                        Explore Marketplace
+
+                <div>
+                    <label class="block text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest mb-2">Status</label>
+                    <select name="status" class="w-full h-11 px-3 rounded-xl bg-white/5 border border-white/10 text-sm text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue/50 transition-all">
+                        <option value="all" <%= activeFilters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+                        <% statusOptions.forEach(status => { %>
+                            <option value="<%= status %>" <%= activeFilters.status === status ? 'selected' : '' %>><%= status %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest mb-2">From</label>
+                    <input type="date" name="startDate" value="<%= activeFilters.startDate || '' %>"
+                        class="w-full h-11 px-3 rounded-xl bg-white/5 border border-white/10 text-sm text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue/50 transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest mb-2">To</label>
+                    <input type="date" name="endDate" value="<%= activeFilters.endDate || '' %>"
+                        class="w-full h-11 px-3 rounded-xl bg-white/5 border border-white/10 text-sm text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue/50 transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest mb-2">Sort</label>
+                    <select name="sort" class="w-full h-11 px-3 rounded-xl bg-white/5 border border-white/10 text-sm text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue/50 transition-all">
+                        <option value="newest" <%= activeFilters.sort === 'newest' ? 'selected' : '' %>>Newest first</option>
+                        <option value="oldest" <%= activeFilters.sort === 'oldest' ? 'selected' : '' %>>Oldest first</option>
+                        <option value="price_desc" <%= activeFilters.sort === 'price_desc' ? 'selected' : '' %>>Price high to low</option>
+                        <option value="price_asc" <%= activeFilters.sort === 'price_asc' ? 'selected' : '' %>>Price low to high</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center justify-end gap-3">
+                <% if (hasActiveFilters) { %>
+                    <a href="<%= buildUrl({ search: '', status: 'all', startDate: '', endDate: '', sort: 'newest', page: 1 }) %>" class="px-4 py-2 rounded-xl border border-white/10 text-xs font-bold text-apple-text-gray hover:text-apple-dark hover:bg-white/5 transition-colors">
+                        Clear Filters
                     </a>
                 <% } %>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-apple-blue text-white text-xs font-bold hover:bg-apple-blue/90 transition-colors flex items-center gap-2">
+                    <i data-lucide="filter" class="w-4 h-4"></i>
+                    Apply Filters
+                </button>
+            </div>
+        </form>
+
+        <% if (activeType === 'purchases') { %>
+            <% if (orders && orders.length > 0) { %>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left" style="min-width: 900px;">
+                        <thead class="text-xs text-apple-text-gray uppercase bg-white/5">
+                            <tr>
+                                <th class="px-6 py-3 font-medium min-w-[260px]">Book Info</th>
+                                <th class="px-6 py-3 font-medium whitespace-nowrap">Date</th>
+                                <th class="px-6 py-3 font-medium whitespace-nowrap">Status</th>
+                                <th class="px-6 py-3 font-medium whitespace-nowrap">Payment</th>
+                                <th class="px-6 py-3 font-medium whitespace-nowrap">Total</th>
+                                <th class="px-6 py-3 font-medium text-right whitespace-nowrap">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            <% orders.forEach(order => { %>
+                                <%
+                                    const displayStatus = getPurchaseStatus(order);
+                                    const firstItem = order.items && order.items.length > 0 ? order.items[0] : null;
+                                    const product = firstItem ? firstItem.product : null;
+                                    const coverImage = product && (product.coverImage || (product.images && product.images[0])) ? (product.coverImage || product.images[0]) : '/images/default-book.jpg';
+                                    const itemCount = order.items ? order.items.reduce((total, item) => total + Number(item.quantity || 0), 0) : 0;
+                                %>
+                                <tr class="hover:bg-white/5 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="<%= coverImage %>" class="w-10 h-14 object-cover rounded shadow-sm border border-white/10" alt="<%= product ? product.name : 'Book' %>">
+                                            <div class="min-w-0">
+                                                <div class="font-medium text-apple-dark line-clamp-1"><%= product ? product.name : 'Unknown Product' %></div>
+                                                <div class="text-xs text-apple-text-gray mt-0.5"><%= product && product.author ? product.author : `Order #${order.orderID}` %></div>
+                                                <div class="text-[10px] text-apple-text-gray/60 mt-1 uppercase tracking-wider">
+                                                    <%= itemCount %> item<%= itemCount === 1 ? '' : 's' %>
+                                                    <% if (order.items && order.items.length > 1) { %>
+                                                        &middot; <%= order.items.length - 1 %> more title<%= order.items.length - 1 === 1 ? '' : 's' %>
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-apple-text-gray whitespace-nowrap"><%= formatDate(order.createdAt) %></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border <%= getStatusClass(displayStatus) %>"><%= displayStatus %></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-apple-dark font-medium"><%= order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod %></div>
+                                        <div class="text-[10px] uppercase tracking-wider <%= order.paymentStatus === 'Success' ? 'text-green-500' : order.paymentStatus === 'Failed' ? 'text-red-500' : 'text-yellow-500' %>"><%= order.paymentStatus %></div>
+                                    </td>
+                                    <td class="px-6 py-4 font-medium text-apple-dark whitespace-nowrap">₹<%= formatAmount(order.totalAmount) %></td>
+                                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                                        <a href="<%= displayStatus === 'Failed' && order.paymentMethod === 'Razorpay' ? `/payment-failure/${order._id}` : `/profile/orders/${order._id}` %>" class="text-sm text-apple-blue hover:underline">
+                                            <%= displayStatus === 'Failed' && order.paymentMethod === 'Razorpay' ? 'Resolve Payment' : 'View Details' %>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="p-10 sm:p-14 text-center text-apple-text-gray text-sm">
+                    <div class="w-16 h-16 bg-white/5 text-apple-text-gray/30 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-white/10">
+                        <i data-lucide="package" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-apple-dark mb-2"><%= hasActiveFilters ? 'No matching purchases' : 'No purchases yet' %></h2>
+                    <p class="mb-6"><%= hasActiveFilters ? 'No marketplace orders matched the selected filters.' : 'Books you buy from the marketplace will appear here.' %></p>
+                    <a href="<%= hasActiveFilters ? buildUrl({ search: '', status: 'all', startDate: '', endDate: '', sort: 'newest', page: 1 }) : '/marketplace' %>" class="btn-primary inline-flex items-center gap-2 px-6 py-3">
+                        <i data-lucide="<%= hasActiveFilters ? 'x' : 'shopping-bag' %>" class="w-4 h-4"></i>
+                        <%= hasActiveFilters ? 'Clear Filters' : 'Explore Marketplace' %>
+                    </a>
+                </div>
+            <% } %>
+        <% } else { %>
+            <% if (rentalOrders && rentalOrders.length > 0) { %>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left" style="min-width: 900px;">
+                        <thead class="text-xs text-apple-text-gray uppercase bg-white/5">
+                            <tr>
+                                <th class="px-6 py-3 font-medium min-w-[260px]">Book</th>
+                                <th class="px-6 py-3 font-medium whitespace-nowrap">Rental Window</th>
+                                <th class="px-6 py-3 font-medium whitespace-nowrap">Status</th>
+                                <th class="px-6 py-3 font-medium whitespace-nowrap">Payment</th>
+                                <th class="px-6 py-3 font-medium whitespace-nowrap">Total</th>
+                                <th class="px-6 py-3 font-medium text-right whitespace-nowrap">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            <% rentalOrders.forEach(rentalOrder => { %>
+                                <%
+                                    const rental = rentalOrder.rental || {};
+                                    const imageSrc = rental.coverImage || (Array.isArray(rental.images) && rental.images[0]) || '/images/default-book.jpg';
+                                %>
+                                <tr class="hover:bg-white/5 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="<%= imageSrc %>" class="w-10 h-14 object-cover rounded shadow-sm border border-white/10" alt="<%= rental.bookTitle || 'Rental book' %>">
+                                            <div class="min-w-0">
+                                                <a href="/rental/<%= rental._id %>" class="font-medium text-apple-dark hover:text-apple-blue line-clamp-1"><%= rental.bookTitle || 'Rental book' %></a>
+                                                <div class="text-xs text-apple-text-gray mt-0.5"><%= rental.author || `Rental #${rentalOrder.rentalCode}` %></div>
+                                                <div class="text-[10px] text-apple-text-gray/60 mt-1 uppercase tracking-wider">#<%= rentalOrder.rentalCode %></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-apple-text-gray whitespace-nowrap">
+                                        <%= formatDate(rentalOrder.startDate) %> - <%= formatDate(rentalOrder.endDate) %>
+                                        <div class="text-[10px] uppercase tracking-wider mt-1"><%= rentalOrder.durationDays %> day<%= rentalOrder.durationDays === 1 ? '' : 's' %></div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border <%= getStatusClass(rentalOrder.status) %>"><%= rentalOrder.status %></span>
+                                        <% if (rentalOrder.rejectionReason && rentalOrder.status === 'Rejected') { %>
+                                            <div class="text-[10px] text-red-500 mt-2 max-w-[180px] truncate"><%= rentalOrder.rejectionReason %></div>
+                                        <% } %>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-apple-dark font-medium">Wallet</div>
+                                        <div class="text-[10px] uppercase tracking-wider <%= rentalOrder.paymentStatus === 'Paid' || rentalOrder.paymentStatus === 'Deposit Refunded' ? 'text-green-500' : rentalOrder.paymentStatus === 'Cancelled' ? 'text-red-500' : 'text-yellow-500' %>"><%= rentalOrder.paymentStatus %></div>
+                                    </td>
+                                    <td class="px-6 py-4 font-medium text-apple-dark whitespace-nowrap">₹<%= formatAmount(rentalOrder.totalAmount) %></td>
+                                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                                        <% if (rentalOrder.status === 'Active') { %>
+                                            <a href="/profile/rentals/<%= rentalOrder._id %>/return" class="text-sm text-orange-500 hover:underline">Return</a>
+                                        <% } else if (rentalOrder.status === 'Returned') { %>
+                                            <a href="/rental/<%= rental._id %>#reviews" class="text-sm text-apple-blue hover:underline">Review</a>
+                                        <% } else if (rentalOrder.status === 'Requested') { %>
+                                            <span class="text-xs text-yellow-500">Waiting for owner</span>
+                                        <% } else { %>
+                                            <a href="/rental/<%= rental._id %>" class="text-sm text-apple-blue hover:underline">View Book</a>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="p-10 sm:p-14 text-center text-apple-text-gray text-sm">
+                    <div class="w-16 h-16 bg-white/5 text-apple-text-gray/30 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-white/10">
+                        <i data-lucide="book-open" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-apple-dark mb-2"><%= hasActiveFilters ? 'No matching rents' : 'No rents yet' %></h2>
+                    <p class="mb-6"><%= hasActiveFilters ? 'No rental records matched the selected filters.' : 'Books you rent from Rentalplace will appear here.' %></p>
+                    <a href="<%= hasActiveFilters ? buildUrl({ search: '', status: 'all', startDate: '', endDate: '', sort: 'newest', page: 1 }) : '/rental-place' %>" class="btn-primary inline-flex items-center gap-2 px-6 py-3">
+                        <i data-lucide="<%= hasActiveFilters ? 'x' : 'book-open' %>" class="w-4 h-4"></i>
+                        <%= hasActiveFilters ? 'Clear Filters' : 'Browse Rentalplace' %>
+                    </a>
+                </div>
+            <% } %>
+        <% } %>
+
+        <% if (pageData.totalPages > 1) { %>
+            <div class="px-6 py-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-xs text-apple-text-gray">
+                    Showing
+                    <span class="font-bold text-apple-dark"><%= (pageData.currentPage - 1) * pageData.limit + 1 %></span>
+                    to
+                    <span class="font-bold text-apple-dark"><%= Math.min(pageData.currentPage * pageData.limit, pageData.total) %></span>
+                    of
+                    <span class="font-bold text-apple-dark"><%= pageData.total %></span>
+                </p>
+                <div class="flex items-center gap-1">
+                    <% if (pageData.currentPage > 1) { %>
+                        <a href="<%= buildUrl({ page: pageData.currentPage - 1 }) %>" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-apple-text-gray hover:bg-white/10">
+                            Previous
+                        </a>
+                    <% } %>
+                    <% for (let i = 1; i <= pageData.totalPages; i++) { %>
+                        <a href="<%= buildUrl({ page: i }) %>" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors <%= i === pageData.currentPage ? 'bg-apple-blue text-white font-bold' : 'text-apple-text-gray hover:bg-white/10' %>">
+                            <%= i %>
+                        </a>
+                    <% } %>
+                    <% if (pageData.currentPage < pageData.totalPages) { %>
+                        <a href="<%= buildUrl({ page: pageData.currentPage + 1 }) %>" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-apple-text-gray hover:bg-white/10">
+                            Next
+                        </a>
+                    <% } %>
+                </div>
             </div>
         <% } %>
     </div>

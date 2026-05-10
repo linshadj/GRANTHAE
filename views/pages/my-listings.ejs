@@ -9,204 +9,201 @@
         return acc;
     }, { total: 0 });
 
-    const liveCount = (counts.Available || 0) + (counts.Approved || 0);
-    const pendingCount = counts.Pending || 0;
-    const rentedCount = counts.Rented || 0;
-    const rejectedCount = counts.Rejected || 0;
-
     const statusMeta = {
         Pending: {
             label: 'Pending Review',
-            icon: 'clock-3',
             badge: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
             dot: 'bg-yellow-500 animate-pulse'
         },
         Approved: {
-            label: 'Live & Available',
-            icon: 'check-circle-2',
+            label: 'Live',
             badge: 'bg-green-500/10 text-green-500 border-green-500/20',
             dot: 'bg-green-500'
         },
         Available: {
-            label: 'Live & Available',
-            icon: 'check-circle-2',
+            label: 'Live',
             badge: 'bg-green-500/10 text-green-500 border-green-500/20',
             dot: 'bg-green-500'
         },
         Rejected: {
             label: 'Rejected',
-            icon: 'alert-circle',
             badge: 'bg-red-500/10 text-red-500 border-red-500/20',
             dot: 'bg-red-500'
         },
         Rented: {
-            label: 'Currently Rented',
-            icon: 'book-check',
+            label: 'Rented',
             badge: 'bg-apple-blue/10 text-apple-blue border-apple-blue/20',
             dot: 'bg-apple-blue'
         },
         Hidden: {
             label: 'Hidden',
-            icon: 'eye-off',
             badge: 'bg-white/5 text-apple-text-gray border-white/10',
             dot: 'bg-apple-text-gray'
         }
     };
 %>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-8">
-    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+<div class="max-w-7xl mx-auto space-y-8">
+    <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
-            <nav class="flex mb-4" aria-label="Breadcrumb">
-                <ol class="flex items-center space-x-2 text-sm font-medium text-apple-text-gray">
-                    <li><a href="/home" class="hover:text-apple-dark transition-colors">Home</a></li>
-                    <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
-                    <li><a href="/profile" class="hover:text-apple-dark transition-colors">Profile</a></li>
-                    <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
-                    <li class="text-apple-dark">My Listings</li>
-                </ol>
-            </nav>
-            <h1 class="text-4xl font-bold text-apple-dark tracking-tight font-serif">My Listings</h1>
-            <p class="mt-2 text-apple-text-gray">Manage listed rental books, review status, and track renter interest.</p>
+            <h1 class="text-3xl font-bold text-apple-dark tracking-tight font-serif">My Listings</h1>
+            <p class="mt-2 text-sm text-apple-text-gray">Manage rental books, review approval status, and open incoming requests.</p>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-3 lg:justify-end">
+        <div class="flex flex-col sm:flex-row gap-3">
             <a href="/profile/my-listings/rental-requests"
-                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white/5 border border-white/10 text-apple-dark hover:bg-white/10 transition-all font-bold text-sm">
+                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-apple-dark hover:bg-white/10 transition-all font-bold text-sm">
                 <i data-lucide="inbox" class="w-4 h-4"></i>
                 Incoming Requests
             </a>
             <a href="/list-rental-book"
                 class="btn-primary inline-flex items-center justify-center gap-2 px-6 py-3 font-bold shadow-xl shadow-apple-gold/20">
                 <i data-lucide="plus" class="w-5 h-5"></i>
-                Add New Listing
+                List New Book
             </a>
         </div>
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-apple-card border border-white/10 rounded-2xl p-5 shadow-sm">
-            <p class="text-xs uppercase tracking-widest text-apple-text-gray font-bold">Total Listings</p>
+        <div class="bg-apple-card border border-white/10 rounded-2xl p-5">
+            <p class="text-[10px] uppercase tracking-widest text-apple-text-gray font-bold">Total</p>
             <p class="text-3xl font-bold text-apple-dark mt-2"><%= counts.total %></p>
         </div>
-        <div class="bg-apple-card border border-white/10 rounded-2xl p-5 shadow-sm">
-            <p class="text-xs uppercase tracking-widest text-apple-text-gray font-bold">Live</p>
-            <p class="text-3xl font-bold text-green-500 mt-2"><%= liveCount %></p>
+        <div class="bg-apple-card border border-white/10 rounded-2xl p-5">
+            <p class="text-[10px] uppercase tracking-widest text-apple-text-gray font-bold">Live</p>
+            <p class="text-3xl font-bold text-green-500 mt-2"><%= (counts.Available || 0) + (counts.Approved || 0) %></p>
         </div>
-        <div class="bg-apple-card border border-white/10 rounded-2xl p-5 shadow-sm">
-            <p class="text-xs uppercase tracking-widest text-apple-text-gray font-bold">Pending</p>
-            <p class="text-3xl font-bold text-yellow-500 mt-2"><%= pendingCount %></p>
+        <div class="bg-apple-card border border-white/10 rounded-2xl p-5">
+            <p class="text-[10px] uppercase tracking-widest text-apple-text-gray font-bold">Pending</p>
+            <p class="text-3xl font-bold text-yellow-500 mt-2"><%= counts.Pending || 0 %></p>
         </div>
-        <div class="bg-apple-card border border-white/10 rounded-2xl p-5 shadow-sm">
-            <p class="text-xs uppercase tracking-widest text-apple-text-gray font-bold">Rejected</p>
-            <p class="text-3xl font-bold text-red-500 mt-2"><%= rejectedCount %></p>
+        <div class="bg-apple-card border border-white/10 rounded-2xl p-5">
+            <p class="text-[10px] uppercase tracking-widest text-apple-text-gray font-bold">Rejected</p>
+            <p class="text-3xl font-bold text-red-500 mt-2"><%= counts.Rejected || 0 %></p>
         </div>
     </div>
 
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div class="inline-flex p-1 bg-white/5 border border-white/10 rounded-2xl w-full sm:w-auto">
-            <a href="/profile/my-listings"
-                class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-apple-gold text-[#1a231e] font-bold text-sm text-center shadow-lg shadow-apple-gold/10">
-                Listings
-            </a>
-            <a href="/profile/my-listings/rental-requests"
-                class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-apple-text-gray hover:text-apple-dark hover:bg-white/5 font-bold text-sm text-center transition-colors">
-                Incoming Requests
-            </a>
-        </div>
-
-        <p class="text-sm text-apple-text-gray"><%= rentedCount %> currently rented</p>
-    </div>
-
-    <% if (listings.length > 0) { %>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <% listings.forEach(listing => { %>
-                <%
-                    const meta = statusMeta[listing.status] || statusMeta.Hidden;
-                    const imageSrc = listing.coverImage || (Array.isArray(listing.images) && listing.images[0]) || '';
-                %>
-                <article class="bg-apple-card border border-white/10 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all group">
-                    <div class="relative aspect-[4/5] bg-white/5 overflow-hidden">
-                        <% if (imageSrc) { %>
-                            <img src="<%= imageSrc %>" alt="<%= listing.bookTitle %>" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                        <% } else { %>
-                            <div class="w-full h-full flex items-center justify-center bg-white/5">
-                                <i data-lucide="book-open" class="w-12 h-12 text-apple-text-gray/40"></i>
-                            </div>
-                        <% } %>
-
-                        <div class="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full border <%= meta.badge %> backdrop-blur-md text-xs font-bold uppercase tracking-wider">
-                            <span class="w-1.5 h-1.5 rounded-full <%= meta.dot %>"></span>
-                            <%= meta.label %>
-                        </div>
-                    </div>
-
-                    <div class="p-6 space-y-5">
-                        <div>
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="px-2.5 py-1 bg-apple-blue/10 text-apple-blue rounded-lg text-[10px] font-bold uppercase tracking-wider">
-                                    <%= listing.category ? listing.category.name : 'Uncategorized' %>
-                                </span>
-                                <span class="px-2.5 py-1 bg-white/5 text-apple-text-gray rounded-lg text-[10px] font-bold uppercase tracking-wider">
-                                    <%= listing.bookCondition %>
-                                </span>
-                            </div>
-                            <h2 class="text-xl font-bold text-apple-dark line-clamp-2 group-hover:text-apple-blue transition-colors">
-                                <%= listing.bookTitle %>
-                            </h2>
-                            <p class="text-sm text-apple-text-gray mt-1">by <%= listing.author %></p>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-3">
-                            <div class="rounded-2xl bg-white/5 border border-white/10 p-3">
-                                <p class="text-[10px] uppercase tracking-wider text-apple-text-gray font-bold">Rate</p>
-                                <p class="text-sm font-bold text-apple-dark mt-1">&#8377;<%= formatAmount(listing.dailyRate) %></p>
-                            </div>
-                            <div class="rounded-2xl bg-white/5 border border-white/10 p-3">
-                                <p class="text-[10px] uppercase tracking-wider text-apple-text-gray font-bold">Deposit</p>
-                                <p class="text-sm font-bold text-apple-dark mt-1">&#8377;<%= formatAmount(listing.depositAmount) %></p>
-                            </div>
-                            <div class="rounded-2xl bg-white/5 border border-white/10 p-3">
-                                <p class="text-[10px] uppercase tracking-wider text-apple-text-gray font-bold">Min</p>
-                                <p class="text-sm font-bold text-apple-dark mt-1"><%= listing.minRentalDays %> days</p>
-                            </div>
-                        </div>
-
-                        <% if (listing.status === 'Rejected' && listing.rejectionReason) { %>
-                            <button type="button" data-rejection-reason="<%= listing.rejectionReason %>" onclick="showRejectionReason(this)"
-                                class="w-full px-4 py-2.5 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 text-sm font-bold hover:bg-red-500/15 transition-colors">
-                                View Rejection Reason
-                            </button>
-                        <% } %>
-
-                        <div class="flex gap-3 pt-1">
-                            <a href="/rental/<%= listing._id %>"
-                                class="flex-1 btn-primary inline-flex items-center justify-center gap-2 py-3 font-bold">
-                                <i data-lucide="eye" class="w-4 h-4"></i>
-                                View
-                            </a>
-                            <button type="button" onclick="showEditNotice()"
-                                class="px-4 py-3 rounded-full bg-white/5 border border-white/10 text-apple-text-gray hover:text-apple-dark hover:bg-white/10 transition-all">
-                                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-                </article>
-            <% }) %>
-        </div>
-    <% } else { %>
-        <div class="bg-apple-card border border-white/10 rounded-3xl p-10 sm:p-16 text-center shadow-lg">
-            <div class="w-20 h-20 bg-apple-blue/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <i data-lucide="book" class="w-10 h-10 text-apple-blue"></i>
+    <div class="bg-apple-card border border-white/10 rounded-2xl overflow-hidden shadow-sm">
+        <div class="p-6 border-b border-white/10 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="text-xl font-bold text-apple-dark font-serif">Active Listings</h2>
+                <p class="text-xs text-apple-text-gray mt-1"><%= counts.total %> book<%= counts.total === 1 ? '' : 's' %> listed for rental</p>
             </div>
-            <h3 class="text-2xl font-bold text-apple-dark mb-2 font-serif">No listings yet</h3>
-            <p class="text-apple-text-gray mb-8 max-w-sm mx-auto">Start earning by sharing your library with readers nearby.</p>
-            <a href="/list-rental-book" class="btn-primary inline-flex items-center gap-2 px-8 py-3 font-bold">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                List Your First Book
-            </a>
+            <span class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-apple-text-gray">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                Marketplace status
+            </span>
         </div>
-    <% } %>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left" style="min-width: 960px;">
+                <thead class="bg-white/5 text-xs text-apple-text-gray uppercase tracking-wider">
+                    <tr>
+                        <th class="px-6 py-4">Book Info</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Daily Rate</th>
+                        <th class="px-6 py-4 text-right">Deposit</th>
+                        <th class="px-6 py-4 text-right">Total Earnings</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/10">
+                    <% if (listings.length === 0) { %>
+                        <tr>
+                            <td colspan="6" class="px-6 py-16 text-center">
+                                <div class="w-16 h-16 bg-apple-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                                    <i data-lucide="book-open" class="w-8 h-8 text-apple-blue"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-apple-dark mb-2 font-serif">No listings yet</h3>
+                                <p class="text-sm text-apple-text-gray mb-6">Start earning by sharing your library with readers nearby.</p>
+                                <a href="/list-rental-book" class="btn-primary inline-flex items-center gap-2 px-6 py-3 font-bold">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    List Your First Book
+                                </a>
+                            </td>
+                        </tr>
+                    <% } %>
+
+                    <% listings.forEach(listing => { %>
+                        <%
+                            const meta = statusMeta[listing.status] || statusMeta.Hidden;
+                            const imageSrc = listing.coverImage || (Array.isArray(listing.images) && listing.images[0]) || '';
+                            const income = listingIncomeMap && listingIncomeMap[listing._id.toString()] ? listingIncomeMap[listing._id.toString()] : { totalIncome: 0, rentalCount: 0 };
+                        %>
+                        <tr class="hover:bg-white/5 transition-colors align-middle">
+                            <td class="px-6 py-5">
+                                <div class="flex items-center gap-4 min-w-0">
+                                    <div class="w-14 h-20 rounded-xl bg-white/5 border border-white/10 overflow-hidden shrink-0">
+                                        <% if (imageSrc) { %>
+                                            <img src="<%= imageSrc %>" alt="<%= listing.bookTitle %>" class="w-full h-full object-cover">
+                                        <% } else { %>
+                                            <div class="w-full h-full flex items-center justify-center">
+                                                <i data-lucide="book-open" class="w-6 h-6 text-apple-text-gray/50"></i>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h3 class="text-sm font-bold text-apple-dark truncate max-w-xs"><%= listing.bookTitle %></h3>
+                                        <p class="text-xs text-apple-text-gray truncate max-w-xs">by <%= listing.author %></p>
+                                        <div class="flex flex-wrap items-center gap-2 mt-2">
+                                            <span class="px-2 py-1 rounded-lg bg-apple-blue/10 text-apple-blue text-[10px] font-bold uppercase tracking-wider">
+                                                <%= listing.category ? listing.category.name : 'Uncategorized' %>
+                                            </span>
+                                            <span class="px-2 py-1 rounded-lg bg-white/5 text-apple-text-gray text-[10px] font-bold uppercase tracking-wider">
+                                                <%= listing.bookCondition %>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5">
+                                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold <%= meta.badge %>">
+                                    <span class="w-1.5 h-1.5 rounded-full <%= meta.dot %>"></span>
+                                    <%= meta.label %>
+                                </span>
+                                <% if (listing.status === 'Rejected' && listing.rejectionReason) { %>
+                                    <button type="button" data-rejection-reason="<%= listing.rejectionReason %>" onclick="showRejectionReason(this)"
+                                        class="block mt-2 text-xs font-bold text-red-500 hover:underline">
+                                        View reason
+                                    </button>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-5 text-right whitespace-nowrap">
+                                <p class="text-sm font-bold text-apple-dark">&#8377;<%= formatAmount(listing.dailyRate) %></p>
+                                <p class="text-xs text-apple-text-gray">Min <%= listing.minRentalDays %> day<%= listing.minRentalDays === 1 ? '' : 's' %></p>
+                            </td>
+                            <td class="px-6 py-5 text-right text-sm font-bold text-apple-dark whitespace-nowrap">
+                                &#8377;<%= formatAmount(listing.depositAmount) %>
+                            </td>
+                            <td class="px-6 py-5 text-right whitespace-nowrap">
+                                <p class="text-sm font-bold text-apple-dark">&#8377;<%= formatAmount(income.totalIncome) %></p>
+                                <p class="text-xs text-apple-text-gray"><%= income.rentalCount %> rental<%= income.rentalCount === 1 ? '' : 's' %></p>
+                            </td>
+                            <td class="px-6 py-5">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="/rental/<%= listing._id %>"
+                                        class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-apple-dark hover:bg-white/10 transition-colors"
+                                        title="View listing">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </a>
+                                    <a href="/profile/my-listings/<%= listing._id %>/edit"
+                                        class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-apple-text-gray hover:text-apple-dark hover:bg-white/10 transition-colors"
+                                        title="Edit listing">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    </a>
+                                    <button type="button" onclick="toggleListing('<%= listing._id %>', '<%= listing.status %>')"
+                                        class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 <%= listing.status === 'Hidden' ? 'text-green-500' : 'text-orange-500' %> hover:bg-white/10 transition-colors"
+                                        title="<%= listing.status === 'Hidden' ? 'Enable listing' : 'Disable listing' %>">
+                                        <i data-lucide="<%= listing.status === 'Hidden' ? 'eye' : 'eye-off' %>" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -221,14 +218,39 @@
         });
     }
 
-    function showEditNotice() {
-        Swal.fire({
-            title: 'Edit Listing',
-            text: 'Edit listing tools are being prepared.',
-            icon: 'info',
+    async function toggleListing(listingId, currentStatus) {
+        const enabling = currentStatus === 'Hidden';
+        const result = await Swal.fire({
+            title: enabling ? 'Enable Listing?' : 'Disable Listing?',
+            text: enabling ? 'This book will be visible in Rentalplace again.' : 'This book will be hidden from new rental requests.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: enabling ? 'Enable' : 'Disable',
             background: '#1e2a22',
             color: '#E6CFA7',
             confirmButtonColor: '#E6CFA7'
         });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch(`/profile/my-listings/${listingId}/toggle`, { method: 'PATCH' });
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: data.message,
+                    background: '#1e2a22',
+                    color: '#E6CFA7',
+                    confirmButtonColor: '#E6CFA7'
+                }).then(() => window.location.reload());
+                return;
+            }
+
+            Swal.fire({ icon: 'error', title: 'Update Failed', text: data.message || 'Could not update listing.' });
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Update Failed', text: 'Could not update listing.' });
+        }
     }
 </script>

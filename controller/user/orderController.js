@@ -1,18 +1,40 @@
 import * as orderService from "../../service/user/orderService.js";
+import * as rentalService from "../../service/user/rentalService.js";
 
 export const listOrdersPage = async (req, res) => {
     try {
         const userId = req.user._id;
-        const searchQuery = req.query.search || '';
+        const orderType = req.query.type === "rents" ? "rents" : "purchases";
+        const filters = {
+            search: req.query.search || "",
+            status: req.query.status || "all",
+            startDate: req.query.startDate || "",
+            endDate: req.query.endDate || "",
+            sort: req.query.sort || "newest",
+            page: req.query.page || 1,
+            limit: 8
+        };
         
-        const orders = await orderService.getUserOrders(userId, searchQuery);
+        const [purchaseResult, rentalResult] = orderType === "rents"
+            ? [
+                { orders: [], total: 0, totalPages: 1, currentPage: 1, limit: filters.limit },
+                await rentalService.getRenterOrdersForOrdersPage(userId, filters)
+            ]
+            : [
+                await orderService.getUserOrders(userId, filters),
+                { rentalOrders: [], total: 0, totalPages: 1, currentPage: 1, limit: filters.limit }
+            ];
 
         res.render("pages/orders", {
             title: "My Orders | GRANTHAE",
             layout: "layouts/user-panel",
             user: req.user,
-            orders,
-            searchQuery,
+            orderType,
+            orders: purchaseResult.orders,
+            rentalOrders: rentalResult.rentalOrders,
+            pagination: orderType === "rents" ? rentalResult : purchaseResult,
+            searchQuery: filters.search,
+            filters,
             path: '/profile/orders'
         });
     } catch (error) {

@@ -93,45 +93,36 @@
             const data = await res.json();
             
             if (data.success) {
-                // Remove from wishlist visually since backend will do it silently but we need UI update
-                const itemEl = document.getElementById(`wishlist-item-${productId}-${variant || 'default'}`);
-                if (itemEl) {
-                    itemEl.classList.add('opacity-0', 'scale-95');
-                    setTimeout(() => {
-                        itemEl.remove();
-                        // Optional: if list is empty, reload to show empty state
-                        if (document.querySelectorAll('[id^="wishlist-item-"]').length === 0) {
-                            window.location.reload();
-                        }
-                    }, 300);
-                }
+                removeWishlistProductCards(productId);
 
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Moved to cart',
-                    showConfirmButton: false,
-                    timer: 3000
-                });
+                showToast('success', 'Moved to cart');
             } else {
                 if ((data.message || '').toLowerCase().includes('select a product option')) {
                     window.location.href = `/product/${productId}`;
                     return;
                 }
 
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'error',
-                    title: data.message,
-                    showConfirmButton: false,
-                    timer: 3000
-                });
+                showToast('error', data.message || 'Could not move item to cart.');
             }
         } catch (err) {
             console.error(err);
         }
+    }
+
+    function removeWishlistProductCards(productId) {
+        const itemEls = document.querySelectorAll(`[id^="wishlist-item-${productId}-"]`);
+        if (itemEls.length === 0) return;
+
+        itemEls.forEach((itemEl) => {
+            itemEl.classList.add('opacity-0', 'scale-95');
+        });
+
+        setTimeout(() => {
+            itemEls.forEach((itemEl) => itemEl.remove());
+            if (document.querySelectorAll('[id^="wishlist-item-"]').length === 0) {
+                window.location.reload();
+            }
+        }, 300);
     }
 
     async function removeWishlistItem(productId, variant) {

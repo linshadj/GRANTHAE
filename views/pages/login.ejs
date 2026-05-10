@@ -26,9 +26,12 @@
         type="password"
         name="password"
         id="password"
-        class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/50 focus:border-apple-blue transition-shadow sm:text-sm"
+        class="block w-full pl-10 pr-11 py-2.5 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-apple-blue/50 focus:border-apple-blue transition-shadow sm:text-sm"
         placeholder="••••••••"
       />
+      <button type="button" class="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-apple-blue transition-colors" data-target="password" aria-label="Show password">
+        <i data-lucide="eye" class="h-5 w-5"></i>
+      </button>
     </div>
     <div class="flex items-center justify-end mt-1">
       <a
@@ -40,7 +43,7 @@
     <p id="passwordError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
   </div>
 
-  <p id="backendError" class="hidden text-xs mt-1" style="color: rgb(225, 0, 0)"></p>
+  <p id="backendError" class="hidden text-xs mt-1 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 font-medium" style="color: rgb(225, 0, 0)"></p>
 
   <button
     id="submitButton"
@@ -85,6 +88,18 @@
   const passwordError = document.getElementById("passwordError")
   const backendError = document.getElementById("backendError");
   const submitButton = document.getElementById("submitButton");
+
+  document.querySelectorAll(".password-toggle").forEach((button) => {
+    button.addEventListener("click", () => {
+      const input = document.getElementById(button.dataset.target);
+      if (!input) return;
+      const isPassword = input.type === "password";
+      input.type = isPassword ? "text" : "password";
+      button.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+      button.innerHTML = `<i data-lucide="${isPassword ? 'eye-off' : 'eye'}" class="h-5 w-5"></i>`;
+      lucide.createIcons();
+    });
+  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -146,7 +161,7 @@
         console.log("Error in signIn fetch:", error);
         resetSubmitButton();
         backendError.classList.remove("hidden");
-        backendError.textContent = error;
+        backendError.textContent = "Could not sign in. Please try again.";
       }
     }
   });

@@ -18,7 +18,7 @@ export const signInVerify = async (userData) => {
     throw new Error("Email is registered using google, Please login using google.");
   }
   if (user.isBlocked) {
-    throw new Error("User has been blocked by admin.");
+    throw new Error("Your account has been blocked by admin.");
   }
 
   const isPassMatching = await bcrypt.compare(password, user.password);

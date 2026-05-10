@@ -89,10 +89,24 @@ const normalizeCouponPayload = (body) => {
   };
 };
 
+const couponErrorMessage = (error) => {
+  if (error?.code === 11000) return "A coupon with this code already exists.";
+  if (error?.name === "ValidationError") {
+    return Object.values(error.errors || {})[0]?.message || "Coupon validation failed.";
+  }
+  if (error?.name === "CastError") return "Invalid coupon details.";
+  return error?.message || "Something went wrong while saving the coupon.";
+};
+
 const validateCouponPayload = async (payload, excludedId = null) => {
   if (!payload.code) return "Coupon code is required.";
   if (!payload.discountValue || payload.discountValue <= 0) return "Discount value must be greater than zero.";
   if (payload.discountType === "percentage" && payload.discountValue > 100) return "Percentage discount cannot exceed 100%.";
+  if (!payload.minPurchaseAmount || payload.minPurchaseAmount <= 0) return "Minimum order value must be greater than zero.";
+  if (payload.discountValue >= payload.minPurchaseAmount) return "Discount value must be less than the minimum order value.";
+  if (payload.maxDiscountAmount < 0) return "Max discount cannot be negative.";
+  if (payload.usageLimit < 0) return "Total usage limit cannot be negative.";
+  if (payload.usageLimitPerUser < 0) return "Usage limit per user cannot be negative.";
   if (!payload.startDate || Number.isNaN(payload.startDate.getTime())) return "Start date is required.";
   if (!payload.expiresAt || Number.isNaN(payload.expiresAt.getTime())) return "Expiry date is required.";
   if (payload.expiresAt < payload.startDate) return "Expiry date cannot be before the start date.";
@@ -181,7 +195,7 @@ export const addCoupon = async (req, res, next) => {
       redirectUrl: "/admin/coupons",
     });
   } catch (error) {
-    next(error);
+    return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: couponErrorMessage(error) });
   }
 };
 
@@ -204,7 +218,7 @@ export const editCoupon = async (req, res, next) => {
       redirectUrl: "/admin/coupons",
     });
   } catch (error) {
-    next(error);
+    return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: couponErrorMessage(error) });
   }
 };
 

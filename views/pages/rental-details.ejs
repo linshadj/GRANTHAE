@@ -9,6 +9,11 @@
     const requiredWalletBalance = minRentalCharge + depositAmount;
     const walletBalance = wallet ? Number(wallet.balance || 0) : 0;
     const isRentalAvailable = rental.status === 'Available' && !rental.isBlocked && !rental.isDeleted;
+    const isOwnListing = typeof isOwner !== 'undefined' && isOwner;
+    const canRequestRental = isRentalAvailable && !isOwnListing;
+    const rentalReviews = reviewMeta && reviewMeta.reviews ? reviewMeta.reviews : [];
+    const rentalRating = Number(reviewMeta ? reviewMeta.avgRating : 0);
+    const rentalReviewCount = reviewMeta ? reviewMeta.reviewCount : 0;
     const createdDate = rental.createdAt ? new Date(rental.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not available';
     const updatedDate = rental.updatedAt ? new Date(rental.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not available';
     const statusClass = isRentalAvailable
@@ -18,7 +23,16 @@
             : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
 %>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-32">
+<style>
+    @media (min-width: 1024px) {
+        .rental-price-panel {
+            max-height: calc(100vh - 8rem);
+            overflow-y: auto;
+        }
+    }
+</style>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-24 lg:pb-36">
     <nav class="flex mb-8" aria-label="Breadcrumb">
         <ol class="flex items-center space-x-2 text-sm font-medium text-apple-text-gray">
             <li><a href="/home" class="hover:text-apple-dark transition-colors">Home</a></li>
@@ -64,11 +78,19 @@
                     <i data-lucide="share-2" class="w-4 h-4"></i>
                     Share
                 </button>
-                <a href="/profile/my-listings/rental-requests"
+                <% if (isOwnListing) { %>
+                    <a href="/profile/my-listings/<%= rental._id %>/edit"
+                        class="flex items-center justify-center gap-2 py-3 border border-white/10 rounded-xl bg-white/5 hover:bg-white/10 transition-all text-sm font-bold text-apple-dark">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        Edit
+                    </a>
+                <% } else { %>
+                    <a href="/rental-place"
                     class="flex items-center justify-center gap-2 py-3 border border-white/10 rounded-xl bg-white/5 hover:bg-white/10 transition-all text-sm font-bold text-apple-dark">
-                    <i data-lucide="inbox" class="w-4 h-4"></i>
-                    Requests
-                </a>
+                        <i data-lucide="book-open" class="w-4 h-4"></i>
+                        More
+                    </a>
+                <% } %>
             </div>
         </aside>
 
@@ -84,6 +106,14 @@
 
                 <h1 class="text-4xl md:text-5xl font-bold text-apple-dark leading-tight font-serif"><%= rental.bookTitle %></h1>
                 <p class="text-lg text-apple-text-gray mt-3">by <span class="text-apple-dark font-semibold"><%= rental.author %></span></p>
+                <div class="flex flex-wrap items-center gap-4 mt-6">
+                    <div class="flex items-center text-yellow-400">
+                        <% for (let i = 1; i <= 5; i++) { %>
+                            <i data-lucide="star" class="w-5 h-5 <%= i <= Math.round(rentalRating) ? 'fill-current' : 'text-white/20' %>"></i>
+                        <% } %>
+                    </div>
+                    <span class="text-sm text-apple-text-gray font-medium"><%= rentalRating.toFixed(1) %> (<%= rentalReviewCount %> reviews)</span>
+                </div>
             </div>
 
             <div class="text-apple-text-gray leading-relaxed whitespace-pre-line">
@@ -91,10 +121,6 @@
             </div>
 
             <div class="border-y border-white/10 py-6 grid grid-cols-2 gap-y-5 gap-x-6">
-                <div>
-                    <span class="block text-xs font-bold text-apple-text-gray/70 uppercase tracking-wide">ISBN</span>
-                    <span class="text-sm font-semibold text-apple-dark"><%= rental.isbn || 'Not provided' %></span>
-                </div>
                 <div>
                     <span class="block text-xs font-bold text-apple-text-gray/70 uppercase tracking-wide">Category</span>
                     <span class="text-sm font-semibold text-apple-dark"><%= categoryName %></span>
@@ -118,10 +144,6 @@
                 <div>
                     <span class="block text-xs font-bold text-apple-text-gray/70 uppercase tracking-wide">Security Deposit</span>
                     <span class="text-sm font-semibold text-apple-dark">&#8377;<%= depositAmount.toLocaleString('en-IN') %></span>
-                </div>
-                <div>
-                    <span class="block text-xs font-bold text-apple-text-gray/70 uppercase tracking-wide">Images</span>
-                    <span class="text-sm font-semibold text-apple-dark"><%= rentalImages.length %> uploaded</span>
                 </div>
                 <div>
                     <span class="block text-xs font-bold text-apple-text-gray/70 uppercase tracking-wide">Listed</span>
@@ -157,8 +179,8 @@
             </div>
         </section>
 
-        <aside>
-            <div class="lg:sticky lg:top-32 glass-card p-6 shadow-2xl">
+        <aside class="lg:self-start">
+            <div class="rental-price-panel glass-card p-6 shadow-2xl lg:sticky lg:top-28">
                 <div class="flex justify-between items-end mb-6">
                     <div>
                         <span class="text-4xl font-bold text-apple-dark">&#8377;<%= dailyRate.toLocaleString('en-IN') %></span>
@@ -201,7 +223,7 @@
                     <div>
                         <% if (isLoggedIn) { %>
                             <p class="font-bold">Wallet balance: &#8377;<%= walletBalance.toLocaleString('en-IN') %></p>
-                            <p class="text-xs opacity-80">Deposit and rental charge must be available before requesting.</p>
+                            <p class="text-xs opacity-80">Keep this amount available. Payment is captured only after the owner confirms.</p>
                         <% } else { %>
                             <p class="font-bold">Login required</p>
                             <p class="text-xs opacity-80">Sign in to check wallet balance and request this rental.</p>
@@ -210,12 +232,12 @@
                 </div>
 
                 <button type="button" onclick="handleRentalRequest()"
-                    class="w-full btn-primary py-3 text-base shadow-lg shadow-apple-gold/20 flex items-center justify-center gap-2 <%= !isRentalAvailable ? 'opacity-50 cursor-not-allowed' : '' %>"
-                    <%= !isRentalAvailable ? 'disabled' : '' %>>
+                    class="w-full btn-primary py-3 text-base shadow-lg shadow-apple-gold/20 flex items-center justify-center gap-2 <%= !canRequestRental ? 'opacity-50 cursor-not-allowed' : '' %>"
+                    <%= !canRequestRental ? 'disabled' : '' %>>
                     <i data-lucide="calendar" class="w-5 h-5"></i>
-                    Request to Rent
+                    <%= isOwnListing ? 'Your Listing' : 'Request to Rent' %>
                 </button>
-                <p class="text-xs text-center text-apple-text-gray mt-3">You will not be charged until the request flow is confirmed.</p>
+                <p class="text-xs text-center text-apple-text-gray mt-3"><%= isOwnListing ? 'You cannot rent a book listed by you.' : 'The owner must confirm before the book is marked as rented.' %></p>
 
                 <div class="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 gap-4">
                     <div class="text-center">
@@ -230,6 +252,101 @@
             </div>
         </aside>
     </div>
+
+    <% if (relatedRentals && relatedRentals.length > 0) { %>
+        <section class="mt-24 pt-12 border-t border-white/10">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-apple-dark font-serif">Related Rental Books</h2>
+                <a href="/rental-place?category=<%= rental.category ? rental.category._id : '' %>" class="text-sm font-bold text-apple-blue hover:underline">View more</a>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <% relatedRentals.forEach(relRental => { %>
+                    <article class="bg-apple-card border border-white/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all">
+                        <a href="/rental/<%= relRental._id %>" class="block aspect-[2/3] bg-white/5">
+                            <img src="<%= relRental.coverImage || (relRental.images && relRental.images[0]) || '/images/default-book.jpg' %>" alt="<%= relRental.bookTitle %>" class="w-full h-full object-cover">
+                        </a>
+                        <div class="p-4">
+                            <p class="text-[10px] text-apple-blue font-bold uppercase tracking-widest mb-2"><%= relRental.category ? relRental.category.name : 'Rental' %></p>
+                            <a href="/rental/<%= relRental._id %>" class="font-bold text-apple-dark hover:text-apple-blue line-clamp-2"><%= relRental.bookTitle %></a>
+                            <p class="text-xs text-apple-text-gray mt-1">by <%= relRental.author %></p>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span class="text-sm font-bold text-apple-dark">&#8377;<%= Number(relRental.dailyRate || 0).toLocaleString('en-IN') %>/day</span>
+                                <span class="text-[10px] text-green-500 font-bold uppercase tracking-widest">Available</span>
+                            </div>
+                        </div>
+                    </article>
+                <% }) %>
+            </div>
+        </section>
+    <% } %>
+
+    <section id="reviews" class="mt-24 pt-12 border-t border-white/10">
+        <div class="flex items-center justify-between gap-4 mb-8">
+            <h2 class="text-2xl font-bold text-apple-dark font-serif">Rental Reviews</h2>
+            <span class="text-sm text-apple-text-gray"><%= rentalReviewCount %> reviews</span>
+        </div>
+
+        <% if (reviewMeta && reviewMeta.canReview) { %>
+            <form id="rentalReviewForm" class="bg-apple-card border border-white/10 rounded-3xl p-6 mb-8 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Rating</label>
+                        <select name="rating" required class="w-full px-3 py-3 bg-white/5 border border-white/10 rounded-xl text-apple-dark outline-none">
+                            <option value="">Select</option>
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-4">
+                        <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Review</label>
+                        <textarea name="comment" rows="3" required class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-apple-dark outline-none resize-none" placeholder="Share your rental experience..."></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="btn-primary px-6 py-3 font-bold">Submit Review</button>
+                </div>
+            </form>
+        <% } else if (reviewMeta && reviewMeta.userReview) { %>
+            <div class="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 mb-8 text-sm text-green-600 font-bold">
+                You have already reviewed this rental book.
+            </div>
+        <% } %>
+
+        <% if (rentalReviews.length > 0) { %>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <% rentalReviews.forEach(review => { %>
+                    <div class="bg-apple-card border border-white/10 p-6 rounded-3xl shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-apple-blue/10 text-apple-blue rounded-full flex items-center justify-center font-bold">
+                                    <%= review.user?.firstName ? review.user.firstName[0] : 'R' %>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-apple-dark"><%= review.user?.firstName || 'Reader' %> <%= review.user?.lastName || '' %></p>
+                                    <p class="text-xs text-apple-text-gray"><%= review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-IN') : '' %></p>
+                                </div>
+                            </div>
+                            <div class="flex">
+                                <% for (let i = 1; i <= 5; i++) { %>
+                                    <i data-lucide="star" class="w-4 h-4 <%= i <= review.rating ? 'text-yellow-400 fill-current' : 'text-white/20' %>"></i>
+                                <% } %>
+                            </div>
+                        </div>
+                        <p class="text-apple-text-gray text-sm leading-relaxed">"<%= review.comment %>"</p>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="text-center py-12 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                <i data-lucide="message-square-quote" class="w-12 h-12 text-apple-text-gray/50 mx-auto mb-4"></i>
+                <h3 class="text-lg font-bold text-apple-dark">No rental reviews yet</h3>
+                <p class="text-apple-text-gray">Reviews will appear after readers share feedback.</p>
+            </div>
+        <% } %>
+    </section>
 </div>
 
 <div id="fund-check-modal" class="fixed inset-0 z-[100000] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -275,6 +392,7 @@
     const currentWalletBalance = <%= walletBalance %>;
     const userLoggedIn = <%= isLoggedIn ? 'true' : 'false' %>;
     const rentalAvailable = <%= isRentalAvailable ? 'true' : 'false' %>;
+    const rentalOwnedByUser = <%= isOwnListing ? 'true' : 'false' %>;
 
     const rentalDuration = document.getElementById('rentalDuration');
     const rentalStartDate = document.getElementById('rentalStartDate');
@@ -306,11 +424,23 @@
         if (requiredWalletBalance) requiredWalletBalance.textContent = formatRupees(required);
     }
 
-    function handleRentalRequest() {
+    async function handleRentalRequest() {
         updateRentalTotals();
 
         if (!userLoggedIn) {
             window.location.href = '/sign-in?status=error&message=Please%20login';
+            return;
+        }
+
+        if (rentalOwnedByUser) {
+            Swal.fire({
+                title: 'Own Listing',
+                text: 'You cannot rent a book listed by you.',
+                icon: 'info',
+                background: '#1e2a22',
+                color: '#E6CFA7',
+                confirmButtonColor: '#E6CFA7'
+            });
             return;
         }
 
@@ -326,27 +456,80 @@
             return;
         }
 
+        if (!rentalStartDate?.value) {
+            Swal.fire({
+                title: 'Select Start Date',
+                text: 'Choose when you want the rental to begin.',
+                icon: 'warning',
+                background: '#1e2a22',
+                color: '#E6CFA7',
+                confirmButtonColor: '#E6CFA7'
+            });
+            return;
+        }
+
         const required = getRequiredBalance();
         if (currentWalletBalance < required) {
             document.getElementById('modalRequiredBalance').textContent = formatRupees(required);
             document.getElementById('modalCurrentBalance').textContent = formatRupees(currentWalletBalance);
             document.getElementById('modalShortfall').textContent = formatRupees(required - currentWalletBalance);
             document.getElementById('fund-check-modal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
             return;
         }
 
-        Swal.fire({
-            title: 'Rental Request',
-            text: 'Rental request submission is being finalized.',
-            icon: 'info',
+        const result = await Swal.fire({
+            title: 'Send Rental Request?',
+            text: `${formatRupees(required)} should remain available. Your wallet is charged only after owner confirmation.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Send Request',
             background: '#1e2a22',
             color: '#E6CFA7',
             confirmButtonColor: '#E6CFA7'
         });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch('/rentals/<%= rental._id %>/request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    startDate: rentalStartDate.value,
+                    durationDays: getSelectedDuration()
+                })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.href = data.redirectUrl;
+                return;
+            }
+
+            Swal.fire({
+                title: 'Request Failed',
+                text: data.message || 'Could not send this rental request.',
+                icon: 'error',
+                background: '#1e2a22',
+                color: '#E6CFA7',
+                confirmButtonColor: '#E6CFA7'
+            });
+        } catch (error) {
+            Swal.fire({
+                title: 'Request Failed',
+                text: 'Could not send this rental request.',
+                icon: 'error',
+                background: '#1e2a22',
+                color: '#E6CFA7',
+                confirmButtonColor: '#E6CFA7'
+            });
+        }
     }
 
     function closeCheckModal() {
         document.getElementById('fund-check-modal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
     }
 
     function updateRentalImage(button, src) {
@@ -377,19 +560,50 @@
             return;
         }
         navigator.clipboard?.writeText(window.location.href);
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: 'Link copied',
-            showConfirmButton: false,
-            timer: 2000
-        });
+        showToast('success', 'Link copied');
     }
 
     if (rentalStartDate) {
         rentalStartDate.min = new Date().toISOString().split('T')[0];
     }
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !document.getElementById('fund-check-modal').classList.contains('hidden')) {
+            closeCheckModal();
+        }
+    });
+
     rentalDuration?.addEventListener('input', updateRentalTotals);
     updateRentalTotals();
+
+    const rentalReviewForm = document.getElementById('rentalReviewForm');
+    rentalReviewForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = Object.fromEntries(new FormData(rentalReviewForm).entries());
+
+        try {
+            const response = await fetch('/rental/<%= rental._id %>/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Review Submitted',
+                    text: data.message,
+                    background: '#1e2a22',
+                    color: '#E6CFA7',
+                    confirmButtonColor: '#E6CFA7'
+                }).then(() => window.location.reload());
+                return;
+            }
+
+            Swal.fire({ icon: 'error', title: 'Review Failed', text: data.message || 'Could not submit review.' });
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Review Failed', text: 'Could not submit review.' });
+        }
+    });
 </script>

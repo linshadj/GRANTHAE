@@ -1,5 +1,6 @@
 <div id="sidebar-overlay"
   class="fixed inset-0 bg-black/50 z-30 hidden md:hidden glass-blur transition-opacity opacity-0"></div>
+<% const isOrdersPage = typeof path !== 'undefined' && path === '/profile/orders'; %>
 <aside id="admin-sidebar"
   class="w-64 bg-apple-card border-r border-white/10 h-screen fixed left-0 top-0 overflow-y-auto transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 ease-in-out">
   <div class="h-16 flex items-center px-6 border-b border-white/10">
@@ -54,30 +55,39 @@
           <a href="/profile/orders"
             class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/profile/orders' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
             <i data-lucide="package" class="w-5 h-5"></i>
-            Order History
+            My Orders
           </a>
         </li>
-        <li>
-          <a href="/profile/my-listings"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/profile/my-listings' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
-            <i data-lucide="book-copy" class="w-5 h-5"></i>
-            My Listings
-          </a>
-        </li>
-        <li>
-          <a href="/profile/my-listings/rental-requests"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/profile/my-listings/rental-requests' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
-            <i data-lucide="inbox" class="w-5 h-5"></i>
-            Rental Requests
-          </a>
-        </li>
-        <li>
-          <a href="/list-rental-book"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/list-rental-book' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
-            <i data-lucide="plus-circle" class="w-5 h-5"></i>
-            List a Book
-          </a>
-        </li>
+        <% if (!isOrdersPage) { %>
+          <li>
+            <a href="/profile/my-listings"
+              class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/profile/my-listings' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
+              <i data-lucide="book-copy" class="w-5 h-5"></i>
+              My Listings
+            </a>
+          </li>
+          <li>
+            <a href="/profile/rentals"
+              class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/profile/rentals' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
+              <i data-lucide="book-open-check" class="w-5 h-5"></i>
+              My Rentals
+            </a>
+          </li>
+          <li>
+            <a href="/profile/my-listings/rental-requests"
+              class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/profile/my-listings/rental-requests' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
+              <i data-lucide="inbox" class="w-5 h-5"></i>
+              Rental Requests
+            </a>
+          </li>
+          <li>
+            <a href="/list-rental-book"
+              class="flex items-center gap-3 px-4 py-2.5 rounded-lg <%= path === '/list-rental-book' ? 'bg-white/5 text-apple-dark font-medium border border-white/5' : 'text-apple-text-gray hover:bg-white/5 hover:text-apple-dark transition-colors' %>">
+              <i data-lucide="plus-circle" class="w-5 h-5"></i>
+              List a Book
+            </a>
+          </li>
+        <% } %>
 
       </ul>
     </div>

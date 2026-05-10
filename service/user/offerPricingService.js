@@ -19,6 +19,34 @@ const calculateDiscountAmount = (offer, price) => {
     return roundCurrency(Math.min(Math.max(rawDiscount, 0), normalizedPrice));
 };
 
+const getActiveOffers = async () => {
+    const now = new Date();
+
+    return Offer.find({
+        isDeleted: false,
+        isActive: true,
+        startDate: { $lte: now },
+        endDate: { $gte: now },
+    });
+};
+
+const offerAppliesToProduct = (offer, product) => {
+    if (offer.appliesTo === "all") return true;
+
+    const productId = toIdString(product);
+    const categoryId = toIdString(product.category);
+
+    if (offer.appliesTo === "products") {
+        return Array.isArray(offer.products) && offer.products.some((id) => toIdString(id) === productId);
+    }
+
+    if (offer.appliesTo === "categories") {
+        return categoryId && Array.isArray(offer.categories) && offer.categories.some((id) => toIdString(id) === categoryId);
+    }
+
+    return false;
+};
+
 export const getActiveOffersForProduct = async (product) => {
     const now = new Date();
     const productId = toIdString(product);
@@ -42,12 +70,13 @@ export const getActiveOffersForProduct = async (product) => {
     });
 };
 
-export const getBestOfferForProduct = async (product, basePrice = product.price) => {
+const getBestOfferFromOffers = (product, basePrice, offers = []) => {
     const price = roundCurrency(basePrice);
-    const offers = await getActiveOffersForProduct(product);
     let best = null;
 
     for (const offer of offers) {
+        if (!offerAppliesToProduct(offer, product)) continue;
+
         const discountAmount = calculateDiscountAmount(offer, price);
         if (discountAmount <= 0) continue;
 
@@ -73,14 +102,21 @@ export const getBestOfferForProduct = async (product, basePrice = product.price)
     };
 };
 
-export const applyOfferToProductObject = async (product) => {
+export const getBestOfferForProduct = async (product, basePrice = product.price) => {
+    const price = roundCurrency(basePrice);
+    const offers = await getActiveOffersForProduct(product);
+    return getBestOfferFromOffers(product, price, offers);
+};
+
+export const applyOfferToProductObject = async (product, activeOffers = null) => {
     const productObject = typeof product.toObject === "function" ? product.toObject() : { ...product };
-    const offer = await getBestOfferForProduct(productObject, productObject.price);
+    const offers = activeOffers || await getActiveOffersForProduct(productObject);
+    const offer = getBestOfferFromOffers(productObject, productObject.price, offers);
     const variants = Array.isArray(productObject.variants)
-        ? await Promise.all(productObject.variants.map(async (variant) => {
+        ? productObject.variants.map((variant) => {
             const variantObject = typeof variant.toObject === "function" ? variant.toObject() : { ...variant };
             const basePrice = roundCurrency(variantObject.priceOverride || productObject.price);
-            const variantOffer = await getBestOfferForProduct(productObject, basePrice);
+            const variantOffer = getBestOfferFromOffers(productObject, basePrice, offers);
             return {
                 ...variantObject,
                 basePrice,
@@ -89,7 +125,7 @@ export const applyOfferToProductObject = async (product) => {
                 offerTitle: variantOffer.title,
                 hasOffer: variantOffer.discountAmount > 0,
             };
-        }))
+        })
         : [];
 
     return {
@@ -97,6 +133,7 @@ export const applyOfferToProductObject = async (product) => {
         variants,
         originalPrice: roundCurrency(productObject.price),
         offerPrice: offer.finalPrice,
+        effectivePrice: offer.finalPrice,
         offerDiscountAmount: offer.discountAmount,
         bestOffer: offer.title ? offer : null,
         hasOffer: offer.discountAmount > 0,
@@ -104,5 +141,6 @@ export const applyOfferToProductObject = async (product) => {
 };
 
 export const applyOffersToProductObjects = async (products) => {
-    return Promise.all(products.map((product) => applyOfferToProductObject(product)));
+    const activeOffers = await getActiveOffers();
+    return Promise.all(products.map((product) => applyOfferToProductObject(product, activeOffers)));
 };

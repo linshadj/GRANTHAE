@@ -12,6 +12,7 @@ export const getCheckoutPage = async (req, res) => {
             checkoutService.getCheckoutData(userId),
             getWallet(userId)
         ]);
+        const availableCoupons = await checkoutService.getAvailableCouponsForCheckout(userId, checkoutData.cartTotal);
         let appliedCoupon = null;
 
         if (req.session.checkoutCoupon?.code) {
@@ -26,6 +27,7 @@ export const getCheckoutPage = async (req, res) => {
             title: "Checkout",
             user: req.user,
             appliedCoupon,
+            availableCoupons,
             walletBalance: wallet.balance || 0,
             razorpayKeyId: getRazorpayKeyId(),
             razorpayConfigured: isRazorpayConfigured(),

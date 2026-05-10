@@ -55,15 +55,7 @@ export const addToCart = async (userId, productId, variant = "", quantity = 1) =
     const itemIndex = cart.items.findIndex(item => item.product.toString() === productId && item.variant === variant);
 
     if (itemIndex > -1) {
-        // Increase the quantity if the product is already in the cart
-        const newQuantity = cart.items[itemIndex].quantity + Number(quantity);
-        if (newQuantity > maxQuantityPerItem) {
-            throw new Error(`Maximum quantity limit of ${maxQuantityPerItem} reached for this item.`);
-        }
-        if (newQuantity > availableStock) {
-            throw new Error(`Cannot add more than available stock (${availableStock}).`);
-        }
-        cart.items[itemIndex].quantity = newQuantity;
+        throw new Error("This item is already in your cart. Update the quantity from the cart page.");
     } else {
         if (quantity > maxQuantityPerItem) {
              throw new Error(`Maximum quantity limit of ${maxQuantityPerItem} reached for this item.`);
@@ -73,10 +65,10 @@ export const addToCart = async (userId, productId, variant = "", quantity = 1) =
 
     await cart.save();
 
-    // Remove product from wishlist when added to cart
+    // Once a product is in cart, keep only one buying intent visible to the user.
     await wishlistDb.updateOne(
         { user: userId },
-        { $pull: { items: { product: productId, variant: variant } } }
+        { $pull: { items: { product: productId } } }
     );
 
     return cart;

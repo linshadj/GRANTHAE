@@ -17,11 +17,12 @@
             </button>
         </div>
 
+        <% const displayPrice = book.effectivePrice || book.offerPrice || book.price; %>
         <div class="absolute top-2 right-2 bg-green-500 px-3 py-1 rounded-lg text-sm font-black text-white shadow-xl border border-white/20 text-right leading-tight">
             <% if (book.hasOffer) { %>
                 <span class="block text-[10px] line-through decoration-2 opacity-75"><s>₹<%= book.price %></s></span>
             <% } %>
-            <span>₹<%= book.hasOffer ? book.offerPrice : book.price %></span>
+            <span>₹<%= displayPrice %></span>
         </div>
     </div>
 

@@ -191,6 +191,35 @@
                             </button>
                         </div>
                         <p id="coupon-message" class="<%= appliedCoupon && appliedCoupon.couponCode ? '' : 'hidden' %> text-[10px] font-bold <%= appliedCoupon && appliedCoupon.couponCode ? 'text-green-500' : '' %>"><%= appliedCoupon && appliedCoupon.couponCode ? `${appliedCoupon.couponCode} applied.` : '' %></p>
+                        <% if (availableCoupons && availableCoupons.length > 0) { %>
+                            <div class="pt-3 border-t border-white/5 space-y-2">
+                                <p class="text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest">Available Coupons</p>
+                                <div class="space-y-2 max-h-44 overflow-y-auto pr-1 custom-scrollbar">
+                                    <% availableCoupons.forEach(coupon => { %>
+                                        <button type="button"
+                                            data-coupon-code="<%= coupon.code %>"
+                                            class="available-coupon-btn w-full text-left rounded-xl border p-3 transition-all <%= coupon.isApplicable ? 'border-apple-blue/20 bg-apple-blue/5 hover:bg-apple-blue/10' : 'border-white/5 bg-black/10 opacity-60 cursor-not-allowed' %>"
+                                            <%= coupon.isApplicable ? '' : 'disabled' %>>
+                                            <span class="flex items-start justify-between gap-3">
+                                                <span>
+                                                    <span class="block font-mono text-xs font-bold text-apple-blue tracking-wider"><%= coupon.code %></span>
+                                                    <span class="block text-[10px] text-apple-text-gray mt-1">
+                                                        <%= coupon.discountType === 'percentage' ? `${coupon.discountValue}% off` : `₹${coupon.discountValue} off` %>
+                                                        <% if (coupon.maxDiscountAmount > 0 && coupon.discountType === 'percentage') { %>
+                                                            up to ₹<%= coupon.maxDiscountAmount %>
+                                                        <% } %>
+                                                        on orders above ₹<%= coupon.minPurchaseAmount %>
+                                                    </span>
+                                                </span>
+                                                <span class="text-[10px] font-bold <%= coupon.isApplicable ? 'text-green-500' : 'text-apple-text-gray' %>">
+                                                    <%= coupon.isApplicable ? `Save ₹${coupon.discountAmount}` : 'Not eligible' %>
+                                                </span>
+                                            </span>
+                                        </button>
+                                    <% }) %>
+                                </div>
+                            </div>
+                        <% } %>
                     </div>
                     <div id="coupon-discount-row" class="<%= appliedCoupon && appliedCoupon.discountAmount > 0 ? 'flex' : 'hidden' %> justify-between items-center text-sm">
                         <span id="coupon-discount-label" class="text-apple-text-gray/60 uppercase tracking-widest text-[10px] font-medium">Coupon Discount<%= appliedCoupon && appliedCoupon.couponCode ? ` (${appliedCoupon.couponCode})` : '' %></span>
@@ -287,6 +316,7 @@
     const couponDiscountRow = document.getElementById('coupon-discount-row');
     const couponDiscountLabel = document.getElementById('coupon-discount-label');
     const couponDiscountAmount = document.getElementById('coupon-discount-amount');
+    const availableCouponBtns = document.querySelectorAll('.available-coupon-btn');
     const checkoutTotalAmount = document.getElementById('checkout-total-amount');
     const walletPaymentInput = document.getElementById('wallet-payment-input');
     const walletPaymentLabel = document.getElementById('wallet-payment-label');
@@ -388,6 +418,10 @@
         checkoutPayableAmount = Number(data.totalAmount ?? cartTotal);
         checkoutTotalAmount.textContent = formatCurrency(checkoutPayableAmount);
         updateWalletAvailability();
+        availableCouponBtns.forEach((btn) => {
+            btn.classList.toggle('ring-2', Boolean(appliedCouponCode && btn.dataset.couponCode === appliedCouponCode));
+            btn.classList.toggle('ring-apple-blue/40', Boolean(appliedCouponCode && btn.dataset.couponCode === appliedCouponCode));
+        });
 
         if (appliedCouponCode && Number(data.discountAmount) > 0) {
             couponInput.value = appliedCouponCode;
@@ -519,16 +553,7 @@
                 const countryInput = checkoutAddressForm.querySelector('[name="country"]');
                 if (countryInput) countryInput.value = 'India';
                 closeCheckoutAddressModal();
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Address added',
-                    showConfirmButton: false,
-                    timer: 1800,
-                    background: '#2c3b32',
-                    color: '#e6cfa7'
-                });
+                showToast('success', 'Address added');
             } catch (error) {
                 checkoutAddressError.textContent = 'Could not save address. Please try again.';
                 checkoutAddressError.classList.remove('hidden');
@@ -584,6 +609,19 @@
             }
         });
     }
+
+    availableCouponBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const couponCode = btn.dataset.couponCode || '';
+            if (!couponCode || btn.disabled) return;
+            if (appliedCouponCode && appliedCouponCode !== couponCode) {
+                setCouponMessage('Remove the current coupon before applying another one.');
+                return;
+            }
+            couponInput.value = couponCode;
+            applyCouponBtn?.click();
+        });
+    });
 
     if (removeCouponBtn) {
         removeCouponBtn.addEventListener('click', async () => {
@@ -707,4 +745,11 @@
     });
 
     updateWalletAvailability();
+    if (appliedCouponCode) {
+        availableCouponBtns.forEach((btn) => {
+            const isActive = btn.dataset.couponCode === appliedCouponCode;
+            btn.classList.toggle('ring-2', isActive);
+            btn.classList.toggle('ring-apple-blue/40', isActive);
+        });
+    }
 </script>

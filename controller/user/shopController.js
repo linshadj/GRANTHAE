@@ -2,11 +2,12 @@ import { getFilteredProducts, getProductById, getRelatedProducts } from "../../s
 import { Category } from "../../models/categoryDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 import wishlistDb from "../../models/wishlistDb.js";
+import * as reviewService from "../../service/user/reviewService.js";
 
 export const listProducts = async (req, res) => {
     try {
         const query = req.query;
-        const { products, totalProducts, totalPages, currentPage } = await getFilteredProducts(query);
+        const { products, totalProducts, totalPages, currentPage, priceRange } = await getFilteredProducts(query);
         const categories = await Category.find({ isBlocked: false, isDeleted: false });
 
         let wishlistProductIds = [];
@@ -25,6 +26,7 @@ export const listProducts = async (req, res) => {
             totalProducts,
             totalPages,
             currentPage,
+            priceRange,
             query, // Pass query back to views for persistence in filters/pagination
             wishlistProductIds
         });
@@ -58,18 +60,38 @@ export const productDetails = async (req, res) => {
             if (wishlist) isInWishlist = true;
         }
 
+        const reviewMeta = await reviewService.getProductReviewMeta(id, userId);
+
         res.render("pages/product-details", {
             title: `${product.name} - GRANTHAE`,
             product,
             relatedProducts,
             isUnavailable: product.isUnavailable,
-            isInWishlist
+            isInWishlist,
+            reviewMeta
         });
     } catch (error) {
         console.error("Error in productDetails:", error);
         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("pages/error", {
             message: "Something went wrong while loading product details.",
             error
+        });
+    }
+};
+
+export const submitProductReview = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        await reviewService.createProductReview(req.params.id, userId, req.body.rating, req.body.comment);
+
+        res.status(STATUS_CODES.CREATED).json({
+            success: true,
+            message: "Review submitted."
+        });
+    } catch (error) {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+            success: false,
+            message: error.message || "Could not submit review."
         });
     }
 };

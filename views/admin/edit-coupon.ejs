@@ -57,8 +57,9 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Minimum Order</label>
-                    <input type="number" id="minPurchaseAmount" name="minPurchaseAmount" min="0" step="0.01" value="<%= data.minPurchaseAmount || 0 %>"
+                    <input type="number" id="minPurchaseAmount" name="minPurchaseAmount" min="0.01" step="0.01" value="<%= data.minPurchaseAmount || '' %>"
                         class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:ring-1 focus:ring-apple-gold/50 transition-all">
+                    <span id="minPurchaseAmountError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Max Discount</label>
@@ -155,7 +156,7 @@
         document.querySelectorAll('.error-msg').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('input, textarea, select').forEach(el => el.classList.remove('border-red-500'));
 
-        const required = ['code', 'discountValue', 'startDate', 'expiresAt'];
+        const required = ['code', 'discountValue', 'minPurchaseAmount', 'startDate', 'expiresAt'];
         required.forEach(id => {
             if (!document.getElementById(id).value.trim()) {
                 setError(id, 'This field is required.');
@@ -165,11 +166,20 @@
 
         const discountType = document.getElementById('discountType').value;
         const discountValue = Number(document.getElementById('discountValue').value);
+        const minPurchaseAmount = Number(document.getElementById('minPurchaseAmount').value);
         if (discountValue <= 0) {
             setError('discountValue', 'Discount value must be greater than zero.');
             isValid = false;
         } else if (discountType === 'percentage' && discountValue > 100) {
             setError('discountValue', 'Percentage discount cannot exceed 100%.');
+            isValid = false;
+        }
+        if (minPurchaseAmount <= 0) {
+            setError('minPurchaseAmount', 'Minimum order value must be greater than zero.');
+            isValid = false;
+        } else if (discountValue >= minPurchaseAmount) {
+            setError('discountValue', 'Discount value must be less than the minimum order value.');
+            setError('minPurchaseAmount', 'Minimum order value must be greater than discount value.');
             isValid = false;
         }
 
@@ -214,22 +224,42 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            const result = await res.json();
+            const result = await res.json().catch(() => ({
+                success: false,
+                message: 'Something went wrong while saving the coupon.'
+            }));
             if (result.success) {
                 Swal.fire({ icon: 'success', title: 'Saved', text: result.message, background: '#1e2a22', color: '#E6CFA7' }).then(() => {
                     window.location.href = result.redirectUrl || '/admin/coupons';
                 });
             } else {
-                Swal.fire({ icon: 'error', title: 'Error', text: result.message, background: '#1e2a22', color: '#E6CFA7' });
+                const message = result.message || 'Coupon could not be saved.';
+                applyServerError(message);
+                Swal.fire({ icon: 'error', title: 'Error', text: message, background: '#1e2a22', color: '#E6CFA7' });
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 lucide.createIcons();
             }
         } catch (error) {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong', background: '#1e2a22', color: '#E6CFA7' });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Could not save the coupon. Please try again.', background: '#1e2a22', color: '#E6CFA7' });
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
             lucide.createIcons();
         }
     });
+
+    function applyServerError(message) {
+        const normalized = String(message || '').toLowerCase();
+        if (normalized.includes('code') || normalized.includes('exists')) {
+            setError('code', message);
+        } else if (normalized.includes('minimum') || normalized.includes('order')) {
+            setError('minPurchaseAmount', message);
+        } else if (normalized.includes('discount')) {
+            setError('discountValue', message);
+        } else if (normalized.includes('start')) {
+            setError('startDate', message);
+        } else if (normalized.includes('expiry') || normalized.includes('date')) {
+            setError('expiresAt', message);
+        }
+    }
 </script>

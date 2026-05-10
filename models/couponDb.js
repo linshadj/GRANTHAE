@@ -101,9 +101,8 @@ couponSchema.virtual("status").get(function () {
   return "Active";
 });
 
-couponSchema.pre("validate", function (next) {
+couponSchema.pre("validate", function normalizeCouponCode() {
   if (this.code) this.code = this.code.trim().toUpperCase();
-  next();
 });
 
 export const Coupon = mongoose.model("Coupon", couponSchema);

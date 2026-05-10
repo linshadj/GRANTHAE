@@ -71,18 +71,74 @@ const refundItemToWallet = async (order, item, reason, precomputedRefundAmount =
     return refundAmount;
 };
 
-export const getUserOrders = async (userId, searchQuery = '') => {
-    let query = { user: userId };
+export const getUserOrders = async (userId, filters = {}) => {
+    const normalizedFilters = typeof filters === "string" ? { search: filters } : filters;
+    const {
+        search = "",
+        status = "all",
+        startDate = "",
+        endDate = "",
+        sort = "newest",
+        page = 1,
+        limit = 8
+    } = normalizedFilters;
+
+    const currentPage = Math.max(parseInt(page, 10) || 1, 1);
+    const pageLimit = Math.min(Math.max(parseInt(limit, 10) || 8, 1), 25);
+    const query = { user: userId };
     
-    if (searchQuery) {
-        query.orderID = { $regex: searchQuery, $options: 'i' };
+    if (search && search.trim()) {
+        query.orderID = { $regex: search.trim(), $options: 'i' };
     }
 
+    if (status && status !== "all") {
+        if (status === "Failed") {
+            query.paymentStatus = "Failed";
+        } else {
+            query.orderStatus = status;
+        }
+    }
+
+    const createdAt = {};
+    if (startDate) {
+        const parsedStartDate = new Date(startDate);
+        if (!Number.isNaN(parsedStartDate.getTime())) {
+            parsedStartDate.setHours(0, 0, 0, 0);
+            createdAt.$gte = parsedStartDate;
+        }
+    }
+    if (endDate) {
+        const parsedEndDate = new Date(endDate);
+        if (!Number.isNaN(parsedEndDate.getTime())) {
+            parsedEndDate.setHours(23, 59, 59, 999);
+            createdAt.$lte = parsedEndDate;
+        }
+    }
+    if (Object.keys(createdAt).length > 0) {
+        query.createdAt = createdAt;
+    }
+
+    const sortOptions = {
+        newest: { createdAt: -1 },
+        oldest: { createdAt: 1 },
+        price_desc: { totalAmount: -1 },
+        price_asc: { totalAmount: 1 }
+    };
+
+    const total = await orderDb.countDocuments(query);
     const orders = await orderDb.find(query)
         .populate('items.product')
-        .sort({ createdAt: -1 });
+        .sort(sortOptions[sort] || sortOptions.newest)
+        .skip((currentPage - 1) * pageLimit)
+        .limit(pageLimit);
     
-    return orders;
+    return {
+        orders,
+        total,
+        totalPages: Math.max(Math.ceil(total / pageLimit), 1),
+        currentPage,
+        limit: pageLimit
+    };
 };
 
 export const getOrderById = async (userId, orderId) => {
