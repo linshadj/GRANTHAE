@@ -1,4 +1,4 @@
-import { orderDetails, getOrderById, updateOrderStatusService } from "../../service/admin/orderService.js";
+import { orderDetails, getOrderById, reviewReturnRequestService, updateOrderStatusService } from "../../service/admin/orderService.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 
 export const ordersPage = async (req, res, next) => {
@@ -59,6 +59,25 @@ export const updateOrderStatus = async (req, res, next) => {
         res.status(STATUS_CODES.OK).json({
             success: true,
             message: `Order status updated to ${status}`
+        });
+    } catch (error) {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+export const reviewReturnRequest = async (req, res) => {
+    try {
+        const { orderId, itemId } = req.params;
+        const { action, rejectionReason } = req.body;
+
+        await reviewReturnRequestService(orderId, itemId, action, rejectionReason);
+
+        res.status(STATUS_CODES.OK).json({
+            success: true,
+            message: action === "approve" ? "Return approved. Wallet refund completed for prepaid orders." : "Return request rejected."
         });
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({

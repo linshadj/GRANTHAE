@@ -17,9 +17,11 @@
             </button>
         </div>
 
-        <div
-            class="absolute top-2 right-2 bg-green-500 px-3 py-1 rounded-lg text-sm font-black text-white shadow-xl border border-white/20">
-            ₹<%= book.price %>
+        <div class="absolute top-2 right-2 bg-green-500 px-3 py-1 rounded-lg text-sm font-black text-white shadow-xl border border-white/20 text-right leading-tight">
+            <% if (book.hasOffer) { %>
+                <span class="block text-[10px] line-through decoration-2 opacity-75"><s>₹<%= book.price %></s></span>
+            <% } %>
+            <span>₹<%= book.hasOffer ? book.offerPrice : book.price %></span>
         </div>
     </div>
 
@@ -42,6 +44,11 @@
         <p class="mt-1 text-sm text-apple-text-gray">
             <%= book.author %>
         </p>
+        <% if (book.hasOffer && book.bestOffer) { %>
+            <p class="mt-2 text-[10px] font-bold text-green-600 uppercase tracking-widest">
+                <%= book.bestOffer.title %>
+            </p>
+        <% } %>
 
         <div class="mt-auto pt-4 flex items-center justify-between border-t border-gray-100/50">
             <div class="flex items-center">

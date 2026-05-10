@@ -5,12 +5,13 @@ import { adminDashboardPage } from "../controller/admin/dashboardController.js";
 import { liveUsersSearch, toggleBlockUser, usersPage, viewUserDetail } from "../controller/admin/userController.js";
 import { addCategory, categoriesPage, editCategory, getAddCategoryPage, getEditCategoryPage, liveCategoriesSearch, toggleCategoryStatus } from "../controller/admin/categoryController.js";
 import { addProduct, editProduct, getAddProductPage, getEditProductPage, liveProductsSearch, productsPage, toggleProductStatus } from "../controller/admin/productController.js";
-import { liveOrdersSearch, ordersPage, updateOrderStatus, viewOrderDetail } from "../controller/admin/orderController.js";
+import { liveOrdersSearch, ordersPage, reviewReturnRequest, updateOrderStatus, viewOrderDetail } from "../controller/admin/orderController.js";
 import { getInventoryPage, updateStock } from "../controller/admin/inventoryController.js";
 import { getRentalRequestsPage, handleRentalRequest } from "../controller/admin/rentalRequestController.js";
 import { uploadCategory, uploadProduct } from "../middlewares/multerUpload.js";
 import { addCoupon, couponsPage, editCoupon, getAddCouponPage, getEditCouponPage, toggleCouponStatus } from "../controller/admin/couponController.js";
 import { addOffer, editOffer, getAddOfferPage, getEditOfferPage, offersPage, toggleOfferStatus } from "../controller/admin/offerController.js";
+import { downloadSalesReport, reportsPage } from "../controller/admin/reportController.js";
 
 const router = express.Router();
 
@@ -71,6 +72,7 @@ router.get("/products/live", isAdmin, liveProductsSearch);
 router.get("/orders", isAdmin, ordersPage);
 router.get("/orders/view/:id", isAdmin, viewOrderDetail);
 router.patch("/orders/update-status/:id", isAdmin, updateOrderStatus);
+router.patch("/orders/:orderId/items/:itemId/return-review", isAdmin, reviewReturnRequest);
 router.get("/orders/live", isAdmin, liveOrdersSearch);
 
 // Inventory
@@ -80,6 +82,10 @@ router.patch("/inventory/update-stock/:id", isAdmin, updateStock);
 // Rental Requests
 router.get("/rental-requests", isAdmin, getRentalRequestsPage);
 router.patch("/rental-requests/:id", isAdmin, handleRentalRequest);
+
+// Reports
+router.get("/reports", isAdmin, reportsPage);
+router.get("/reports/download/:format", isAdmin, downloadSalesReport);
 
 router.get("/logout", isAdmin, adminLogoutHandler);
 

@@ -138,6 +138,7 @@
                 <% if (orders && orders.length > 0) { %>
                     <div class="space-y-3">
                         <% orders.slice(0, 3).forEach(order => { %>
+                            <% const displayStatus = order.orderStatus === 'Cancelled' ? 'Cancelled' : order.paymentStatus === 'Failed' ? 'Failed' : order.orderStatus; %>
                             <div class="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
                                 <div class="flex items-center gap-4">
                                     <div class="flex -space-x-2">
@@ -167,11 +168,11 @@
                                     <div class="text-right">
                                         <p class="text-white text-sm font-bold">₹<%= order.totalAmount %></p>
                                         <span class="text-[10px] font-bold uppercase tracking-wider
-                                            <% if (order.orderStatus === 'Delivered') { %>text-green-500
-                                            <% } else if (order.orderStatus === 'Cancelled') { %>text-red-500
-                                            <% } else if (order.orderStatus === 'Pending') { %>text-yellow-500
+                                            <% if (displayStatus === 'Delivered') { %>text-green-500
+                                            <% } else if (displayStatus === 'Cancelled' || displayStatus === 'Failed') { %>text-red-500
+                                            <% } else if (displayStatus === 'Pending') { %>text-yellow-500
                                             <% } else { %>text-apple-blue<% } %>">
-                                            <%= order.orderStatus %>
+                                            <%= displayStatus %>
                                         </span>
                                     </div>
                                     <a href="/admin/orders/view/<%= order._id %>" class="p-2 bg-white/5 text-apple-gold hover:bg-white/10 rounded-lg transition-colors border border-white/5" title="View Order">

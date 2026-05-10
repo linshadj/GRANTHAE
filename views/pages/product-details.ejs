@@ -3,7 +3,8 @@
     const variants = Array.isArray(product.variants) ? product.variants : [];
     const firstAvailableIndex = variants.findIndex((variant) => Number(variant.stock) > 0);
     const selectedVariant = firstAvailableIndex >= 0 ? variants[firstAvailableIndex] : variants[0];
-    const selectedPrice = selectedVariant ? (selectedVariant.priceOverride || product.price) : product.price;
+    const selectedBasePrice = selectedVariant ? (selectedVariant.basePrice || selectedVariant.priceOverride || product.price) : product.price;
+    const selectedPrice = selectedVariant ? (selectedVariant.offerPrice || selectedBasePrice) : (product.offerPrice || product.price);
     const totalStock = Number(product.totalStock || 0);
     const rating = Number(product.avgRating || 0);
     const reviewCount = product.reviews ? product.reviews.length : 0;
@@ -84,6 +85,9 @@
                 <div class="flex flex-wrap items-center gap-3 mb-5">
                     <span class="px-3 py-1 rounded-lg bg-apple-blue/10 text-apple-blue text-xs font-bold uppercase tracking-wider"><%= categoryName %></span>
                     <span class="px-3 py-1 rounded-lg border text-xs font-bold uppercase tracking-wider <%= availabilityClass %>"><%= availabilityLabel %></span>
+                    <% if (product.hasOffer && product.bestOffer) { %>
+                        <span class="px-3 py-1 rounded-lg bg-green-500/10 text-green-600 border border-green-500/20 text-xs font-bold uppercase tracking-wider"><%= product.bestOffer.title %></span>
+                    <% } %>
                     <% if (product.featured) { %>
                         <span class="px-3 py-1 rounded-lg bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-xs font-bold uppercase tracking-wider">Featured</span>
                     <% } %>
@@ -163,8 +167,18 @@
         <aside>
             <div class="lg:sticky lg:top-32 glass-card p-6 shadow-2xl">
                 <div class="mb-6">
-                    <span id="displayPrice" class="text-4xl font-bold text-apple-dark">&#8377;<%= selectedPrice %></span>
-                    <span class="text-apple-text-gray text-sm ml-2">Purchase price</span>
+                    <div class="flex flex-wrap items-end gap-3">
+                        <% if (selectedBasePrice > selectedPrice) { %>
+                            <span id="displayBasePrice" class="text-apple-text-gray text-xl line-through decoration-2">&#8377;<%= selectedBasePrice %></span>
+                        <% } else { %>
+                            <span id="displayBasePrice" class="hidden text-apple-text-gray text-xl line-through decoration-2"></span>
+                        <% } %>
+                        <span id="displayPrice" class="text-4xl font-bold text-apple-dark">&#8377;<%= selectedPrice %></span>
+                    </div>
+                    <span class="text-apple-text-gray text-sm">Purchase price</span>
+                    <p id="displayOffer" class="<%= selectedBasePrice > selectedPrice ? '' : 'hidden' %> mt-2 text-[10px] font-bold text-green-600 uppercase tracking-widest">
+                        <%= selectedVariant && selectedVariant.offerTitle ? `${selectedVariant.offerTitle} saved ₹${selectedVariant.offerDiscountAmount}` : '' %>
+                    </p>
                 </div>
 
                 <% if (variants.length > 0) { %>
@@ -175,7 +189,10 @@
                                 <label class="block <%= Number(variant.stock) === 0 ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer' %>">
                                     <input type="radio" name="productVariant" value="<%= variant.name %>"
                                         class="peer sr-only"
-                                        data-price="<%= variant.priceOverride || product.price %>"
+                                        data-price="<%= variant.offerPrice || variant.priceOverride || product.price %>"
+                                        data-base-price="<%= variant.basePrice || variant.priceOverride || product.price %>"
+                                        data-offer-title="<%= variant.offerTitle || '' %>"
+                                        data-offer-discount="<%= variant.offerDiscountAmount || 0 %>"
                                         data-stock="<%= variant.stock %>"
                                         data-sku="<%= variant.sku %>"
                                         <%= index === firstAvailableIndex || (firstAvailableIndex === -1 && index === 0) ? 'checked' : '' %>
@@ -183,7 +200,12 @@
                                     <div class="rounded-2xl border border-white/10 bg-white/5 p-4 transition-all peer-checked:border-apple-gold peer-checked:bg-apple-gold/10 hover:border-apple-gold/40">
                                         <div class="flex items-center justify-between gap-3">
                                             <p class="font-bold text-apple-dark"><%= variant.name %></p>
-                                            <p class="font-bold text-apple-dark">&#8377;<%= variant.priceOverride || product.price %></p>
+                                            <div class="text-right">
+                                                <p class="font-bold text-apple-dark">&#8377;<%= variant.offerPrice || variant.priceOverride || product.price %></p>
+                                                <% if (variant.hasOffer) { %>
+                                                    <p class="text-[10px] line-through decoration-2 text-apple-text-gray">&#8377;<%= variant.basePrice %></p>
+                                                <% } %>
+                                            </div>
                                         </div>
                                         <div class="flex items-center justify-between gap-3 mt-2 text-xs text-apple-text-gray">
                                             <span>SKU: <%= variant.sku %></span>
@@ -340,6 +362,8 @@
 
     const variantInputs = document.querySelectorAll('input[name="productVariant"]');
     const displayPrice = document.getElementById('displayPrice');
+    const displayBasePrice = document.getElementById('displayBasePrice');
+    const displayOffer = document.getElementById('displayOffer');
     const displaySku = document.getElementById('displaySku');
     const displayStockContainer = document.getElementById('displayStockContainer');
     const addToCartBtn = document.getElementById('addToCartBtn');
@@ -349,10 +373,29 @@
         if (!selectedVariant) return;
 
         const price = selectedVariant.dataset.price;
+        const basePrice = selectedVariant.dataset.basePrice || price;
+        const offerTitle = selectedVariant.dataset.offerTitle || '';
+        const offerDiscount = Number(selectedVariant.dataset.offerDiscount || 0);
         const stock = Number(selectedVariant.dataset.stock || 0);
         const sku = selectedVariant.dataset.sku || 'Default';
 
         if (displayPrice) displayPrice.textContent = `₹${price}`;
+        if (displayBasePrice) {
+            if (Number(basePrice) > Number(price)) {
+                displayBasePrice.textContent = `₹${basePrice}`;
+                displayBasePrice.classList.remove('hidden');
+            } else {
+                displayBasePrice.classList.add('hidden');
+            }
+        }
+        if (displayOffer) {
+            if (offerTitle && offerDiscount > 0) {
+                displayOffer.textContent = `${offerTitle} saved ₹${offerDiscount}`;
+                displayOffer.classList.remove('hidden');
+            } else {
+                displayOffer.classList.add('hidden');
+            }
+        }
         if (displaySku) displaySku.textContent = sku;
 
         if (displayStockContainer) {

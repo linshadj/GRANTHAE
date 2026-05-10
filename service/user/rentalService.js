@@ -4,6 +4,35 @@ import userDb from "../../models/userDb.js";
 
 
 export const createRentalRequest = async (rentalData) => {
+    const requiredTextFields = ["owner", "bookTitle", "author", "description", "category", "bookCondition"];
+    for (const field of requiredTextFields) {
+        if (!String(rentalData[field] || "").trim()) {
+            throw new Error("Please fill all required listing details.");
+        }
+    }
+
+    const category = await Category.findOne({
+        _id: rentalData.category,
+        isDeleted: false,
+        isBlocked: false,
+    });
+    if (!category) {
+        throw new Error("Select a valid category.");
+    }
+
+    if (!Array.isArray(rentalData.images) || rentalData.images.length < 3) {
+        throw new Error("A minimum of 3 images are required.");
+    }
+    if (!Number.isFinite(Number(rentalData.dailyRate)) || Number(rentalData.dailyRate) <= 0) {
+        throw new Error("Daily rate must be greater than zero.");
+    }
+    if (!Number.isFinite(Number(rentalData.minRentalDays)) || Number(rentalData.minRentalDays) < 1) {
+        throw new Error("Minimum rental days must be at least 1.");
+    }
+    if (!Number.isFinite(Number(rentalData.depositAmount)) || Number(rentalData.depositAmount) < 0) {
+        throw new Error("Deposit amount cannot be negative.");
+    }
+
     const newRental = new Rental(rentalData);
     return await newRental.save();
 };

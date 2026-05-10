@@ -6,6 +6,41 @@
         </div>
     </div>
 
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="/profile/orders" class="glass-card p-5 rounded-2xl border border-white/10 hover:border-apple-blue/30 transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-bold text-apple-text-gray/50 uppercase tracking-widest">Orders</span>
+                <i data-lucide="shopping-bag" class="w-4 h-4 text-apple-blue"></i>
+            </div>
+            <p class="text-2xl font-bold text-apple-dark"><%= dashboard ? dashboard.orderCount : 0 %></p>
+            <p class="text-xs text-apple-text-gray mt-1"><%= dashboard ? dashboard.activeOrders : 0 %> active</p>
+        </a>
+        <a href="/wallet" class="glass-card p-5 rounded-2xl border border-white/10 hover:border-apple-blue/30 transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-bold text-apple-text-gray/50 uppercase tracking-widest">Wallet</span>
+                <i data-lucide="wallet" class="w-4 h-4 text-purple-500"></i>
+            </div>
+            <p class="text-2xl font-bold text-apple-dark">₹<%= Number(dashboard ? dashboard.walletBalance : 0).toLocaleString('en-IN') %></p>
+            <p class="text-xs text-apple-text-gray mt-1">Available balance</p>
+        </a>
+        <a href="/wishlist" class="glass-card p-5 rounded-2xl border border-white/10 hover:border-apple-blue/30 transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-bold text-apple-text-gray/50 uppercase tracking-widest">Wishlist</span>
+                <i data-lucide="heart" class="w-4 h-4 text-red-500"></i>
+            </div>
+            <p class="text-2xl font-bold text-apple-dark"><%= dashboard ? dashboard.wishlistCount : 0 %></p>
+            <p class="text-xs text-apple-text-gray mt-1">Saved books</p>
+        </a>
+        <a href="/profile/orders" class="glass-card p-5 rounded-2xl border border-white/10 hover:border-apple-blue/30 transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-bold text-apple-text-gray/50 uppercase tracking-widest">Returns</span>
+                <i data-lucide="undo-2" class="w-4 h-4 text-orange-500"></i>
+            </div>
+            <p class="text-2xl font-bold text-apple-dark"><%= dashboard ? dashboard.pendingReturnRequests : 0 %></p>
+            <p class="text-xs text-apple-text-gray mt-1">Pending review</p>
+        </a>
+    </div>
+
     <!-- Profile Card -->
     <div class="glass-card p-8 relative overflow-hidden">
         <div class="flex flex-col md:flex-row gap-8 items-start">

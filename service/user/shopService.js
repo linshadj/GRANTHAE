@@ -1,6 +1,7 @@
 import { Product } from "../../models/productDb.js";
 import { Category } from "../../models/categoryDb.js";
 import { Review } from "../../models/reviewDb.js";
+import { applyOfferToProductObject, applyOffersToProductObjects } from "./offerPricingService.js";
 
 export const getFilteredProducts = async (query) => {
     const {
@@ -90,8 +91,9 @@ export const getFilteredProducts = async (query) => {
             ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
             : 0;
         const totalStock = product.variants ? product.variants.reduce((acc, v) => acc + v.stock, 0) : 0;
+        const pricedProduct = await applyOfferToProductObject(product);
         return {
-            ...product.toObject(),
+            ...pricedProduct,
             avgRating,
             reviewCount: reviews.length,
             totalStock
@@ -121,8 +123,10 @@ export const getProductById = async (id) => {
 
     const totalStock = product.variants ? product.variants.reduce((acc, v) => acc + v.stock, 0) : 0;
 
+    const pricedProduct = await applyOfferToProductObject(product);
+
     return {
-        ...product.toObject(),
+        ...pricedProduct,
         isUnavailable,
         avgRating,
         reviews,
@@ -131,11 +135,19 @@ export const getProductById = async (id) => {
 };
 
 export const getRelatedProducts = async (categoryId, excludeProductId) => {
-    return await Product.find({
+    const relatedProducts = await Product.find({
         category: categoryId,
         _id: { $ne: excludeProductId },
         isBlocked: false,
         isDeleted: false
     })
+    .populate('category')
     .limit(4);
+
+    const pricedProducts = await applyOffersToProductObjects(relatedProducts);
+    return pricedProducts.map((product) => ({
+        ...product,
+        totalStock: product.variants ? product.variants.reduce((acc, variant) => acc + Number(variant.stock || 0), 0) : 0,
+        avgRating: product.avgRating || 0,
+    }));
 };

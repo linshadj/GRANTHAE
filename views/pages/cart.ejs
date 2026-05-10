@@ -53,8 +53,18 @@
 
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="text-sm text-apple-text-gray/80 font-medium tracking-wide">
-                                            Unit Price: <span class="font-bold text-apple-dark">₹<%= item.price %></span>
+                                            Unit Price:
+                                            <% if (item.offerDiscountAmount && item.offerDiscountAmount > 0) { %>
+                                                <span class="text-apple-text-gray/50 line-through decoration-2 mr-1">₹<%= item.basePrice %></span>
+                                            <% } %>
+                                            <span class="font-bold text-apple-dark">₹<%= item.price %></span>
                                         </span>
+                                        <% if (item.offerDiscountAmount && item.offerDiscountAmount > 0) { %>
+                                            <span class="text-gray-300">|</span>
+                                            <span class="inline-flex items-center text-xs font-bold text-green-600 uppercase tracking-widest">
+                                                <i data-lucide="percent" class="w-3 h-3 mr-1"></i> <%= item.offerTitle %> saved ₹<%= item.offerDiscountAmount %>/unit
+                                            </span>
+                                        <% } %>
                                         <% if (item.variant) { %>
                                             <span class="text-gray-300">|</span>
                                             <span class="inline-flex items-center text-xs font-bold text-apple-blue uppercase tracking-widest">

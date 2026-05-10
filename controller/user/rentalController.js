@@ -75,7 +75,11 @@ export const submitRentalListing = async (req, res, next) => {
         });
     } catch (error) {
         await deleteCloudinaryUploads(uploadedImages);
-        next(error);
+        console.error("Submit Rental Listing Error:", error);
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+            success: false,
+            message: error.message || "Could not submit rental listing."
+        });
     }
 };
 

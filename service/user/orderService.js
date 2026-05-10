@@ -1,6 +1,75 @@
 import orderDb from "../../models/orderDb.js";
 import { Product } from "../../models/productDb.js";
+import { creditWallet } from "./walletService.js";
 import PDFDocument from "pdfkit";
+
+const roundCurrency = (amount) => Math.round((Number(amount || 0) + Number.EPSILON) * 100) / 100;
+
+const isPaidOrder = (order) => order.paymentStatus === 'Success' || order.paymentMethod === 'Wallet';
+
+const getActiveItemsSubtotal = (order) => {
+    return roundCurrency(order.items.reduce((total, item) => {
+        if (item.itemStatus === 'Cancelled' || item.itemStatus === 'Returned') return total;
+        return total + (Number(item.price || 0) * Number(item.quantity || 0));
+    }, 0));
+};
+
+const calculateItemRefundAmount = (order, item) => {
+    const itemAmount = roundCurrency(Number(item.price || 0) * Number(item.quantity || 0));
+    const activeSubtotal = getActiveItemsSubtotal(order);
+
+    if (activeSubtotal <= 0) return 0;
+    const refundShare = itemAmount / activeSubtotal;
+    return roundCurrency(Math.min(itemAmount, Number(order.totalAmount || 0) * refundShare));
+};
+
+const applyFinancialAdjustment = (order, item, refundAmount, trackRefund = true) => {
+    const itemAmount = Number(item.price || 0) * Number(item.quantity || 0);
+
+    order.subtotalAmount = Math.max(0, roundCurrency(Number(order.subtotalAmount || 0) - itemAmount));
+    order.totalAmount = Math.max(0, roundCurrency(Number(order.totalAmount || 0) - refundAmount));
+    if (trackRefund) {
+        order.refundedAmount = roundCurrency(Number(order.refundedAmount || 0) + refundAmount);
+    }
+};
+
+const refundItemToWallet = async (order, item, reason, precomputedRefundAmount = null) => {
+    if (!isPaidOrder(order) || item.refundStatus === 'Completed') return 0;
+
+    const refundAmount = precomputedRefundAmount === null
+        ? calculateItemRefundAmount(order, item)
+        : roundCurrency(precomputedRefundAmount);
+    if (refundAmount <= 0) {
+        item.refundAmount = 0;
+        item.refundStatus = 'None';
+        applyFinancialAdjustment(order, item, 0, false);
+        return 0;
+    }
+
+    await creditWallet(
+        order.user,
+        refundAmount,
+        `${reason} refund for order ${order.orderID}`,
+        "order_refund",
+        `${order._id}:${item._id}`
+    );
+
+    item.refundAmount = refundAmount;
+    item.refundStatus = 'Completed';
+    item.refundedAt = new Date();
+    applyFinancialAdjustment(order, item, refundAmount, true);
+
+    const refundableItemsRemaining = order.items.some((orderItem) => {
+        if (orderItem._id.toString() === item._id.toString()) return false;
+        return orderItem.itemStatus !== 'Cancelled' && orderItem.itemStatus !== 'Returned';
+    });
+
+    if (!refundableItemsRemaining && order.totalAmount === 0) {
+        order.paymentStatus = 'Refunded';
+    }
+
+    return refundAmount;
+};
 
 export const getUserOrders = async (userId, searchQuery = '') => {
     let query = { user: userId };
@@ -25,6 +94,8 @@ export const getOrderById = async (userId, orderId) => {
 };
 
 export const cancelOrderItem = async (userId, orderId, itemId, reason) => {
+    if (!reason || !reason.trim()) throw new Error("Cancellation reason is mandatory.");
+
     const order = await orderDb.findOne({ _id: orderId, user: userId });
     if (!order) throw new Error("Order not found");
 
@@ -39,30 +110,30 @@ export const cancelOrderItem = async (userId, orderId, itemId, reason) => {
         throw new Error("Item is already cancelled or returned.");
     }
 
+    const refundAmount = calculateItemRefundAmount(order, item);
     item.itemStatus = 'Cancelled';
-    item.cancellationReason = reason || 'User request';
+    item.cancellationReason = reason.trim();
 
-    const itemAmount = item.quantity * item.price;
-    if (order.subtotalAmount > 0) {
-        order.subtotalAmount -= itemAmount;
-        if (order.subtotalAmount < 0) order.subtotalAmount = 0;
-        order.totalAmount = Math.max(0, order.subtotalAmount - (order.discountAmount || 0));
-    } else {
-        order.totalAmount -= itemAmount;
-        if (order.totalAmount < 0) order.totalAmount = 0;
+    if (order.stockAdjusted !== false) {
+        if (item.variant) {
+            await Product.updateOne(
+                { _id: item.product, "variants.name": item.variant },
+                { $inc: { "variants.$.stock": item.quantity } }
+            );
+        } else {
+            await Product.updateOne(
+                { _id: item.product },
+                { $inc: { stock: item.quantity } }
+            );
+        }
     }
 
-    // Increment stock
-    if (item.variant) {
-        await Product.updateOne(
-            { _id: item.product, "variants.name": item.variant },
-            { $inc: { "variants.$.stock": item.quantity } }
-        );
+    if (isPaidOrder(order)) {
+        await refundItemToWallet(order, item, 'Cancellation', refundAmount);
     } else {
-        await Product.updateOne(
-            { _id: item.product },
-            { $inc: { stock: item.quantity } }
-        );
+        item.refundAmount = 0;
+        item.refundStatus = 'None';
+        applyFinancialAdjustment(order, item, refundAmount, false);
     }
 
     // Check if all items are cancelled, then cancel the entire order
@@ -76,7 +147,7 @@ export const cancelOrderItem = async (userId, orderId, itemId, reason) => {
 };
 
 export const returnOrderItem = async (userId, orderId, itemId, reason) => {
-    if (!reason) throw new Error("Return reason is mandatory.");
+    if (!reason || !reason.trim()) throw new Error("Return reason is mandatory.");
     
     const order = await orderDb.findOne({ _id: orderId, user: userId });
     if (!order) throw new Error("Order not found");
@@ -88,39 +159,19 @@ export const returnOrderItem = async (userId, orderId, itemId, reason) => {
     const item = order.items.id(itemId);
     if (!item) throw new Error("Item not found in order");
 
+    if (item.itemStatus === 'Return Requested') {
+        throw new Error("Return request is already pending.");
+    }
+
     if (item.itemStatus !== 'Delivered') {
         throw new Error("Item must be delivered to be returned.");
     }
 
-    item.itemStatus = 'Returned';
-    item.returnReason = reason;
-
-    const itemAmount = item.quantity * item.price;
-    if (order.subtotalAmount > 0) {
-        order.subtotalAmount -= itemAmount;
-        if (order.subtotalAmount < 0) order.subtotalAmount = 0;
-        order.totalAmount = Math.max(0, order.subtotalAmount - (order.discountAmount || 0));
-    } else {
-        order.totalAmount -= itemAmount;
-        if (order.totalAmount < 0) order.totalAmount = 0;
-    }
-
-    // Increment stock
-    if (item.variant) {
-        await Product.updateOne(
-            { _id: item.product, "variants.name": item.variant },
-            { $inc: { "variants.$.stock": item.quantity } }
-        );
-    } else {
-        await Product.updateOne(
-            { _id: item.product },
-            { $inc: { stock: item.quantity } }
-        );
-    }
-
-    // Check if all items are returned/cancelled
-    const allItemsCancelledOrReturned = order.items.every(i => i.itemStatus === 'Cancelled' || i.itemStatus === 'Returned');
-    // If we want to change order status to Returned, we should add it to enum. Since it's not in enum, we leave it as Delivered or maybe Cancelled? We'll leave it as Delivered and let the individual items hold the Returned status.
+    item.itemStatus = 'Return Requested';
+    item.returnReason = reason.trim();
+    item.returnRequestStatus = 'Pending';
+    item.returnRequestedAt = new Date();
+    item.refundStatus = isPaidOrder(order) ? 'Pending' : 'None';
 
     await order.save();
     return order;

@@ -18,11 +18,11 @@
                         <i data-lucide="map-pin" class="w-6 h-6 text-apple-blue"></i>
                         Shipping Address
                     </h2>
-                    <a href="/profile/edit" class="text-sm font-medium text-apple-blue hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/5">+ Add New</a>
+                    <button type="button" onclick="openCheckoutAddressModal()" class="text-sm font-medium text-apple-blue hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/5">+ Add New</button>
                 </div>
 
                 <% if (addresses && addresses.length > 0) { %>
-                    <div class="flex flex-col gap-6 relative">
+                    <div id="checkout-address-list" class="flex flex-col gap-6 relative">
                         <% addresses.forEach((addr, index) => { %>
                             <label class="relative flex cursor-pointer rounded-2xl border border-white/5 bg-black/20 p-5 shadow-sm hover:border-apple-blue/50 focus:outline-none transition-all duration-300 has-[:checked]:border-apple-blue has-[:checked]:bg-apple-blue/5 group">
                                 <input type="radio" name="selectedAddress" value="<%= addr._id %>" class="sr-only peer" <%= index === 0 ? 'checked' : '' %>>
@@ -50,13 +50,14 @@
                         <% }) %>
                     </div>
                 <% } else { %>
-                    <div class="text-center py-12 px-8 border-2 border-dashed border-white/5 rounded-3xl bg-black/10 relative">
+                    <div id="checkout-address-list" class="hidden flex-col gap-6 relative"></div>
+                    <div id="checkout-empty-address" class="text-center py-12 px-8 border-2 border-dashed border-white/5 rounded-3xl bg-black/10 relative">
                         <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5">
                             <i data-lucide="home" class="w-8 h-8 text-apple-text-gray/30"></i>
                         </div>
                         <p class="text-apple-dark font-bold mb-2 font-luxury text-lg">No shipping address found</p>
                         <p class="text-sm text-apple-text-gray/60 mb-6">You need an address to complete your order.</p>
-                        <a href="/profile/edit" class="btn-primary inline-flex items-center gap-2 py-3">Add New Address</a>
+                        <button type="button" onclick="openCheckoutAddressModal()" class="btn-primary inline-flex items-center gap-2 py-3">Add New Address</button>
                     </div>
                 <% } %>
             </div>
@@ -80,6 +81,36 @@
                             <div class="flex-grow">
                                 <span class="block text-base font-bold text-apple-dark mb-0.5">Cash on Delivery (COD)</span>
                                 <span class="block text-xs text-apple-text-gray/60">Pay with cash when your order is delivered.</span>
+                            </div>
+                            <div class="flex items-center justify-center opacity-0 scale-50 peer-checked:opacity-100 peer-checked:scale-100 transition-all duration-300">
+                                <i data-lucide="check-circle-2" class="w-6 h-6 text-apple-blue"></i>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="relative flex <%= razorpayConfigured ? 'cursor-pointer hover:border-apple-blue/50' : 'cursor-not-allowed opacity-60' %> rounded-2xl border border-white/5 bg-black/20 p-5 shadow-sm transition-all duration-300 has-[:checked]:border-apple-blue has-[:checked]:bg-apple-blue/5 group">
+                        <input type="radio" name="paymentMethod" value="Razorpay" class="sr-only peer" <%= razorpayConfigured ? '' : 'disabled' %>>
+                        <div class="flex items-center gap-8 w-full">
+                            <div class="w-12 h-12 rounded-2xl bg-apple-blue/10 flex items-center justify-center text-apple-blue shrink-0 border border-apple-blue/20">
+                                <i data-lucide="credit-card" class="w-6 h-6"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <span class="block text-base font-bold text-apple-dark mb-0.5">Razorpay</span>
+                                <span class="block text-xs text-apple-text-gray/60">Pay securely using card, UPI, wallet, or net banking.</span>
+                            </div>
+                            <div class="flex items-center justify-center opacity-0 scale-50 peer-checked:opacity-100 peer-checked:scale-100 transition-all duration-300">
+                                <i data-lucide="check-circle-2" class="w-6 h-6 text-apple-blue"></i>
+                            </div>
+                        </div>
+                    </label>
+                    <label id="wallet-payment-label" class="relative flex cursor-pointer rounded-2xl border border-white/5 bg-black/20 p-5 shadow-sm hover:border-apple-blue/50 transition-all duration-300 has-[:checked]:border-apple-blue has-[:checked]:bg-apple-blue/5 group">
+                        <input id="wallet-payment-input" type="radio" name="paymentMethod" value="Wallet" class="sr-only peer">
+                        <div class="flex items-center gap-8 w-full">
+                            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 shrink-0 border border-purple-500/20">
+                                <i data-lucide="wallet" class="w-6 h-6"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <span class="block text-base font-bold text-apple-dark mb-0.5">Wallet</span>
+                                <span id="wallet-balance-note" class="block text-xs text-apple-text-gray/60">Available balance: ₹<%= Number(walletBalance || 0).toLocaleString('en-IN') %></span>
                             </div>
                             <div class="flex items-center justify-center opacity-0 scale-50 peer-checked:opacity-100 peer-checked:scale-100 transition-all duration-300">
                                 <i data-lucide="check-circle-2" class="w-6 h-6 text-apple-blue"></i>
@@ -113,7 +144,15 @@
                                         <span class="w-1 h-1 bg-apple-blue rounded-full"></span> <%= item.variant %>
                                     </p>
                                 <% } %>
-                                <div class="mt-2 text-xs font-bold text-apple-blue">₹<%= item.itemTotal %></div>
+                                <div class="mt-2 text-xs font-bold text-apple-blue">
+                                    <% if (item.offerDiscountAmount && item.offerDiscountAmount > 0) { %>
+                                        <span class="text-apple-text-gray/50 line-through decoration-2 mr-1">₹<%= item.basePrice * item.quantity %></span>
+                                    <% } %>
+                                    ₹<%= item.itemTotal %>
+                                </div>
+                                <% if (item.offerDiscountAmount && item.offerDiscountAmount > 0) { %>
+                                    <p class="mt-1 text-[10px] font-bold text-green-500 uppercase tracking-wider"><%= item.offerTitle %> saved ₹<%= item.offerDiscountAmount * item.quantity %></p>
+                                <% } %>
                             </div>
                         </div>
                     <% }) %>
@@ -140,22 +179,27 @@
                             <div class="relative flex-1">
                                 <i data-lucide="ticket" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-gray/60"></i>
                                 <input id="coupon-code-input" type="text" placeholder="Coupon code"
+                                    value="<%= appliedCoupon && appliedCoupon.couponCode ? appliedCoupon.couponCode : '' %>"
+                                    <%= appliedCoupon && appliedCoupon.couponCode ? 'readonly' : '' %>
                                     class="w-full h-11 pl-10 pr-3 rounded-xl bg-black/20 border border-white/5 text-sm text-apple-dark uppercase font-mono tracking-wider placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-apple-text-gray/40 focus:outline-none focus:ring-2 focus:ring-apple-blue/30">
                             </div>
-                            <button id="apply-coupon-btn" type="button" class="h-11 px-4 rounded-xl bg-white/10 border border-white/5 text-xs font-bold text-apple-dark hover:bg-white/15 transition-all">
+                            <button id="apply-coupon-btn" type="button" class="<%= appliedCoupon && appliedCoupon.couponCode ? 'hidden' : '' %> h-11 px-4 rounded-xl bg-white/10 border border-white/5 text-xs font-bold text-apple-dark hover:bg-white/15 transition-all">
                                 Apply
                             </button>
+                            <button id="remove-coupon-btn" type="button" class="<%= appliedCoupon && appliedCoupon.couponCode ? '' : 'hidden' %> h-11 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-xs font-bold text-red-400 hover:bg-red-500/15 transition-all">
+                                Remove
+                            </button>
                         </div>
-                        <p id="coupon-message" class="hidden text-[10px] font-bold"></p>
+                        <p id="coupon-message" class="<%= appliedCoupon && appliedCoupon.couponCode ? '' : 'hidden' %> text-[10px] font-bold <%= appliedCoupon && appliedCoupon.couponCode ? 'text-green-500' : '' %>"><%= appliedCoupon && appliedCoupon.couponCode ? `${appliedCoupon.couponCode} applied.` : '' %></p>
                     </div>
-                    <div id="coupon-discount-row" class="hidden justify-between items-center text-sm">
-                        <span class="text-apple-text-gray/60 uppercase tracking-widest text-[10px] font-medium">Coupon Discount</span>
-                        <span id="coupon-discount-amount" class="font-bold text-green-500">-₹0</span>
+                    <div id="coupon-discount-row" class="<%= appliedCoupon && appliedCoupon.discountAmount > 0 ? 'flex' : 'hidden' %> justify-between items-center text-sm">
+                        <span id="coupon-discount-label" class="text-apple-text-gray/60 uppercase tracking-widest text-[10px] font-medium">Coupon Discount<%= appliedCoupon && appliedCoupon.couponCode ? ` (${appliedCoupon.couponCode})` : '' %></span>
+                        <span id="coupon-discount-amount" class="font-bold text-green-500">-₹<%= appliedCoupon && appliedCoupon.discountAmount ? appliedCoupon.discountAmount : 0 %></span>
                     </div>
                     <div class="pt-6 border-t border-white/5 flex justify-between items-end">
                         <div>
                             <p class="text-[10px] uppercase tracking-widest text-apple-text-gray/40 mb-1">Total Payable</p>
-                            <p id="checkout-total-amount" class="text-3xl font-bold text-apple-blue leading-none">₹<%= cartTotal %></p>
+                            <p id="checkout-total-amount" class="text-3xl font-bold text-apple-blue leading-none">₹<%= appliedCoupon && appliedCoupon.totalAmount !== undefined ? appliedCoupon.totalAmount : cartTotal %></p>
                         </div>
                     </div>
                 </div>
@@ -176,15 +220,84 @@
     </div>
 </div>
 
+<div id="checkout-address-modal" class="fixed inset-0 z-[999] hidden" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeCheckoutAddressModal()"></div>
+    <div class="relative min-h-full flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl rounded-3xl bg-apple-card border border-white/10 shadow-2xl overflow-hidden">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-apple-dark font-luxury">Add Shipping Address</h3>
+                    <p class="text-xs text-apple-text-gray mt-1">This address will be saved to your profile.</p>
+                </div>
+                <button type="button" onclick="closeCheckoutAddressModal()" class="p-2 text-apple-text-gray hover:text-apple-dark rounded-xl hover:bg-white/5">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="checkout-address-form" class="p-6 space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-apple-text-gray uppercase tracking-widest mb-2">Label</label>
+                        <input name="label" placeholder="Home, Work" class="checkout-address-input w-full h-11 px-4 rounded-xl bg-black/20 border border-white/10 text-sm text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-apple-text-gray uppercase tracking-widest mb-2">Phone</label>
+                        <input name="phoneNumber" maxlength="10" placeholder="10 digit number" class="checkout-address-input w-full h-11 px-4 rounded-xl bg-black/20 border border-white/10 text-sm text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-bold text-apple-text-gray uppercase tracking-widest mb-2">Street Address</label>
+                        <input name="streetAddress" placeholder="House, street, area" class="checkout-address-input w-full h-11 px-4 rounded-xl bg-black/20 border border-white/10 text-sm text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-apple-text-gray uppercase tracking-widest mb-2">City</label>
+                        <input name="city" class="checkout-address-input w-full h-11 px-4 rounded-xl bg-black/20 border border-white/10 text-sm text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-apple-text-gray uppercase tracking-widest mb-2">State</label>
+                        <input name="state" class="checkout-address-input w-full h-11 px-4 rounded-xl bg-black/20 border border-white/10 text-sm text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-apple-text-gray uppercase tracking-widest mb-2">PIN Code</label>
+                        <input name="pinCode" maxlength="6" placeholder="6 digit PIN" class="checkout-address-input w-full h-11 px-4 rounded-xl bg-black/20 border border-white/10 text-sm text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-apple-text-gray uppercase tracking-widest mb-2">Country</label>
+                        <input name="country" value="India" class="checkout-address-input w-full h-11 px-4 rounded-xl bg-black/20 border border-white/10 text-sm text-apple-dark focus:outline-none focus:ring-2 focus:ring-apple-blue/30">
+                    </div>
+                </div>
+                <p id="checkout-address-error" class="hidden text-xs font-bold text-red-400"></p>
+                <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeCheckoutAddressModal()" class="px-5 py-3 rounded-xl border border-white/10 text-apple-text-gray hover:text-apple-dark hover:bg-white/5 text-sm font-bold">Cancel</button>
+                    <button id="checkout-address-save-btn" type="submit" class="px-6 py-3 rounded-xl bg-apple-blue text-white text-sm font-bold hover:bg-apple-blue/90 shadow-lg shadow-apple-blue/20">Save Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     const cartTotal = Number('<%= cartTotal %>');
-    let appliedCouponCode = '';
+    const walletBalance = Number('<%= walletBalance || 0 %>');
+    let appliedCouponCode = <%- JSON.stringify(appliedCoupon && appliedCoupon.couponCode ? appliedCoupon.couponCode : '') %>;
+    let checkoutPayableAmount = Number('<%= appliedCoupon && appliedCoupon.totalAmount !== undefined ? appliedCoupon.totalAmount : cartTotal %>');
     const couponInput = document.getElementById('coupon-code-input');
     const applyCouponBtn = document.getElementById('apply-coupon-btn');
+    const removeCouponBtn = document.getElementById('remove-coupon-btn');
     const couponMessage = document.getElementById('coupon-message');
     const couponDiscountRow = document.getElementById('coupon-discount-row');
+    const couponDiscountLabel = document.getElementById('coupon-discount-label');
     const couponDiscountAmount = document.getElementById('coupon-discount-amount');
     const checkoutTotalAmount = document.getElementById('checkout-total-amount');
+    const walletPaymentInput = document.getElementById('wallet-payment-input');
+    const walletPaymentLabel = document.getElementById('wallet-payment-label');
+    const walletBalanceNote = document.getElementById('wallet-balance-note');
+    const checkoutAddressModal = document.getElementById('checkout-address-modal');
+    const checkoutAddressForm = document.getElementById('checkout-address-form');
+    const checkoutAddressError = document.getElementById('checkout-address-error');
+    const checkoutAddressSaveBtn = document.getElementById('checkout-address-save-btn');
+    const checkoutAddressList = document.getElementById('checkout-address-list');
+    const checkoutEmptyAddress = document.getElementById('checkout-empty-address');
+    const placeOrderBtn = document.getElementById('place-order-btn');
 
     function formatCurrency(amount) {
         return `₹${Number(amount).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -196,16 +309,241 @@
         couponMessage.classList.add(isSuccess ? 'text-green-500' : 'text-red-400');
     }
 
+    function openCheckoutAddressModal() {
+        checkoutAddressError?.classList.add('hidden');
+        checkoutAddressModal?.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeCheckoutAddressModal() {
+        checkoutAddressModal?.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    function escapeHtml(value) {
+        return String(value || '').replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        }[char]));
+    }
+
+    function appendCheckoutAddress(address) {
+        if (!checkoutAddressList) return;
+
+        checkoutAddressList.classList.remove('hidden');
+        checkoutAddressList.classList.add('flex');
+        if (checkoutEmptyAddress) checkoutEmptyAddress.classList.add('hidden');
+
+        const label = document.createElement('label');
+        label.className = 'relative flex cursor-pointer rounded-2xl border border-white/5 bg-black/20 p-5 shadow-sm hover:border-apple-blue/50 focus:outline-none transition-all duration-300 has-[:checked]:border-apple-blue has-[:checked]:bg-apple-blue/5 group';
+        label.innerHTML = `
+            <input type="radio" name="selectedAddress" value="${escapeHtml(address._id)}" class="sr-only peer" checked>
+            <span class="flex flex-1">
+                <span class="flex flex-col">
+                    <span class="block text-base font-bold text-apple-dark flex items-center gap-3 mb-1">
+                        ${escapeHtml(address.label || 'Address')}
+                        ${address.isDefault ? '<span class="bg-apple-blue/10 text-apple-blue text-[10px] uppercase tracking-widest px-2.5 py-0.5 rounded-full border border-apple-blue/20">Default</span>' : ''}
+                    </span>
+                    <span class="text-apple-text-gray text-sm leading-relaxed opacity-80">
+                        ${escapeHtml(address.streetAddress)}, ${escapeHtml(address.city)}, ${escapeHtml(address.state)}, ${escapeHtml(address.pinCode)}
+                    </span>
+                    <span class="mt-2 text-xs font-medium text-apple-text-gray/60 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="phone" class="w-3.5 h-3.5"></i> ${escapeHtml(address.phoneNumber)}
+                    </span>
+                </span>
+            </span>
+            <div class="flex items-center justify-center ml-4 opacity-100 scale-100 transition-all duration-300">
+                <i data-lucide="check-circle-2" class="w-6 h-6 text-apple-blue"></i>
+            </div>
+        `;
+
+        checkoutAddressList.querySelectorAll('input[name="selectedAddress"]').forEach(input => input.checked = false);
+        checkoutAddressList.prepend(label);
+        if (placeOrderBtn) placeOrderBtn.disabled = false;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function updateWalletAvailability() {
+        if (!walletPaymentInput || !walletPaymentLabel || !walletBalanceNote) return;
+        const hasBalance = walletBalance >= checkoutPayableAmount;
+        walletPaymentInput.disabled = !hasBalance;
+        walletPaymentLabel.classList.toggle('opacity-60', !hasBalance);
+        walletPaymentLabel.classList.toggle('cursor-not-allowed', !hasBalance);
+        walletPaymentLabel.classList.toggle('cursor-pointer', hasBalance);
+        walletBalanceNote.textContent = hasBalance
+            ? `Available balance: ${formatCurrency(walletBalance)}`
+            : `Available balance: ${formatCurrency(walletBalance)}. Add funds to use wallet.`;
+
+        if (!hasBalance && walletPaymentInput.checked) {
+            const codInput = document.querySelector('input[name="paymentMethod"][value="COD"]');
+            if (codInput) codInput.checked = true;
+        }
+    }
+
+    function setCouponUi(data) {
+        appliedCouponCode = data.couponCode || '';
+        checkoutPayableAmount = Number(data.totalAmount ?? cartTotal);
+        checkoutTotalAmount.textContent = formatCurrency(checkoutPayableAmount);
+        updateWalletAvailability();
+
+        if (appliedCouponCode && Number(data.discountAmount) > 0) {
+            couponInput.value = appliedCouponCode;
+            couponInput.readOnly = true;
+            couponDiscountLabel.textContent = `Coupon Discount (${appliedCouponCode})`;
+            couponDiscountAmount.textContent = `-${formatCurrency(data.discountAmount)}`;
+            couponDiscountRow.classList.remove('hidden');
+            couponDiscountRow.classList.add('flex');
+            applyCouponBtn.classList.add('hidden');
+            removeCouponBtn.classList.remove('hidden');
+            setCouponMessage(`${appliedCouponCode} applied.`, true);
+        } else {
+            couponInput.value = '';
+            couponInput.readOnly = false;
+            couponDiscountLabel.textContent = 'Coupon Discount';
+            couponDiscountAmount.textContent = '-₹0';
+            couponDiscountRow.classList.add('hidden');
+            couponDiscountRow.classList.remove('flex');
+            applyCouponBtn.classList.remove('hidden');
+            removeCouponBtn.classList.add('hidden');
+            couponMessage.classList.add('hidden');
+        }
+    }
+
+    async function recordRazorpayFailure(internalOrderId, reason) {
+        try {
+            const res = await fetch('/checkout/razorpay/failure', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ internalOrderId, reason })
+            });
+            const data = await res.json();
+            return data.redirectUrl || `/payment-failure/${internalOrderId}`;
+        } catch (error) {
+            return `/payment-failure/${internalOrderId}`;
+        }
+    }
+
+    function openRazorpayCheckout(data) {
+        if (typeof Razorpay === 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Payment Unavailable',
+                text: 'Razorpay checkout could not be loaded. Please try again.',
+                confirmButtonColor: '#e6cfa7',
+                background: '#2c3b32',
+                color: '#e6cfa7'
+            });
+            return;
+        }
+
+        let paymentFinished = false;
+        const options = {
+            key: data.razorpay.keyId,
+            amount: data.razorpay.amount,
+            currency: data.razorpay.currency,
+            name: data.razorpay.name,
+            description: data.razorpay.description,
+            order_id: data.razorpay.orderId,
+            prefill: data.razorpay.prefill,
+            theme: { color: '#2c3b32' },
+            handler: async function(response) {
+                paymentFinished = true;
+                try {
+                    const verifyRes = await fetch('/checkout/razorpay/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            internalOrderId: data.internalOrderId,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature
+                        })
+                    });
+                    const verifyData = await verifyRes.json();
+                    window.location.href = verifyData.redirectUrl || (verifyData.success ? `/order-success/${data.orderId}` : `/payment-failure/${data.internalOrderId}`);
+                } catch (error) {
+                    const redirectUrl = await recordRazorpayFailure(data.internalOrderId, 'Payment verification could not be completed.');
+                    window.location.href = redirectUrl;
+                }
+            },
+            modal: {
+                ondismiss: async function() {
+                    if (!paymentFinished) {
+                        const redirectUrl = await recordRazorpayFailure(data.internalOrderId, 'Payment window was closed before completion.');
+                        window.location.href = redirectUrl;
+                    }
+                }
+            }
+        };
+
+        const razorpay = new Razorpay(options);
+        razorpay.on('payment.failed', async function(response) {
+            paymentFinished = true;
+            const reason = response.error && response.error.description ? response.error.description : 'Razorpay payment failed.';
+            const redirectUrl = await recordRazorpayFailure(data.internalOrderId, reason);
+            window.location.href = redirectUrl;
+        });
+        razorpay.open();
+    }
+
+    if (checkoutAddressForm) {
+        checkoutAddressForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            checkoutAddressError.classList.add('hidden');
+
+            const formData = new FormData(checkoutAddressForm);
+            const payload = Object.fromEntries(formData.entries());
+            const originalText = checkoutAddressSaveBtn.textContent;
+            checkoutAddressSaveBtn.textContent = 'Saving...';
+            checkoutAddressSaveBtn.disabled = true;
+
+            try {
+                const response = await fetch('/checkout/address', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+
+                if (!data.success) {
+                    checkoutAddressError.textContent = data.message || 'Could not save address.';
+                    checkoutAddressError.classList.remove('hidden');
+                    return;
+                }
+
+                appendCheckoutAddress(data.address);
+                checkoutAddressForm.reset();
+                const countryInput = checkoutAddressForm.querySelector('[name="country"]');
+                if (countryInput) countryInput.value = 'India';
+                closeCheckoutAddressModal();
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Address added',
+                    showConfirmButton: false,
+                    timer: 1800,
+                    background: '#2c3b32',
+                    color: '#e6cfa7'
+                });
+            } catch (error) {
+                checkoutAddressError.textContent = 'Could not save address. Please try again.';
+                checkoutAddressError.classList.remove('hidden');
+            } finally {
+                checkoutAddressSaveBtn.textContent = originalText;
+                checkoutAddressSaveBtn.disabled = false;
+            }
+        });
+    }
+
     if (couponInput) {
         couponInput.addEventListener('input', () => {
+            if (couponInput.readOnly) return;
             couponInput.value = couponInput.value.toUpperCase().replace(/\s+/g, '');
-            if (!couponInput.value || (appliedCouponCode && couponInput.value !== appliedCouponCode)) {
-                appliedCouponCode = '';
-                couponMessage.classList.add('hidden');
-                couponDiscountRow.classList.add('hidden');
-                couponDiscountRow.classList.remove('flex');
-                checkoutTotalAmount.textContent = formatCurrency(cartTotal);
-            }
+            couponMessage.classList.add('hidden');
         });
     }
 
@@ -214,6 +552,10 @@
             const couponCode = couponInput.value.trim();
             if (!couponCode) {
                 setCouponMessage('Enter a coupon code.');
+                return;
+            }
+            if (appliedCouponCode && couponCode !== appliedCouponCode) {
+                setCouponMessage('Remove the current coupon before applying another one.');
                 return;
             }
 
@@ -230,25 +572,42 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    appliedCouponCode = data.couponCode;
-                    couponDiscountAmount.textContent = `-${formatCurrency(data.discountAmount)}`;
-                    couponDiscountRow.classList.remove('hidden');
-                    couponDiscountRow.classList.add('flex');
-                    checkoutTotalAmount.textContent = formatCurrency(data.totalAmount);
-                    setCouponMessage(`${data.couponCode} applied.`, true);
+                    setCouponUi(data);
                 } else {
-                    appliedCouponCode = '';
-                    couponDiscountRow.classList.add('hidden');
-                    couponDiscountRow.classList.remove('flex');
-                    checkoutTotalAmount.textContent = formatCurrency(cartTotal);
                     setCouponMessage(data.message || 'Coupon could not be applied.');
                 }
             } catch (error) {
-                appliedCouponCode = '';
                 setCouponMessage('Could not apply coupon. Please try again.');
             } finally {
                 applyCouponBtn.textContent = originalText;
                 applyCouponBtn.disabled = false;
+            }
+        });
+    }
+
+    if (removeCouponBtn) {
+        removeCouponBtn.addEventListener('click', async () => {
+            const originalText = removeCouponBtn.textContent;
+            removeCouponBtn.textContent = 'Removing...';
+            removeCouponBtn.disabled = true;
+
+            try {
+                const res = await fetch('/checkout/remove-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setCouponUi(data);
+                    setCouponMessage('Coupon removed.', true);
+                } else {
+                    setCouponMessage(data.message || 'Coupon could not be removed.');
+                }
+            } catch (error) {
+                setCouponMessage('Could not remove coupon. Please try again.');
+            } finally {
+                removeCouponBtn.textContent = originalText;
+                removeCouponBtn.disabled = false;
             }
         });
     }
@@ -272,7 +631,30 @@
         const addressId = selectedAddressEl.value;
         const paymentMethod = paymentMethodEl.value;
 
-        // Show loading state
+        if (paymentMethod === 'Wallet' && walletBalance < checkoutPayableAmount) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Insufficient Wallet Balance',
+                text: 'Add funds to your wallet or choose another payment method.',
+                confirmButtonColor: '#e6cfa7',
+                background: '#2c3b32',
+                color: '#e6cfa7'
+            });
+            return;
+        }
+
+        if (paymentMethod === 'Razorpay' && typeof Razorpay === 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Payment Unavailable',
+                text: 'Razorpay checkout could not be loaded. Please try again.',
+                confirmButtonColor: '#e6cfa7',
+                background: '#2c3b32',
+                color: '#e6cfa7'
+            });
+            return;
+        }
+
         const originalContent = this.innerHTML;
         this.innerHTML = `<span class="flex items-center gap-3"><svg class="animate-spin h-5 w-5 text-apple-text-gray" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span class="uppercase tracking-widest text-sm">Processing...</span></span>`;
         this.disabled = true;
@@ -286,10 +668,18 @@
 
             const data = await res.json();
 
+            if (data.success && data.paymentMethod === 'Razorpay') {
+                openRazorpayCheckout(data);
+                return;
+            }
+
             if (data.success) {
-                // Redirect to success page
                 window.location.href = `/order-success/${data.orderId}`;
             } else {
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                    return;
+                }
                 Swal.fire({
                     icon: 'error',
                     title: 'Order Failed',
@@ -315,4 +705,6 @@
             this.disabled = false;
         }
     });
+
+    updateWalletAvailability();
 </script>

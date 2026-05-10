@@ -58,11 +58,28 @@ router.patch("/cart/update", isAuth, updateQuantity);
 router.delete("/cart/remove", isAuth, removeFromCart);
 
 // Checkout
-import { applyCoupon, getCheckoutPage, placeOrder, orderSuccessPage } from "../controller/user/checkoutController.js";
+import {
+  addCheckoutAddress,
+  applyCoupon,
+  getCheckoutPage,
+  markRazorpayPaymentFailed,
+  orderSuccessPage,
+  paymentFailurePage,
+  placeOrder,
+  removeCoupon,
+  retryRazorpayPayment,
+  verifyRazorpayPayment
+} from "../controller/user/checkoutController.js";
 router.get("/checkout", isAuth, getCheckoutPage);
+router.post("/checkout/address", isAuth, addCheckoutAddress);
 router.post("/checkout/apply-coupon", isAuth, applyCoupon);
+router.post("/checkout/remove-coupon", isAuth, removeCoupon);
 router.post("/checkout/place-order", isAuth, placeOrder);
+router.post("/checkout/razorpay/verify", isAuth, verifyRazorpayPayment);
+router.post("/checkout/razorpay/failure", isAuth, markRazorpayPaymentFailed);
+router.post("/checkout/razorpay/retry/:orderId", isAuth, retryRazorpayPayment);
 router.get("/order-success/:orderId", isAuth, orderSuccessPage);
+router.get("/payment-failure/:orderId", isAuth, paymentFailurePage);
 
 // Wishlist
 import { getWishlistPage, addToWishlist, removeFromWishlist } from "../controller/user/wishlistController.js";

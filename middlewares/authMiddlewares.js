@@ -32,6 +32,20 @@ export const isAuth = async (req, res, next) => {
       return next();
     }
   }
+
+  const wantsJson = req.xhr
+    || req.headers.accept?.includes("application/json")
+    || req.headers["content-type"]?.includes("application/json")
+    || req.headers["content-type"]?.includes("multipart/form-data");
+
+  if (wantsJson) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login",
+      redirectUrl: "/sign-in?status=error&message=Please%20login"
+    });
+  }
+
   return res.redirect(`/sign-in?status=error&message=${encodeURIComponent("Please login")}`);
 };
 

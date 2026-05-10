@@ -25,6 +25,20 @@ const uploadStream = ({ folderName, publicId, streamFactory }) => {
   assertCloudinaryConfigured();
 
   return new Promise((resolve, reject) => {
+    let isSettled = false;
+    const uploadTimeout = setTimeout(() => {
+      if (isSettled) return;
+      isSettled = true;
+      reject(new Error("Image upload timed out. Please try again with smaller images or check your connection."));
+    }, 60000);
+
+    const settle = (handler, value) => {
+      if (isSettled) return;
+      isSettled = true;
+      clearTimeout(uploadTimeout);
+      handler(value);
+    };
+
     const stream = cloudinary.uploader.upload_stream(
       {
         folder: getCloudinaryFolder(folderName),
@@ -33,20 +47,20 @@ const uploadStream = ({ folderName, publicId, streamFactory }) => {
         overwrite: false,
       },
       (error, result) => {
-        if (error) return reject(error);
+        if (error) return settle(reject, error);
         if (!result?.secure_url) {
-          return reject(new Error("Cloudinary upload did not return a secure URL"));
+          return settle(reject, new Error("Cloudinary upload did not return a secure URL"));
         }
 
-        resolve({
+        settle(resolve, {
           url: result.secure_url,
           publicId: result.public_id,
         });
       },
     );
 
-    stream.on("error", reject);
-    streamFactory(stream, reject);
+    stream.on("error", (error) => settle(reject, error));
+    streamFactory(stream, (error) => settle(reject, error));
   });
 };
 

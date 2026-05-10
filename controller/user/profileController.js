@@ -9,6 +9,9 @@ import {
   updateProfile,
 } from "../../service/user/profileService.js";
 import * as orderService from "../../service/user/orderService.js";
+import { getWallet } from "../../service/user/walletService.js";
+import orderDb from "../../models/orderDb.js";
+import wishlistDb from "../../models/wishlistDb.js";
 import { deleteCloudinaryUploads, uploadImageToCloudinary } from "../../utils/cloudinaryUploader.js";
 
 export const viewProfile = async (req, res) => {
@@ -20,9 +23,27 @@ export const viewProfile = async (req, res) => {
       })
       .sort({ isDefault: -1, createdAt: -1 });
 
+    const [orderCount, activeOrders, pendingReturnRequests, wallet, wishlist] = await Promise.all([
+      orderDb.countDocuments({ user: user._id }),
+      orderDb.countDocuments({ user: user._id, orderStatus: { $in: ["Pending", "Shipped", "Out for delivery"] } }),
+      orderDb.countDocuments({
+        user: user._id,
+        items: { $elemMatch: { itemStatus: "Return Requested", returnRequestStatus: "Pending" } }
+      }),
+      getWallet(user._id),
+      wishlistDb.findOne({ user: user._id }).select("items")
+    ]);
+
     res.render("pages/profile", {
       user,
       addresses,
+      dashboard: {
+        orderCount,
+        activeOrders,
+        pendingReturnRequests,
+        walletBalance: wallet.balance || 0,
+        wishlistCount: wishlist?.items?.length || 0,
+      },
       title: "Profile",
       layout: "layouts/user-panel",
     });

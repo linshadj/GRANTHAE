@@ -9,10 +9,8 @@ export const adminNotificationMiddleware = async (req, res, next) => {
             // Count pending orders
             const pendingOrdersCount = await orderDb.countDocuments({ orderStatus: 'Pending' });
             
-            // Count pending return requests (items with status 'Returned')
-            // Using aggregation to count orders that have at least one 'Returned' item
             const returnRequestsOrders = await orderDb.countDocuments({
-                "items.itemStatus": "Returned"
+                items: { $elemMatch: { itemStatus: "Return Requested", returnRequestStatus: "Pending" } }
             });
 
             // Count pending rental requests
@@ -26,7 +24,7 @@ export const adminNotificationMiddleware = async (req, res, next) => {
 
         } catch (error) {
             console.error("Error fetching admin notifications:", error);
-            res.locals.adminNotifications = { orders: 0, requests: 0 };
+            res.locals.adminNotifications = { orders: 0, requests: 0, rentals: 0 };
         }
     }
     next();
