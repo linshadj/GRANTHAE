@@ -103,6 +103,15 @@ couponSchema.virtual("status").get(function () {
 
 couponSchema.pre("validate", function normalizeCouponCode() {
   if (this.code) this.code = this.code.trim().toUpperCase();
+  if (this.discountValue >= this.minPurchaseAmount) {
+    this.invalidate("discountValue", "Discount value must be less than the minimum order value.");
+  }
+  if (this.discountType === "percentage" && (!this.maxDiscountAmount || this.maxDiscountAmount <= 0)) {
+    this.invalidate("maxDiscountAmount", "Max discount is required for percentage coupons.");
+  }
+  if (this.discountType === "percentage" && this.maxDiscountAmount >= this.minPurchaseAmount) {
+    this.invalidate("maxDiscountAmount", "Max discount must be less than the minimum order value.");
+  }
 });
 
 export const Coupon = mongoose.model("Coupon", couponSchema);

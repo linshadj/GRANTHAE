@@ -2,6 +2,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import userDb from "../models/userDb.js";
 import dotenv from "dotenv";
+import { ensureReferralIdentity } from "../service/user/referralService.js";
 
 dotenv.config();
 
@@ -21,8 +22,8 @@ passport.use(
           }
           if (!user.googleId) {
             user.googleId = profile.id;
-            await user.save();
           }
+          await ensureReferralIdentity(user);
           return done(null, user);
         }
 
@@ -38,6 +39,8 @@ passport.use(
             avatar: avatar,
             googleId: profile.id,
         });
+        await ensureReferralIdentity(user);
+        user.$locals.isNewGoogleUser = true;
         return done(null, user);
       } catch (error) {
         return done(error, null);

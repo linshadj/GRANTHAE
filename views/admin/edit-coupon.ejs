@@ -62,10 +62,11 @@
                     <span id="minPurchaseAmountError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Max Discount</label>
+                    <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Max Discount <span id="maxDiscountRequired" class="text-red-500">*</span></label>
                     <input type="number" id="maxDiscountAmount" name="maxDiscountAmount" min="0" step="0.01" value="<%= data.maxDiscountAmount || 0 %>"
                         class="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:ring-1 focus:ring-apple-gold/50 transition-all">
-                    <p class="text-[10px] text-apple-text-gray/60 mt-1">Use 0 for no cap.</p>
+                    <span id="maxDiscountAmountError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
+                    <p id="maxDiscountHelp" class="text-[10px] text-apple-text-gray/60 mt-1">Required for percentage coupons.</p>
                 </div>
             </div>
         </div>
@@ -136,6 +137,9 @@
     const form = document.getElementById('couponForm');
     const submitBtn = document.getElementById('couponSubmitBtn');
     const codeInput = document.getElementById('code');
+    const discountTypeInput = document.getElementById('discountType');
+    const maxDiscountRequired = document.getElementById('maxDiscountRequired');
+    const maxDiscountHelp = document.getElementById('maxDiscountHelp');
 
     codeInput.addEventListener('input', () => {
         codeInput.value = codeInput.value.toUpperCase().replace(/\s+/g, '');
@@ -149,6 +153,14 @@
             errorEl.classList.toggle('hidden', !message);
         }
         if (inputEl) inputEl.classList.toggle('border-red-500', Boolean(message));
+    }
+
+    function updateMaxDiscountHint() {
+        const isPercentage = discountTypeInput.value === 'percentage';
+        maxDiscountRequired.classList.toggle('hidden', !isPercentage);
+        maxDiscountHelp.textContent = isPercentage
+            ? 'Required for percentage coupons and must be less than minimum order.'
+            : 'Optional for fixed coupons. Use 0 for no cap.';
     }
 
     function validateForm() {
@@ -167,6 +179,7 @@
         const discountType = document.getElementById('discountType').value;
         const discountValue = Number(document.getElementById('discountValue').value);
         const minPurchaseAmount = Number(document.getElementById('minPurchaseAmount').value);
+        const maxDiscountAmount = Number(document.getElementById('maxDiscountAmount').value);
         if (discountValue <= 0) {
             setError('discountValue', 'Discount value must be greater than zero.');
             isValid = false;
@@ -182,6 +195,16 @@
             setError('minPurchaseAmount', 'Minimum order value must be greater than discount value.');
             isValid = false;
         }
+        if (maxDiscountAmount < 0) {
+            setError('maxDiscountAmount', 'Max discount cannot be negative.');
+            isValid = false;
+        } else if (discountType === 'percentage' && maxDiscountAmount <= 0) {
+            setError('maxDiscountAmount', 'Max discount is required for percentage coupons.');
+            isValid = false;
+        } else if (discountType === 'percentage' && minPurchaseAmount > 0 && maxDiscountAmount >= minPurchaseAmount) {
+            setError('maxDiscountAmount', 'Max discount must be less than the minimum order value.');
+            isValid = false;
+        }
 
         const startDate = document.getElementById('startDate').value;
         const expiresAt = document.getElementById('expiresAt').value;
@@ -192,6 +215,9 @@
 
         return isValid;
     }
+
+    discountTypeInput.addEventListener('change', updateMaxDiscountHint);
+    updateMaxDiscountHint();
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -252,6 +278,8 @@
         const normalized = String(message || '').toLowerCase();
         if (normalized.includes('code') || normalized.includes('exists')) {
             setError('code', message);
+        } else if (normalized.includes('max discount')) {
+            setError('maxDiscountAmount', message);
         } else if (normalized.includes('minimum') || normalized.includes('order')) {
             setError('minPurchaseAmount', message);
         } else if (normalized.includes('discount')) {

@@ -13,6 +13,8 @@ import orderDb from "../../models/orderDb.js";
 import wishlistDb from "../../models/wishlistDb.js";
 import { Rental } from "../../models/rentalDb.js";
 import { deleteCloudinaryUploads, uploadImageToCloudinary } from "../../utils/cloudinaryUploader.js";
+import { getReferralSummary } from "../../service/user/referralService.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 export const viewDashboard = async (req, res, next) => {
   try {
@@ -74,10 +76,13 @@ export const viewProfile = async (req, res, next) => {
         userId: new mongoose.Types.ObjectId(user._id),
       })
       .sort({ isDefault: -1, createdAt: -1 });
+    const origin = `${req.protocol}://${req.get("host")}`;
+    const referralData = await getReferralSummary(user._id, origin);
 
     res.render("pages/profile", {
       user,
       addresses,
+      referralData,
       title: "Profile",
       layout: "layouts/user-panel",
       path: "/profile",
@@ -139,7 +144,7 @@ export const editProfile = async (req, res) => {
     console.error("Error in editProfile:", err.message);
     return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Internal Server Error",
+      message: getFriendlyErrorMessage(err, "Could not update your profile. Please try again."),
     });
   }
 };
@@ -160,7 +165,7 @@ export const addNewAddress = async (req, res) => {
     console.error("Error in addNewAddress: ", err.message);
     return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: err.message,
+      message: getFriendlyErrorMessage(err, "Could not add the address. Please check the details and try again."),
     });
   }
 };
@@ -200,7 +205,7 @@ export const editAddress = async (req, res) => {
     console.error("Error in editAddress:", err.message);
     return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: err,
+      message: getFriendlyErrorMessage(err, "Could not update the address. Please check the details and try again."),
     });
   }
 }

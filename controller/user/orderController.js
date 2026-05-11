@@ -1,5 +1,6 @@
 import * as orderService from "../../service/user/orderService.js";
 import * as rentalService from "../../service/user/rentalService.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 export const listOrdersPage = async (req, res) => {
     try {
@@ -73,7 +74,7 @@ export const cancelProduct = async (req, res) => {
         res.status(200).json({ success: true, message: "Item cancelled successfully." });
     } catch (error) {
         console.error("Cancel Product Error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not cancel this item.") });
     }
 };
 
@@ -87,7 +88,7 @@ export const returnProduct = async (req, res) => {
         res.status(200).json({ success: true, message: "Return request submitted successfully." });
     } catch (error) {
         console.error("Return Product Error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not submit return request.") });
     }
 };
 
@@ -105,6 +106,6 @@ export const downloadInvoice = async (req, res) => {
         res.send(pdfBuffer);
     } catch (error) {
         console.error("Invoice generation error:", error);
-        res.status(500).send(error.message);
+        res.status(500).send(getFriendlyErrorMessage(error, "Could not generate the invoice."));
     }
 };

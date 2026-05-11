@@ -55,7 +55,7 @@
                                         <span class="text-sm text-apple-text-gray/80 font-medium tracking-wide">
                                             Unit Price:
                                             <% if (item.offerDiscountAmount && item.offerDiscountAmount > 0) { %>
-                                                <span class="text-apple-text-gray/50 line-through decoration-2 mr-1">₹<%= item.basePrice %></span>
+                                                <span class="text-apple-text-gray/50 line-through decoration-2 mr-1">₹<%= item.originalPrice %></span>
                                             <% } %>
                                             <span class="font-bold text-apple-dark">₹<%= item.price %></span>
                                         </span>

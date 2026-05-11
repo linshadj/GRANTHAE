@@ -3,6 +3,7 @@ import { Category } from "../../models/categoryDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 import wishlistDb from "../../models/wishlistDb.js";
 import * as reviewService from "../../service/user/reviewService.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 export const listProducts = async (req, res) => {
     try {
@@ -91,7 +92,7 @@ export const submitProductReview = async (req, res) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message || "Could not submit review."
+            message: getFriendlyErrorMessage(error, "Could not submit review.")
         });
     }
 };

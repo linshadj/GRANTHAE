@@ -6,6 +6,7 @@ import * as rentalService from "../../service/user/rentalService.js";
 import * as walletService from "../../service/user/walletService.js";
 import * as reviewService from "../../service/user/reviewService.js";
 import { deleteCloudinaryUploads, uploadImagesToCloudinary } from "../../utils/cloudinaryUploader.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 export const getListRentalBookPage = async (req, res, next) => {
     try {
@@ -79,7 +80,7 @@ export const submitRentalListing = async (req, res, next) => {
         console.error("Submit Rental Listing Error:", error);
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message || "Could not submit rental listing."
+            message: getFriendlyErrorMessage(error, "Could not submit rental listing.")
         });
     }
 };
@@ -155,7 +156,7 @@ export const requestRentalBook = async (req, res) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message || "Could not request this rental."
+            message: getFriendlyErrorMessage(error, "Could not request this rental.")
         });
     }
 };
@@ -223,7 +224,7 @@ export const submitRentalReturn = async (req, res) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message || "Could not submit rental return."
+            message: getFriendlyErrorMessage(error, "Could not submit rental return.")
         });
     }
 };
@@ -304,7 +305,7 @@ export const completeRentalReturn = async (req, res) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message || "Could not complete the return."
+            message: getFriendlyErrorMessage(error, "Could not complete the return.")
         });
     }
 };
@@ -321,7 +322,7 @@ export const confirmRentalRequest = async (req, res) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message || "Could not confirm rental request."
+            message: getFriendlyErrorMessage(error, "Could not confirm rental request.")
         });
     }
 };
@@ -338,7 +339,7 @@ export const rejectRentalRequest = async (req, res) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message || "Could not decline rental request."
+            message: getFriendlyErrorMessage(error, "Could not decline rental request.")
         });
     }
 };
@@ -411,7 +412,7 @@ export const updateRentalListing = async (req, res) => {
 
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message || "Could not update listing."
+            message: getFriendlyErrorMessage(error, "Could not update listing.")
         });
     }
 };
@@ -429,7 +430,7 @@ export const toggleRentalListing = async (req, res) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message || "Could not update listing status."
+            message: getFriendlyErrorMessage(error, "Could not update listing status.")
         });
     }
 };
@@ -450,7 +451,7 @@ export const submitRentalReview = async (req, res) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message || "Could not submit review."
+            message: getFriendlyErrorMessage(error, "Could not submit review.")
         });
     }
 };

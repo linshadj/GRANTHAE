@@ -4,6 +4,7 @@ import { getWallet } from "../../service/user/walletService.js";
 import { addNewAddressService } from "../../service/user/profileService.js";
 import mongoose from "mongoose";
 import orderDb from "../../models/orderDb.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 export const getCheckoutPage = async (req, res) => {
     try {
@@ -42,7 +43,7 @@ export const getCheckoutPage = async (req, res) => {
             // Can add flash message here if using express-flash
             return res.redirect('/cart');
         }
-        res.status(500).render("pages/error", { title: "Error", message: error.message });
+        res.status(500).render("pages/error", { title: "Error", message: getFriendlyErrorMessage(error, "Could not load checkout. Please try again.") });
     }
 };
 
@@ -105,7 +106,7 @@ export const placeOrder = async (req, res) => {
                 await checkoutService.markRazorpayPaymentFailed(userId, newOrder._id, paymentError.message);
                 return res.status(400).json({
                     success: false,
-                    message: paymentError.message,
+                    message: getFriendlyErrorMessage(paymentError, "Could not initialize payment. Please try another method."),
                     redirectUrl: `/payment-failure/${newOrder._id}`
                 });
             }
@@ -121,7 +122,7 @@ export const placeOrder = async (req, res) => {
         });
     } catch (error) {
         console.error("Place Order Error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not place the order. Please try again.") });
     }
 };
 
@@ -173,7 +174,7 @@ export const addCheckoutAddress = async (req, res) => {
         });
     } catch (error) {
         console.error("Add Checkout Address Error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not add the address. Please check the details and try again.") });
     }
 };
 
@@ -205,7 +206,7 @@ export const applyCoupon = async (req, res) => {
         });
     } catch (error) {
         console.error("Apply Coupon Error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not apply this coupon.") });
     }
 };
 
@@ -226,7 +227,7 @@ export const removeCoupon = async (req, res) => {
         });
     } catch (error) {
         console.error("Remove Coupon Error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not remove this coupon.") });
     }
 };
 
@@ -349,7 +350,7 @@ export const retryRazorpayPayment = async (req, res) => {
         });
     } catch (error) {
         console.error("Retry Razorpay Payment Error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not retry the payment. Please try another method.") });
     }
 };
 
@@ -390,7 +391,7 @@ export const verifyRazorpayPayment = async (req, res) => {
         }
         res.status(400).json({
             success: false,
-            message: error.message,
+            message: getFriendlyErrorMessage(error, "Payment verification failed. Please try another method."),
             redirectUrl: internalOrderId ? `/payment-failure/${internalOrderId}` : "/checkout"
         });
     }
@@ -414,6 +415,6 @@ export const markRazorpayPaymentFailed = async (req, res) => {
         });
     } catch (error) {
         console.error("Mark Razorpay Payment Failed Error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not record the payment failure.") });
     }
 };

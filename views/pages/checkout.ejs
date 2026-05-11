@@ -146,7 +146,7 @@
                                 <% } %>
                                 <div class="mt-2 text-xs font-bold text-apple-blue">
                                     <% if (item.offerDiscountAmount && item.offerDiscountAmount > 0) { %>
-                                        <span class="text-apple-text-gray/50 line-through decoration-2 mr-1">₹<%= item.basePrice * item.quantity %></span>
+                                        <span class="text-apple-text-gray/50 line-through decoration-2 mr-1">₹<%= item.originalPrice * item.quantity %></span>
                                     <% } %>
                                     ₹<%= item.itemTotal %>
                                 </div>

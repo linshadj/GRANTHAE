@@ -70,8 +70,8 @@ export const getActiveOffersForProduct = async (product) => {
     });
 };
 
-const getBestOfferFromOffers = (product, basePrice, offers = []) => {
-    const price = roundCurrency(basePrice);
+const getBestOfferFromOffers = (product, regularPrice, offers = []) => {
+    const price = roundCurrency(regularPrice);
     let best = null;
 
     for (const offer of offers) {
@@ -102,8 +102,8 @@ const getBestOfferFromOffers = (product, basePrice, offers = []) => {
     };
 };
 
-export const getBestOfferForProduct = async (product, basePrice = product.price) => {
-    const price = roundCurrency(basePrice);
+export const getBestOfferForProduct = async (product, regularPrice = product.price) => {
+    const price = roundCurrency(regularPrice);
     const offers = await getActiveOffersForProduct(product);
     return getBestOfferFromOffers(product, price, offers);
 };
@@ -115,11 +115,11 @@ export const applyOfferToProductObject = async (product, activeOffers = null) =>
     const variants = Array.isArray(productObject.variants)
         ? productObject.variants.map((variant) => {
             const variantObject = typeof variant.toObject === "function" ? variant.toObject() : { ...variant };
-            const basePrice = roundCurrency(variantObject.priceOverride || productObject.price);
-            const variantOffer = getBestOfferFromOffers(productObject, basePrice, offers);
+            const originalPrice = roundCurrency(variantObject.priceOverride || productObject.price);
+            const variantOffer = getBestOfferFromOffers(productObject, originalPrice, offers);
             return {
                 ...variantObject,
-                basePrice,
+                originalPrice,
                 offerPrice: variantOffer.finalPrice,
                 offerDiscountAmount: variantOffer.discountAmount,
                 offerTitle: variantOffer.title,

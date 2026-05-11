@@ -13,6 +13,7 @@ import { STATUS_CODES } from "../../utils/statusCodes.js";
 import { Product } from "../../models/productDb.js";
 import { Category } from "../../models/categoryDb.js";
 import { normalizeEmail } from "../../utils/validator.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 
 export const signIn = async (req, res) => {
@@ -20,7 +21,12 @@ export const signIn = async (req, res) => {
 };
 
 export const signUp = (req, res) => {
-  res.render("pages/signup", { title: "Signup", layout: "layouts/auth" });
+  res.render("pages/signup", {
+    title: "Signup",
+    layout: "layouts/auth",
+    referralCode: req.query.ref || "",
+    referralToken: req.query.refToken || req.query.token || "",
+  });
 };
 
 export const signInData = async (req, res) => {
@@ -33,18 +39,20 @@ export const signInData = async (req, res) => {
     return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: "/home" });
   } catch (error) {
     console.log(error);
-    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not sign in. Please try again.") });
   }
 };
 
 export const signupData = async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password, referralCode, referralToken } = req.body;
     const body = {
       firstName: firstName?.trim(),
       lastName: lastName?.trim(),
       email: normalizeEmail(email),
       password,
+      referralCode: referralCode?.trim(),
+      referralToken: referralToken?.trim(),
     };
     const validateUser = await signupVerify(body);
     req.session.tempUser = body;
@@ -58,7 +66,7 @@ export const signupData = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not create your account. Please check the details and try again.") });
   }
 };
 
@@ -102,7 +110,7 @@ export const otpHandler = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not verify the OTP. Please try again.") });
   }
 };
 
@@ -145,7 +153,7 @@ export const forgotPassData = async (req, res) => {
     return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: "/otp" });
   } catch (error) {
     console.log("error in forgotPassData: ", error.message);
-    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not start password reset. Please try again.") });
   }
 };
 
@@ -174,7 +182,7 @@ export const setNewPassData = async (req, res) => {
     return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: "/password-changed" });
   } catch (error) {
     console.log("Error in resetPassData: ", error);
-    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not reset password. Please try again.") });
   }
 };
 

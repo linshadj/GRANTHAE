@@ -29,11 +29,6 @@ const orderSchema = new mongoose.Schema({
             type: Number,
             required: true
         },
-        basePrice: {
-            type: Number,
-            default: 0,
-            min: 0
-        },
         offerDiscountAmount: {
             type: Number,
             default: 0,

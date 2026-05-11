@@ -1,5 +1,6 @@
 import * as cartService from "../../service/user/cartService.js";
 import { getBestOfferForProduct } from "../../service/user/offerPricingService.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 const getCartData = async (userId) => {
     const cart = await cartService.getCart(userId);
@@ -28,7 +29,7 @@ const getCartData = async (userId) => {
             }
 
             const offer = await getBestOfferForProduct(product, price);
-            const basePrice = price;
+            const originalPrice = price;
             price = offer.finalPrice;
             
             const itemTotal = price * item.quantity;
@@ -44,7 +45,7 @@ const getCartData = async (userId) => {
                 variant: item.variant,
                 quantity: item.quantity,
                 price: price,
-                basePrice,
+                originalPrice,
                 offerDiscountAmount: offer.discountAmount,
                 offerTitle: offer.title,
                 itemTotal: itemTotal,
@@ -84,7 +85,7 @@ export const addToCart = async (req, res) => {
         res.status(200).json({ success: true, message: "Added to cart successfully." });
     } catch (error) {
         console.error("Add to cart error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not add this item to the cart.") });
     }
 };
 
@@ -117,7 +118,7 @@ export const updateQuantity = async (req, res) => {
         });
     } catch (error) {
         console.error("Update quantity error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not update cart quantity.") });
     }
 };
 

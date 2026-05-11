@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { otpCreator } from "../../utils/otpGenerator.js";
 import { hashPass } from "../../utils/passHasher.js";
 import { normalizeEmail, validateEmail, validateName, validatePassword } from "../../utils/validator.js";
+import { applyReferralReward, ensureReferralIdentity, validateReferralForSignup } from "./referralService.js";
 
 export const signInVerify = async (userData) => {
   const { password } = userData;
@@ -31,7 +32,7 @@ export const signInVerify = async (userData) => {
 };
 
 export const signupVerify = async (userData) => {
-  const { firstName, lastName, password } = userData;
+  const { firstName, lastName, password, referralCode, referralToken } = userData;
   const email = normalizeEmail(userData.email);
 
   if (!validateName(firstName)) throw new Error("First name should contain only letters.");
@@ -49,6 +50,7 @@ export const signupVerify = async (userData) => {
   if (existingEmail) {
     throw new Error("Email is already registered.");
   }
+  await validateReferralForSignup({ referralCode, referralToken, email });
   await otpCreator(firstName, email);
 };
 
@@ -108,6 +110,11 @@ export const createNewUser = async (body) => {
     lastName: body.lastName?.trim(),
     email: normalizeEmail(body.email),
     password: hashedPass,
+  });
+  await ensureReferralIdentity(newUser);
+  await applyReferralReward(newUser, {
+    referralCode: body.referralCode,
+    referralToken: body.referralToken,
   });
   return newUser._id;
 };

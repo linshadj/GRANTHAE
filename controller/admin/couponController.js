@@ -105,6 +105,12 @@ const validateCouponPayload = async (payload, excludedId = null) => {
   if (!payload.minPurchaseAmount || payload.minPurchaseAmount <= 0) return "Minimum order value must be greater than zero.";
   if (payload.discountValue >= payload.minPurchaseAmount) return "Discount value must be less than the minimum order value.";
   if (payload.maxDiscountAmount < 0) return "Max discount cannot be negative.";
+  if (payload.discountType === "percentage" && (!payload.maxDiscountAmount || payload.maxDiscountAmount <= 0)) {
+    return "Max discount is required for percentage coupons.";
+  }
+  if (payload.discountType === "percentage" && payload.maxDiscountAmount >= payload.minPurchaseAmount) {
+    return "Max discount must be less than the minimum order value.";
+  }
   if (payload.usageLimit < 0) return "Total usage limit cannot be negative.";
   if (payload.usageLimitPerUser < 0) return "Usage limit per user cannot be negative.";
   if (!payload.startDate || Number.isNaN(payload.startDate.getTime())) return "Start date is required.";

@@ -1,5 +1,6 @@
 import { orderDetails, getOrderById, reviewReturnRequestService, updateOrderStatusService } from "../../service/admin/orderService.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 export const ordersPage = async (req, res, next) => {
     try {
@@ -63,7 +64,7 @@ export const updateOrderStatus = async (req, res, next) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message
+            message: getFriendlyErrorMessage(error, "Could not update order status.")
         });
     }
 };
@@ -82,7 +83,7 @@ export const reviewReturnRequest = async (req, res) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message
+            message: getFriendlyErrorMessage(error, "Could not review the return request.")
         });
     }
 };
@@ -102,7 +103,7 @@ export const liveOrdersSearch = async (req, res, next) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message
+            message: getFriendlyErrorMessage(error, "Could not search orders.")
         });
     }
 };

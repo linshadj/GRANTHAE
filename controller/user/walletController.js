@@ -1,5 +1,6 @@
 import * as walletService from "../../service/user/walletService.js";
 import { createRazorpayOrder, getRazorpayKeyId, isRazorpayConfigured } from "../../service/user/razorpayService.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 const walletPageData = async (req) => {
     const wallet = await walletService.getWallet(req.user._id);
@@ -91,7 +92,7 @@ export const addFunds = async (req, res) => {
                 console.error("Mark Wallet Top-up Failed Error:", markError);
             }
         }
-        res.status(400).json({ success: false, message: error.message || "Could not initialize wallet top-up." });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not initialize wallet top-up.") });
     }
 };
 
@@ -121,7 +122,7 @@ export const verifyAddFunds = async (req, res) => {
         console.error("Verify Wallet Top-up Error:", error);
         res.status(400).json({
             success: false,
-            message: error.message || "Payment verification failed.",
+            message: getFriendlyErrorMessage(error, "Payment verification failed."),
             redirectUrl: "/wallet/add-funds?status=error&message=Payment%20verification%20failed."
         });
     }
@@ -138,6 +139,6 @@ export const markAddFundsFailed = async (req, res) => {
         });
     } catch (error) {
         console.error("Mark Wallet Top-up Failed Error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not record wallet top-up failure.") });
     }
 };

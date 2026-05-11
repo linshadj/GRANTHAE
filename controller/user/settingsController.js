@@ -1,6 +1,7 @@
 import userDb from "../../models/userDb.js"
 import { changePasswordService, verifyEmail } from "../../service/user/settingsService.js"
 import { STATUS_CODES } from "../../utils/statusCodes.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 
 export const viewSettings = async (req, res) => {
@@ -24,7 +25,7 @@ export const changeEmail = async (req, res) => {
         return res.status(STATUS_CODES.OK).json({ success: true, message: "Verification code sent to new email."});
       } catch (error) {
         console.log("error in updateEmail: ", error.message);
-        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
+        return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not update email. Please try again.") });
       }
 }
 
@@ -38,6 +39,6 @@ export const changePassword = async (req, res) => {
         return res.status(STATUS_CODES.OK).json({ success: true, message: "Password updated successfully.", redirectUrl: "/settings?status=success&message=Password updated successfully." });
     } catch (error) {
         console.log("Error in changePassword: ", error.message);
-        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
+        return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not update password. Please try again.") });
     }
 }

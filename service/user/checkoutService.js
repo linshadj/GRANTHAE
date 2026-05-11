@@ -51,8 +51,8 @@ export const getCheckoutData = async (userId) => {
              throw new Error(`Insufficient stock for "${product.name}". Only ${availableStock} left.`);
         }
 
-        const basePrice = price;
-        const offer = await getBestOfferForProduct(product, basePrice);
+        const originalPrice = price;
+        const offer = await getBestOfferForProduct(product, originalPrice);
         price = offer.finalPrice;
 
         const itemTotal = price * item.quantity;
@@ -65,7 +65,7 @@ export const getCheckoutData = async (userId) => {
             variant: item.variant,
             quantity: item.quantity,
             price: price,
-            basePrice,
+            originalPrice,
             offerDiscountAmount: offer.discountAmount,
             offerTitle: offer.title,
             itemTotal: itemTotal,
@@ -297,8 +297,8 @@ export const placeOrder = async (userId, addressId, paymentMethod, couponCode = 
              throw new Error(`Insufficient stock for "${product.name}". Only ${availableStock} left.`);
         }
 
-        const basePrice = price;
-        const offer = await getBestOfferForProduct(product, basePrice);
+        const originalPrice = price;
+        const offer = await getBestOfferForProduct(product, originalPrice);
         price = offer.finalPrice;
 
         subtotalAmount += (price * item.quantity);
@@ -307,7 +307,6 @@ export const placeOrder = async (userId, addressId, paymentMethod, couponCode = 
             variant: item.variant,
             quantity: item.quantity,
             price: price,
-            basePrice,
             offerDiscountAmount: offer.discountAmount,
             offerTitle: offer.title,
             itemStatus: 'Pending'
