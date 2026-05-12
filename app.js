@@ -24,10 +24,26 @@ const __dirname = path.dirname(__filename)
 
 const app = express()
 
-app.use(cors({
-  origin: 'https://granthae.linshad.xyz',
-  credentials: true
-}));
+const allowedOrigins = [
+    'http://localhost:5001',
+    'https://granthae.linshad.xyz'
+]
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        if(!origin) return callback(null, true);
+
+        if(allowedOrigins.includes(origin)) {
+            callback(null, true)
+        }else {
+            callback(new Error('Not allowed by CORS'))
+        }
+    },
+    Credential: true,
+    optionSuccessStatus: 200
+}
+
+app.use(cors(corsOptions))
 
 app.use(session({
   secret: process.env.SECRET_KEY,
