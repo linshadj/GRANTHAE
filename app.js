@@ -8,7 +8,7 @@ import userRoutes from './routes/userRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js'
 import { adminNotificationMiddleware } from './middlewares/adminNotificationMiddleware.js'
-
+import cors from 'cors';
 import dotenv from 'dotenv'
 import { connectDb } from './config/dbConnect.js'
 import passport from 'passport'
@@ -23,6 +23,12 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
+
+app.use(cors({
+  origin: 'https://granthae.linshad.xyz',
+  credentials: true
+}));
+
 app.use(session({
   secret: process.env.SECRET_KEY,
   resave: false,
