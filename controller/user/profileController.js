@@ -63,7 +63,7 @@ export const viewDashboard = async (req, res, next) => {
       path: "/dashboard",
     });
   } catch (err) {
-    console.log("err in viewDashboard", err.message);
+    console.error("Error in viewDashboard:", err.message);
     next(err);
   }
 };
@@ -88,7 +88,7 @@ export const viewProfile = async (req, res, next) => {
       path: "/profile",
     });
   } catch (err) {
-    console.log("err in viewProfile", err.message);
+    console.error("Error in viewProfile:", err.message);
     next(err);
   }
 };
@@ -108,7 +108,11 @@ export const viewEditProfile = async (req, res) => {
       layout: "layouts/user-panel",
     });
   } catch (err) {
-    console.log("err in getProfile", err.message);
+    console.error("Error in viewEditProfile:", err.message);
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("pages/error", {
+      title: "Error",
+      message: "Could not load edit profile.",
+    });
   }
 };
 

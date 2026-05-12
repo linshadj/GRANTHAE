@@ -4740,6 +4740,72 @@
   .font-luxury {
     font-family: 'Marcellus', serif;
   }
+  .product-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "gallery" "purchase" "details";
+    align-items: start;
+    gap: 2.5rem;
+  }
+  .product-detail-gallery {
+    grid-area: gallery;
+  }
+  .product-detail-info {
+    grid-area: details;
+  }
+  .product-purchase-column {
+    grid-area: purchase;
+    align-self: start;
+  }
+  .product-purchase-panel {
+    width: 100%;
+  }
+  @media (min-width: 1024px) {
+    .product-detail-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-areas: "gallery details purchase";
+    }
+    .product-purchase-panel {
+      position: sticky;
+      top: 6rem;
+    }
+  }
+  @media (max-width: 639px) {
+    #doodle-container {
+      position: fixed;
+      height: 100dvh;
+      opacity: 0.38;
+    }
+    #doodle-container .doodle-mobile-top {
+      top: 5.5rem;
+      right: -2.5rem;
+      left: auto;
+      width: 8rem;
+      height: 8rem;
+      rotate: 8deg;
+    }
+    #doodle-container .doodle-mobile-mid {
+      top: 48%;
+      left: -2.25rem;
+      right: auto;
+      width: 7rem;
+      height: 7rem;
+      rotate: -10deg;
+    }
+    #doodle-container .doodle-mobile-bottom {
+      top: auto;
+      right: -3rem;
+      bottom: 3.5rem;
+      width: 9.5rem;
+      height: 9.5rem;
+      rotate: 7deg;
+    }
+  }
+  @media (hover: none), (pointer: coarse) {
+    #doodle-container .parallax-layer {
+      transform: none !important;
+    }
+  }
 }
 @property --tw-translate-x {
   syntax: "*";

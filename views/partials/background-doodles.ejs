@@ -29,7 +29,7 @@
     <!-- 1. Top Section (Global Doodles - Shifted to avoid Hero text/Big Doodle collision) -->
     <!-- Removed large abstract path here as it duplicates the Home Page main doodle -->
 
-    <svg class="parallax-layer absolute top-[15%] right-[45%] w-24 h-24 text-apple-dark/10 stroke-current rotate-[-12deg]"
+    <svg class="parallax-layer doodle-mobile-top absolute top-[15%] right-[45%] w-24 h-24 text-apple-dark/10 stroke-current rotate-[-12deg]"
         data-speed="0.05" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"
         stroke-linejoin="round">
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
@@ -76,7 +76,7 @@
         <line x1="12" y1="17" x2="12" y2="21"></line>
     </svg>
 
-    <svg class="parallax-layer absolute top-[72%] left-[30%] w-24 h-24 text-apple-dark/5 stroke-current -rotate-6"
+    <svg class="parallax-layer doodle-mobile-mid absolute top-[72%] left-[30%] w-24 h-24 text-apple-dark/5 stroke-current -rotate-6"
         data-speed="0.05" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round">
         <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
         <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
@@ -85,7 +85,7 @@
     </svg>
 
     <!-- 5. Bottom Section (85-95%) -->
-    <svg class="parallax-layer absolute top-[85%] right-[10%] w-40 h-40 text-apple-dark/5 stroke-current rotate-[6deg]"
+    <svg class="parallax-layer doodle-mobile-bottom absolute top-[85%] right-[10%] w-40 h-40 text-apple-dark/5 stroke-current rotate-[6deg]"
         data-speed="0.03" viewBox="0 0 24 24" fill="none" stroke-width="1" stroke-linecap="round"
         stroke-linejoin="round">
         <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
@@ -110,20 +110,20 @@
 </div>
 
 <script>
-    // Simple Mouse Parallax Effect
-    document.addEventListener('mousemove', (e) => {
-        const layers = document.querySelectorAll('.parallax-layer');
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        document.addEventListener('mousemove', (e) => {
+            const layers = document.querySelectorAll('.parallax-layer');
 
-        const x = (window.innerWidth - e.pageX * 2) / 100;
-        const y = (window.innerHeight - e.pageY * 2) / 100;
+            const x = (window.innerWidth - e.pageX * 2) / 100;
+            const y = (window.innerHeight - e.pageY * 2) / 100;
 
-        layers.forEach(layer => {
-            const speed = layer.getAttribute('data-speed') || 0.05;
-            const xOffset = x * speed * 100;
-            const yOffset = y * speed * 100;
+            layers.forEach(layer => {
+                const speed = layer.getAttribute('data-speed') || 0.05;
+                const xOffset = x * speed * 100;
+                const yOffset = y * speed * 100;
 
-            // Apply transform cleanly
-            layer.style.transform = `translateX(${xOffset}px) translateY(${yOffset}px) rotate(${layer.style.rotate || '0deg'})`;
+                layer.style.transform = `translateX(${xOffset}px) translateY(${yOffset}px)`;
+            });
         });
-    });
+    }
 </script>

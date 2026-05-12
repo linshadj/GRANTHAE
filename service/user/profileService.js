@@ -69,6 +69,7 @@ export const editAddressService = async (addressData, userId, addressId) => {
 
     return true;
   } catch (err) {
-    console.log("Error in editAddressService: " + err.message);
+    console.error("Error in editAddressService:", err.message);
+    throw err;
   }
 }

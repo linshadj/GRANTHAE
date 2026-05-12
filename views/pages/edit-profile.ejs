@@ -506,7 +506,7 @@
                     backendError.textContent = data.message;
                 }
             } catch (error) {
-                console.log("Error in editProfile fetch:", error);
+                console.error("Error in editProfile fetch:", error);
                 resetSubmitButton(submitButton);
                 backendError.classList.remove("hidden");
                 backendError.textContent = error;

@@ -18,8 +18,6 @@ export const toggleBlockUser = async (req, res) => {
     const userId = req.params.id;
     const action = req.params.action;
 
-    console.log("Toggling block status for userId:", userId, "Action:", action);
-
     await toggleBlockUserService(userId, action);
 
     return res.status(STATUS_CODES.OK).json({ success: true, message: `User has been ${action}ed successfully.`, redirectUrl: "/admin/users?status=updated&&message=User+has+been+successfully+updated." });
@@ -31,7 +29,7 @@ export const toggleBlockUser = async (req, res) => {
 
 export const liveUsersSearch = async (req, res) => {
   try {
-    const page = 1; // Always first page during live search
+    const page = 1;
     const search = req.query.search || "";
     const sort = req.query.sort || "newest";
     const filter = req.query.filter || "all";
