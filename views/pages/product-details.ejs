@@ -169,7 +169,7 @@
                 <div class="mb-6">
                     <div class="flex flex-wrap items-end gap-3">
                         <% if (selectedOriginalPrice > selectedPrice) { %>
-                            <span id="displayOriginalPrice" class="text-apple-text-gray text-xl line-through decoration-2">&#8377;<%= selectedOriginalPrice %></span>
+                            <s><span id="displayOriginalPrice" class="text-apple-text-gray text-xl line-through decoration-2">&#8377;<%= selectedOriginalPrice %></span></s>
                         <% } else { %>
                             <span id="displayOriginalPrice" class="hidden text-apple-text-gray text-xl line-through decoration-2"></span>
                         <% } %>
@@ -202,13 +202,9 @@
                                             <div class="text-right">
                                                 <p class="font-bold text-apple-dark">&#8377;<%= variant.offerPrice || variant.priceOverride || product.price %></p>
                                                 <% if (variant.hasOffer) { %>
-                                                    <p class="text-[10px] line-through decoration-2 text-apple-text-gray">&#8377;<%= variant.originalPrice %></p>
+                                                    <p class="text-[10px] line-through decoration-2 text-apple-text-gray"><s>&#8377;<%= variant.originalPrice %></s></p>
                                                 <% } %>
                                             </div>
-                                        </div>
-                                        <div class="flex items-center justify-between gap-3 mt-2 text-xs text-apple-text-gray">
-                                            <span>SKU: <%= variant.sku %></span>
-                                            <span><%= variant.stock %> in stock</span>
                                         </div>
                                     </div>
                                 </label>
