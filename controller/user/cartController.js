@@ -1,4 +1,6 @@
 import * as cartService from "../../service/user/cartService.js";
+import { getBestOfferForProduct } from "../../service/user/offerPricingService.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 const getCartData = async (userId) => {
     const cart = await cartService.getCart(userId);
@@ -6,7 +8,7 @@ const getCartData = async (userId) => {
     let cartItems = [];
 
     if (cart && cart.items.length > 0) {
-        cartItems = cart.items.map(item => {
+        cartItems = await Promise.all(cart.items.map(async (item) => {
             const product = item.product;
             let price = product.price;
             let stock = 0;
@@ -25,6 +27,10 @@ const getCartData = async (userId) => {
                 // Product has no variants
                 stock = 0;
             }
+
+            const offer = await getBestOfferForProduct(product, price);
+            const originalPrice = price;
+            price = offer.finalPrice;
             
             const itemTotal = price * item.quantity;
             cartTotal += itemTotal;
@@ -39,13 +45,16 @@ const getCartData = async (userId) => {
                 variant: item.variant,
                 quantity: item.quantity,
                 price: price,
+                originalPrice,
+                offerDiscountAmount: offer.discountAmount,
+                offerTitle: offer.title,
                 itemTotal: itemTotal,
                 stock: stock,
                 isBlocked: product.isBlocked,
                 isDeleted: product.isDeleted,
                 isCategoryUnavailable
             };
-        });
+        }));
     }
     return { cartItems, cartTotal };
 };
@@ -76,7 +85,7 @@ export const addToCart = async (req, res) => {
         res.status(200).json({ success: true, message: "Added to cart successfully." });
     } catch (error) {
         console.error("Add to cart error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not add this item to the cart.") });
     }
 };
 
@@ -97,6 +106,8 @@ export const updateQuantity = async (req, res) => {
              const v = item.product.variants.find(v => v.name === item.variant);
              if (v && v.priceOverride) itemPrice = v.priceOverride;
         }
+        const offer = await getBestOfferForProduct(item.product, itemPrice);
+        itemPrice = offer.finalPrice;
 
         res.status(200).json({ 
             success: true, 
@@ -107,7 +118,7 @@ export const updateQuantity = async (req, res) => {
         });
     } catch (error) {
         console.error("Update quantity error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not update cart quantity.") });
     }
 };
 

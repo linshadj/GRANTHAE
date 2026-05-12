@@ -37,6 +37,27 @@ const userSchema = new mongoose.Schema(
       default: null,
       trim: true
     },
+    referralCode: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+      uppercase: true,
+    },
+    referralToken: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
+    referredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      default: null,
+    },
+    referredAt: {
+      type: Date,
+    },
     isBlocked: {
       type: Boolean,
       default: false,

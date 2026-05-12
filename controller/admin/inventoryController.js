@@ -1,5 +1,6 @@
 import { getProductsForInventory, updateProductStock } from "../../service/admin/productService.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 export const getInventoryPage = async (req, res, next) => {
     try {
@@ -43,7 +44,7 @@ export const updateStock = async (req, res, next) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message
+            message: getFriendlyErrorMessage(error, "Could not update stock.")
         });
     }
 };

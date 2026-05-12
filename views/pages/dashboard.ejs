@@ -1,0 +1,173 @@
+<%
+    const formatAmount = (amount) => Number(amount || 0).toLocaleString('en-IN', {
+        maximumFractionDigits: 2
+    });
+
+    const orderStatusClass = (order) => {
+        if (order.paymentStatus === 'Failed' || order.orderStatus === 'Cancelled') return 'bg-red-500/10 text-red-500 border-red-500/20';
+        if (order.orderStatus === 'Delivered' || order.paymentStatus === 'Success') return 'bg-green-500/10 text-green-500 border-green-500/20';
+        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+    };
+
+    const listingStatusClass = (status) => {
+        if (['Available', 'Approved'].includes(status)) return 'bg-green-500/10 text-green-500 border-green-500/20';
+        if (status === 'Rejected') return 'bg-red-500/10 text-red-500 border-red-500/20';
+        if (status === 'Rented') return 'bg-apple-blue/10 text-apple-blue border-apple-blue/20';
+        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+    };
+%>
+
+<div class="max-w-7xl mx-auto space-y-8">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-apple-dark font-serif">Dashboard</h1>
+            <p class="text-apple-text-gray text-sm">Your orders, wallet, wishlist, and rental listing activity.</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="/marketplace" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-bold text-apple-dark hover:bg-white/10 transition-colors">
+                <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                Shop Books
+            </a>
+            <a href="/list-rental-book" class="btn-primary inline-flex items-center gap-2 px-4 py-2 text-sm font-bold">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                List a Book
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="/profile/orders" class="glass-card p-5 rounded-2xl border border-white/10 hover:border-apple-blue/30 transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest">Orders</span>
+                <i data-lucide="shopping-bag" class="w-4 h-4 text-apple-blue"></i>
+            </div>
+            <p class="text-3xl font-bold text-apple-dark"><%= dashboard.orderCount %></p>
+            <p class="text-xs text-apple-text-gray mt-1"><%= dashboard.activeOrders %> active</p>
+        </a>
+
+        <a href="/wallet" class="glass-card p-5 rounded-2xl border border-white/10 hover:border-apple-gold/30 transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest">Wallet</span>
+                <i data-lucide="wallet" class="w-4 h-4 text-apple-gold"></i>
+            </div>
+            <p class="text-3xl font-bold text-apple-dark">&#8377;<%= formatAmount(dashboard.walletBalance) %></p>
+            <p class="text-xs text-apple-text-gray mt-1">Available balance</p>
+        </a>
+
+        <a href="/wishlist" class="glass-card p-5 rounded-2xl border border-white/10 hover:border-red-500/30 transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest">Wishlist</span>
+                <i data-lucide="heart" class="w-4 h-4 text-red-500"></i>
+            </div>
+            <p class="text-3xl font-bold text-apple-dark"><%= dashboard.wishlistCount %></p>
+            <p class="text-xs text-apple-text-gray mt-1">Saved books</p>
+        </a>
+
+        <a href="/profile/orders" class="glass-card p-5 rounded-2xl border border-white/10 hover:border-orange-500/30 transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest">Returns</span>
+                <i data-lucide="undo-2" class="w-4 h-4 text-orange-500"></i>
+            </div>
+            <p class="text-3xl font-bold text-apple-dark"><%= dashboard.pendingReturnRequests %></p>
+            <p class="text-xs text-apple-text-gray mt-1">Pending review</p>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-apple-card border border-white/10 rounded-2xl overflow-hidden">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-apple-dark font-serif">Recent Orders</h2>
+                    <p class="text-xs text-apple-text-gray mt-1"><%= dashboard.pendingReturnRequests %> pending return request<%= dashboard.pendingReturnRequests === 1 ? '' : 's' %></p>
+                </div>
+                <a href="/profile/orders" class="text-xs font-bold text-apple-gold uppercase tracking-widest hover:underline">View All</a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left" style="min-width: 640px;">
+                    <thead class="bg-white/5 text-xs text-apple-text-gray uppercase tracking-wider">
+                        <tr>
+                            <th class="px-6 py-4">Order</th>
+                            <th class="px-6 py-4">Date</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/10">
+                        <% if (recentOrders.length === 0) { %>
+                            <tr>
+                                <td colspan="4" class="px-6 py-12 text-center text-apple-text-gray">
+                                    No orders yet.
+                                </td>
+                            </tr>
+                        <% } %>
+                        <% recentOrders.forEach(order => { %>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4">
+                                    <a href="/profile/orders/<%= order._id %>" class="font-bold text-apple-dark hover:text-apple-gold">
+                                        <%= order.orderID %>
+                                    </a>
+                                    <p class="text-xs text-apple-text-gray mt-0.5"><%= order.paymentMethod %></p>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-apple-text-gray whitespace-nowrap">
+                                    <%= new Date(order.createdAt).toLocaleDateString('en-IN') %>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full border text-xs font-bold <%= orderStatusClass(order) %>">
+                                        <%= order.paymentStatus === 'Failed' ? 'Failed' : order.orderStatus %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right text-sm font-bold text-apple-dark whitespace-nowrap">
+                                    &#8377;<%= formatAmount(order.totalAmount) %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-apple-card border border-white/10 rounded-2xl overflow-hidden">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-apple-dark font-serif">My Listings</h2>
+                    <p class="text-xs text-apple-text-gray mt-1"><%= dashboard.listingCount %> total, <%= dashboard.pendingListings %> pending</p>
+                </div>
+                <a href="/profile/my-listings" class="text-xs font-bold text-apple-gold uppercase tracking-widest hover:underline">Manage</a>
+            </div>
+
+            <div class="divide-y divide-white/10">
+                <% if (recentListings.length === 0) { %>
+                    <div class="p-8 text-center">
+                        <div class="w-12 h-12 mx-auto rounded-2xl bg-white/5 flex items-center justify-center mb-4">
+                            <i data-lucide="book-open" class="w-6 h-6 text-apple-text-gray"></i>
+                        </div>
+                        <p class="text-sm text-apple-text-gray">No rental listings yet.</p>
+                    </div>
+                <% } %>
+
+                <% recentListings.forEach(listing => { %>
+                    <a href="/rental/<%= listing._id %>" class="flex items-center gap-4 p-5 hover:bg-white/5 transition-colors">
+                        <div class="w-12 h-16 rounded-lg bg-white/5 border border-white/10 overflow-hidden shrink-0">
+                            <% const listingImage = listing.coverImage || (Array.isArray(listing.images) && listing.images[0]) || ''; %>
+                            <% if (listingImage) { %>
+                                <img src="<%= listingImage %>" alt="<%= listing.bookTitle %>" class="w-full h-full object-cover">
+                            <% } else { %>
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i data-lucide="book-open" class="w-5 h-5 text-apple-text-gray"></i>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="text-sm font-bold text-apple-dark truncate"><%= listing.bookTitle %></h3>
+                            <p class="text-xs text-apple-text-gray truncate"><%= listing.category ? listing.category.name : 'Uncategorized' %></p>
+                            <span class="inline-flex mt-2 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider <%= listingStatusClass(listing.status) %>">
+                                <%= listing.status %>
+                            </span>
+                        </div>
+                    </a>
+                <% }) %>
+            </div>
+        </div>
+    </div>
+</div>

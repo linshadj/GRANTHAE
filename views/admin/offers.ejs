@@ -1,0 +1,227 @@
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div class="flex gap-2">
+            <a href="/admin/offers/add" class="px-4 py-2 bg-apple-gold text-[#1a231e] font-bold rounded-lg hover:bg-yellow-600 transition-colors text-sm flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> Create Offer
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-apple-card rounded-2xl border border-white/5 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex flex-col lg:flex-row justify-between items-center gap-4">
+            <h3 class="font-bold text-lg text-apple-dark">Offers List</h3>
+            <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
+                <div class="relative items-center flex w-full sm:w-auto">
+                    <i data-lucide="search" class="absolute left-3 w-3.5 h-3.5 text-apple-text-gray"></i>
+                    <input id="offerSearch" type="text" value="<%= searchQuery || '' %>" placeholder="Search offers..."
+                        class="pl-10 pr-10 py-3 h-10 w-full sm:w-64 text-sm bg-white/5 border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-gold/50 text-white placeholder-apple-text-gray transition-all hover:bg-white/10">
+                    <button id="clearOfferSearch" class="<%= searchQuery ? '' : 'hidden' %> absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs font-semibold rounded-lg text-apple-text-gray hover:bg-white/10 transition-colors" title="Clear search">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <div class="relative" id="offerFilterWrap">
+                    <button onclick="document.getElementById('offerFilterMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5 h-10 min-w-max whitespace-nowrap">
+                        <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                        <% const filterLabels = { all: 'All', active: 'Active', inactive: 'Inactive', scheduled: 'Scheduled', expired: 'Expired', deleted: 'Soft Deleted' }; %>
+                        <span><%= filterLabels[selectedFilter] || 'Filter By' %></span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div id="offerFilterMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
+                        <% Object.entries(filterLabels).forEach(([key, label]) => { %>
+                            <a href="/admin/offers?page=1&sort=<%= selectedSort || '' %>&search=<%= encodeURIComponent(searchQuery || '') %>&filter=<%= key %>" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                                <% if (key === 'active') { %><i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-400"></i>
+                                <% } else if (key === 'inactive') { %><i data-lucide="pause-circle" class="w-3.5 h-3.5 text-orange-400"></i>
+                                <% } else if (key === 'scheduled') { %><i data-lucide="clock" class="w-3.5 h-3.5 text-blue-400"></i>
+                                <% } else if (key === 'expired') { %><i data-lucide="calendar-x" class="w-3.5 h-3.5 text-red-400"></i>
+                                <% } else if (key === 'deleted') { %><i data-lucide="trash" class="w-3.5 h-3.5 text-red-400"></i>
+                                <% } else { %><i data-lucide="layers" class="w-3.5 h-3.5"></i><% } %>
+                                <%= label %>
+                            </a>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <div class="relative" id="offerSortWrap">
+                    <button onclick="document.getElementById('offerSortMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5 h-10 min-w-max whitespace-nowrap">
+                        <i data-lucide="arrow-up-down" class="w-3.5 h-3.5"></i>
+                        <% const sortLabels = { newest: 'Newest First', oldest: 'Oldest First', 'title-a-z': 'Title (A-Z)', 'title-z-a': 'Title (Z-A)', ends: 'End Date' }; %>
+                        <span><%= sortLabels[selectedSort] || 'Sort By' %></span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div id="offerSortMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
+                        <% Object.entries(sortLabels).forEach(([key, label]) => { %>
+                            <a href="/admin/offers?page=<%= currentPage %>&search=<%= encodeURIComponent(searchQuery || '') %>&filter=<%= selectedFilter || 'all' %>&sort=<%= key %>" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                                <i data-lucide="<%= key === 'ends' ? 'calendar-clock' : 'arrow-up-down' %>" class="w-3.5 h-3.5"></i>
+                                <%= label %>
+                            </a>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-white/5">
+                    <tr class="text-left text-xs font-bold text-apple-text-gray uppercase tracking-wider">
+                        <th class="px-6 py-4">Offer</th>
+                        <th class="px-6 py-4">Discount</th>
+                        <th class="px-6 py-4">Applies To</th>
+                        <th class="px-6 py-4">Duration</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <% if (offers.length === 0) { %>
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-apple-text-gray">
+                                <div class="flex flex-col items-center gap-2">
+                                    <i data-lucide="percent" class="w-12 h-12 opacity-20"></i>
+                                    <p>No offers found</p>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } else { %>
+                        <% offers.forEach(offer => { %>
+                            <% 
+                                const status = offer.status;
+                                let statusClass = 'bg-gray-500/10 text-gray-400';
+                                if (status === 'Active') statusClass = 'bg-green-500/10 text-green-400';
+                                else if (status === 'Scheduled') statusClass = 'bg-blue-500/10 text-blue-400';
+                                else if (status === 'Inactive') statusClass = 'bg-orange-500/10 text-orange-400';
+                                else if (status === 'Expired' || status === 'Deleted') statusClass = 'bg-red-500/10 text-red-400';
+
+                                let appliesLabel = 'All Products';
+                                if (offer.appliesTo === 'categories') appliesLabel = `${offer.categories.length} Categor${offer.categories.length === 1 ? 'y' : 'ies'}`;
+                                if (offer.appliesTo === 'products') appliesLabel = `${offer.products.length} Product${offer.products.length === 1 ? '' : 's'}`;
+                            %>
+                            <tr class="group hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-apple-dark"><%= offer.title %></div>
+                                    <% if (offer.description) { %>
+                                        <div class="text-xs text-apple-text-gray max-w-[280px] truncate"><%= offer.description %></div>
+                                    <% } %>
+                                </td>
+                                <td class="px-6 py-4 font-bold whitespace-nowrap <%= offer.discountType === 'percentage' ? 'text-red-400' : 'text-apple-blue' %>">
+                                    <%= offer.discountType === 'percentage' ? `${offer.discountValue}% OFF` : `₹${offer.discountValue} OFF` %>
+                                </td>
+                                <td class="px-6 py-4 text-apple-text-gray">
+                                    <span class="inline-flex items-center gap-1.5 text-xs font-bold bg-white/5 border border-white/5 rounded-lg px-2 py-1">
+                                        <% if (offer.appliesTo === 'all') { %><i data-lucide="layers" class="w-3.5 h-3.5 text-apple-gold"></i>
+                                        <% } else if (offer.appliesTo === 'categories') { %><i data-lucide="tags" class="w-3.5 h-3.5 text-blue-400"></i>
+                                        <% } else { %><i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-green-400"></i><% } %>
+                                        <%= appliesLabel %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-apple-text-gray whitespace-nowrap">
+                                    <div><%= new Date(offer.startDate).toLocaleDateString('en-IN') %></div>
+                                    <div class="text-[10px] text-apple-text-gray/60">to <%= new Date(offer.endDate).toLocaleDateString('en-IN') %></div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold <%= statusClass %>"><%= status %></span>
+                                </td>
+                                <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                                    <a href="/admin/offers/edit/<%= offer._id %>" class="px-3 py-1.5 inline-block text-xs font-bold rounded-lg transition-all border border-blue-500/20 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20">
+                                        <i data-lucide="edit" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i> Edit
+                                    </a>
+                                    <% if (offer.isDeleted) { %>
+                                        <button onclick="toggleOffer('<%= offer._id %>', false)" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-green-500/20 bg-green-500/10 text-green-400 hover:bg-green-500/20">
+                                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i> Restore
+                                        </button>
+                                    <% } else { %>
+                                        <button onclick="toggleOffer('<%= offer._id %>', true)" class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5 inline-block align-middle mr-1"></i> Delete
+                                        </button>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <% if (totalPages > 0) { %>
+            <div class="p-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-xs text-apple-text-gray">
+                    Showing <span class="font-bold text-apple-dark"><%= totalOffers === 0 ? 0 : (currentPage - 1) * 10 + 1 %></span>
+                    to <span class="font-bold text-apple-dark"><%= Math.min(currentPage * 10, totalOffers) %></span>
+                    of <span class="font-bold text-apple-dark"><%= totalOffers %></span> results
+                </p>
+                <div class="flex items-center gap-1">
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <a href="/admin/offers?page=<%= i %>&sort=<%= selectedSort || '' %>&filter=<%= selectedFilter || 'all' %>&search=<%= encodeURIComponent(searchQuery || '') %>"
+                            class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors <%= i === currentPage ? 'bg-apple-gold text-[#1a231e] font-bold' : 'text-apple-text-gray hover:bg-white/10' %>">
+                            <%= i %>
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    const offerSearch = document.getElementById('offerSearch');
+    const clearOfferSearch = document.getElementById('clearOfferSearch');
+
+    function debounce(func, delay) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    function applyOfferSearch() {
+        const search = offerSearch.value.trim();
+        const sort = '<%= selectedSort || 'newest' %>';
+        const filter = '<%= selectedFilter || 'all' %>';
+        window.location.href = `/admin/offers?page=1&sort=${encodeURIComponent(sort)}&filter=${encodeURIComponent(filter)}&search=${encodeURIComponent(search)}`;
+    }
+
+    offerSearch.addEventListener('input', debounce(applyOfferSearch, 600));
+
+    if (clearOfferSearch) {
+        clearOfferSearch.addEventListener('click', () => {
+            offerSearch.value = '';
+            applyOfferSearch();
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        const filterWrap = document.getElementById('offerFilterWrap');
+        const sortWrap = document.getElementById('offerSortWrap');
+        if (filterWrap && !filterWrap.contains(e.target)) document.getElementById('offerFilterMenu').classList.add('hidden');
+        if (sortWrap && !sortWrap.contains(e.target)) document.getElementById('offerSortMenu').classList.add('hidden');
+    });
+
+    window.toggleOffer = async (id, isDeleting) => {
+        const actionText = isDeleting ? 'Delete' : 'Restore';
+        const color = isDeleting ? '#ef4444' : '#22c55e';
+
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you want to ${actionText.toLowerCase()} this offer?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: color,
+            background: '#1e2a22',
+            color: '#E6CFA7',
+            confirmButtonText: `Yes, ${actionText}`
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const res = await fetch(`/admin/offers/toggle-status/${id}/${isDeleting ? 'delete' : 'restore'}`, { method: 'PATCH' });
+            const data = await res.json();
+            if (data.success) window.location.reload();
+            else Swal.fire({ icon: 'error', title: 'Error', text: data.message, background: '#1e2a22', color: '#E6CFA7' });
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong', background: '#1e2a22', color: '#E6CFA7' });
+        }
+    };
+</script>

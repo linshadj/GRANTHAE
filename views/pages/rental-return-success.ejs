@@ -1,0 +1,47 @@
+<%
+    const formatAmount = (amount) => Number(amount || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+%>
+
+<div class="min-h-[70vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 text-center">
+        <div class="relative w-24 h-24 mx-auto mb-8">
+            <div class="absolute inset-0 bg-green-500/10 rounded-full animate-pulse"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/20">
+                    <i data-lucide="check" class="w-10 h-10 text-white stroke-[3]"></i>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h1 class="text-3xl font-bold text-apple-dark font-serif mb-4">Rental Return Initiated</h1>
+            <p class="text-apple-text-gray mb-8">
+                Your return request has been submitted. The owner will verify receipt and release your deposit refund.
+            </p>
+        </div>
+
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 text-left shadow-sm">
+            <div class="flex justify-between items-center mb-4 pb-4 border-b border-white/10">
+                <span class="text-sm font-medium text-apple-text-gray">Tracking ID</span>
+                <span class="text-sm font-bold text-apple-dark font-mono"><%= rentalOrder.returnTrackingId %></span>
+            </div>
+            <div class="flex justify-between items-center mb-4 pb-4 border-b border-white/10">
+                <span class="text-sm font-medium text-apple-text-gray">Deposit</span>
+                <span class="text-sm font-bold text-apple-dark">&#8377;<%= formatAmount(rentalOrder.depositAmount) %></span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-apple-text-gray">Refund Status</span>
+                <span class="text-sm font-bold text-orange-500">Pending Owner Confirmation</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/profile/rentals" class="btn-secondary w-full justify-center">
+                Back to Rentals
+            </a>
+            <a href="/rental-place" class="btn-primary w-full justify-center shadow-lg shadow-apple-blue/20">
+                Browse Books
+            </a>
+        </div>
+    </div>
+</div>

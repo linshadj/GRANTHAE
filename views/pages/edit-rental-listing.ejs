@@ -1,0 +1,399 @@
+<%
+    const initialImages = Array.isArray(rental.images) ? rental.images : [];
+    const initialCoverIndexRaw = initialImages.findIndex((image) => image === rental.coverImage);
+    const initialCoverIndex = initialCoverIndexRaw >= 0 ? initialCoverIndexRaw : 0;
+%>
+
+<div class="max-w-4xl mx-auto space-y-8">
+    <div class="flex items-center justify-between gap-4">
+        <div>
+            <a href="/profile/my-listings" class="text-[10px] font-bold text-apple-text-gray/60 hover:text-apple-blue flex items-center gap-2 mb-4 uppercase tracking-widest transition-colors">
+                <i data-lucide="arrow-left" class="w-3 h-3"></i>
+                Back to Listings
+            </a>
+            <h1 class="text-3xl font-bold text-apple-dark font-serif">Edit Rental Listing</h1>
+            <p class="text-apple-text-gray mt-2">Update book details, rental terms, and availability information.</p>
+        </div>
+    </div>
+
+    <form id="editRentalListingForm" class="space-y-8">
+        <div class="bg-apple-card/50 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-xl">
+            <h3 class="text-xl font-bold text-apple-dark mb-6 flex items-center gap-2">
+                <i data-lucide="book" class="w-5 h-5 text-apple-blue"></i>
+                Book Details
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-apple-text-gray mb-1">Book Title</label>
+                        <input type="text" name="bookTitle" value="<%= rental.bookTitle %>" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:border-apple-blue/50 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-apple-text-gray mb-1">Author</label>
+                        <input type="text" name="author" value="<%= rental.author %>" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:border-apple-blue/50 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-apple-text-gray mb-1">ISBN <span class="text-apple-text-gray/50 text-xs font-normal ml-1">(Optional)</span></label>
+                        <input type="text" name="isbn" value="<%= rental.isbn || '' %>" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:border-apple-blue/50 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-apple-text-gray mb-1">Category</label>
+                        <select name="category" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:border-apple-blue/50 transition-all">
+                            <% categories.forEach(cat => { %>
+                                <option value="<%= cat._id %>" class="bg-apple-card" <%= rental.category && rental.category._id.toString() === cat._id.toString() ? 'selected' : '' %>><%= cat.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-apple-text-gray mb-1">Description</label>
+                    <textarea name="description" rows="9" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:border-apple-blue/50 transition-all h-[245px] resize-none"><%= rental.description %></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-apple-card/50 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-xl">
+            <h3 class="text-xl font-bold text-apple-dark mb-6 flex items-center gap-2">
+                <i data-lucide="settings" class="w-5 h-5 text-apple-blue"></i>
+                Rental Settings
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-apple-text-gray mb-1">Daily Rate (&#8377;)</label>
+                    <input type="number" name="dailyRate" value="<%= rental.dailyRate %>" min="1" step="1" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:border-apple-blue/50 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-apple-text-gray mb-1">Condition</label>
+                    <select name="bookCondition" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:border-apple-blue/50 transition-all">
+                        <% ["New", "Fine", "Very Good", "Good", "Fair", "Poor"].forEach(condition => { %>
+                            <option value="<%= condition %>" class="bg-apple-card" <%= rental.bookCondition === condition ? 'selected' : '' %>><%= condition %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-apple-text-gray mb-1">Min Rental (Days)</label>
+                    <input type="number" name="minRentalDays" value="<%= rental.minRentalDays %>" min="1" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:border-apple-blue/50 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-apple-text-gray mb-1">Deposit Amount (&#8377;)</label>
+                    <input type="number" name="depositAmount" value="<%= rental.depositAmount %>" min="0" step="1" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-apple-dark focus:outline-none focus:border-apple-blue/50 transition-all">
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-apple-card/50 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-xl">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h3 class="text-xl font-bold text-apple-dark flex items-center gap-2">
+                        <i data-lucide="image" class="w-5 h-5 text-apple-blue"></i>
+                        Listing Images
+                    </h3>
+                    <p class="text-xs text-apple-text-gray mt-1">Keep at least 3 images. Star one image as the cover.</p>
+                </div>
+                <label class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-apple-blue text-white rounded-xl cursor-pointer hover:bg-apple-blue/90 transition-all shadow-lg shadow-apple-blue/20 group">
+                    <i data-lucide="plus" class="w-5 h-5 group-hover:rotate-90 transition-transform"></i>
+                    <span class="font-bold">Add Images</span>
+                    <input type="file" id="editImageInput" accept="image/jpeg, image/png, image/webp" multiple class="hidden">
+                </label>
+            </div>
+
+            <div id="editImageGallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                <div id="editEmptyGallery" class="col-span-full py-12 flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-2xl text-apple-text-gray/50">
+                    <i data-lucide="upload-cloud" class="w-12 h-12 mb-2"></i>
+                    <p>No images selected</p>
+                </div>
+            </div>
+            <span id="editGalleryError" class="error-msg text-red-500 text-xs mt-4 block hidden text-center"></span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-end">
+            <a href="/profile/my-listings" class="px-6 py-3 rounded-xl border border-white/10 text-apple-dark font-bold hover:bg-white/5 transition-colors text-center">
+                Cancel
+            </a>
+            <button type="submit" id="editRentalSubmitBtn" class="btn-primary px-8 py-3 font-bold shadow-lg shadow-apple-blue/20">
+                Save Listing
+            </button>
+        </div>
+    </form>
+</div>
+
+<div id="editCropperModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+    <div class="bg-apple-card border border-white/10 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center">
+            <h3 class="font-bold text-xl text-apple-dark">Adjust Image</h3>
+            <button id="editCloseCropperBtn" type="button" class="p-2 text-apple-text-gray hover:text-apple-dark transition-colors rounded-full hover:bg-white/5">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <div class="p-4 bg-black/20 flex-1 overflow-hidden min-h-[400px] flex items-center justify-center">
+            <img id="editCropperImage" class="max-w-full max-h-full block" alt="">
+        </div>
+        <div class="p-6 border-t border-white/10 flex justify-end gap-3">
+            <button type="button" id="editCancelCropBtn" class="px-6 py-2.5 font-bold text-apple-text-gray hover:text-apple-dark transition-colors">Cancel</button>
+            <button type="button" id="editConfirmCropBtn" class="px-8 py-2.5 bg-apple-blue text-white rounded-xl font-bold hover:bg-apple-blue/90 transition-all">Crop & Apply</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+
+<script>
+    const editRentalListingForm = document.getElementById('editRentalListingForm');
+    const editRentalSubmitBtn = document.getElementById('editRentalSubmitBtn');
+    const editImageInput = document.getElementById('editImageInput');
+    const editImageGallery = document.getElementById('editImageGallery');
+    const editEmptyGallery = document.getElementById('editEmptyGallery');
+    const editGalleryError = document.getElementById('editGalleryError');
+    const editCropperModal = document.getElementById('editCropperModal');
+    const editCropperImage = document.getElementById('editCropperImage');
+    const editCloseCropperBtn = document.getElementById('editCloseCropperBtn');
+    const editCancelCropBtn = document.getElementById('editCancelCropBtn');
+    const editConfirmCropBtn = document.getElementById('editConfirmCropBtn');
+
+    const initialListingImages = <%- JSON.stringify(initialImages) %>;
+    const editListingImages = initialListingImages.map((url) => ({ type: 'existing', url }));
+    let editCoverImageIndex = <%= initialCoverIndex %>;
+    let editCropper = null;
+    let editPendingImageFiles = [];
+
+    function notifyEditListing(type, message) {
+        if (typeof showToast === 'function') {
+            showToast(type, message);
+            return;
+        }
+        if (window.Swal && typeof Swal.fire === 'function') {
+            Swal.fire({ icon: type, title: message });
+            return;
+        }
+        alert(message);
+    }
+
+    async function readEditJsonResponse(response) {
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            return response.json();
+        }
+
+        return {
+            success: false,
+            message: response.redirected ? 'Session expired. Please login again.' : 'Server returned an unexpected response.',
+            redirectUrl: response.redirected ? response.url : ''
+        };
+    }
+
+    function setEditCropperOpen(isOpen) {
+        editCropperModal.classList.toggle('hidden', !isOpen);
+        document.body.classList.toggle('overflow-hidden', isOpen);
+    }
+
+    function resetEditCropper() {
+        if (editCropper) {
+            editCropper.destroy();
+            editCropper = null;
+        }
+
+        if (editCropperImage.dataset.objectUrl) {
+            URL.revokeObjectURL(editCropperImage.dataset.objectUrl);
+            editCropperImage.dataset.objectUrl = '';
+        }
+
+        editCropperImage.removeAttribute('src');
+        editImageInput.value = '';
+        setEditCropperOpen(false);
+    }
+
+    function openEditCropperForFile(file) {
+        if (!file) {
+            resetEditCropper();
+            return;
+        }
+        if (typeof Cropper === 'undefined') {
+            notifyEditListing('error', 'Image editor could not load. Please refresh and try again.');
+            editPendingImageFiles = [];
+            editImageInput.value = '';
+            return;
+        }
+
+        if (editCropperImage.dataset.objectUrl) {
+            URL.revokeObjectURL(editCropperImage.dataset.objectUrl);
+        }
+
+        const objectUrl = URL.createObjectURL(file);
+        editCropperImage.src = objectUrl;
+        editCropperImage.dataset.objectUrl = objectUrl;
+        setEditCropperOpen(true);
+
+        if (editCropper) editCropper.destroy();
+        editCropper = new Cropper(editCropperImage, {
+            aspectRatio: 3 / 4,
+            viewMode: 2,
+            background: false,
+            autoCropArea: 0.9,
+            zoomable: true
+        });
+    }
+
+    function cropNextEditImage() {
+        const nextFile = editPendingImageFiles.shift();
+        if (!nextFile) {
+            resetEditCropper();
+            return;
+        }
+        openEditCropperForFile(nextFile);
+    }
+
+    function updateEditGalleryError(message = '') {
+        editGalleryError.textContent = message;
+        editGalleryError.classList.toggle('hidden', !message);
+    }
+
+    function renderEditImageGallery() {
+        editImageGallery.querySelectorAll('.edit-gallery-item').forEach((item) => item.remove());
+        editEmptyGallery.classList.toggle('hidden', editListingImages.length > 0);
+
+        if (editCoverImageIndex >= editListingImages.length) {
+            editCoverImageIndex = Math.max(0, editListingImages.length - 1);
+        }
+
+        editListingImages.forEach((image, index) => {
+            const item = document.createElement('div');
+            const isCover = editCoverImageIndex === index;
+            item.className = `edit-gallery-item relative group aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border-2 ${isCover ? 'border-apple-blue bg-apple-blue/5' : 'border-white/10 bg-white/5'}`;
+
+            item.innerHTML = `
+                <img src="${image.url}" class="w-full h-full object-cover" alt="Listing image ${index + 1}">
+                <button type="button" onclick="setEditCover(${index})" title="Set as Cover" class="absolute top-3 left-3 w-8 h-8 rounded-full ${isCover ? 'bg-apple-blue text-white' : 'bg-black/40 text-white hover:bg-apple-blue'} flex items-center justify-center shadow-lg transition-all z-20">
+                    <i data-lucide="star" class="w-4 h-4 ${isCover ? 'fill-current' : ''}"></i>
+                </button>
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+                    <button type="button" onclick="removeEditImage(${index})" class="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `;
+            editImageGallery.appendChild(item);
+        });
+
+        if (editListingImages.length >= 3) updateEditGalleryError();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    window.setEditCover = (index) => {
+        editCoverImageIndex = index;
+        renderEditImageGallery();
+    };
+
+    window.removeEditImage = (index) => {
+        const [removedImage] = editListingImages.splice(index, 1);
+        if (removedImage?.type === 'new' && removedImage.url) {
+            URL.revokeObjectURL(removedImage.url);
+        }
+
+        if (editCoverImageIndex === index) editCoverImageIndex = 0;
+        else if (editCoverImageIndex > index) editCoverImageIndex -= 1;
+        renderEditImageGallery();
+    };
+
+    [editCloseCropperBtn, editCancelCropBtn].forEach((button) => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            editPendingImageFiles = [];
+            resetEditCropper();
+        });
+    });
+
+    editImageInput?.addEventListener('change', (event) => {
+        editPendingImageFiles = Array.from(event.target.files || []).filter((file) => file.type.startsWith('image/'));
+        if (!editPendingImageFiles.length) {
+            notifyEditListing('warning', 'Please select JPEG, PNG, or WEBP image files.');
+            editImageInput.value = '';
+            return;
+        }
+        cropNextEditImage();
+    });
+
+    editConfirmCropBtn?.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (!editCropper) return;
+
+        editCropper.getCroppedCanvas({
+            width: 900,
+            height: 1200,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        }).toBlob((blob) => {
+            if (!blob) {
+                notifyEditListing('error', 'Could not process this image.');
+                return;
+            }
+
+            const name = `rental-${Date.now()}-${editListingImages.length}.webp`;
+            const url = URL.createObjectURL(blob);
+            editListingImages.push({ type: 'new', blob, url, name });
+            if (editListingImages.length === 1) editCoverImageIndex = 0;
+            renderEditImageGallery();
+
+            if (editPendingImageFiles.length > 0) {
+                cropNextEditImage();
+            } else {
+                resetEditCropper();
+            }
+        }, 'image/webp', 0.8);
+    });
+
+    editRentalListingForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if (editListingImages.length < 3) {
+            updateEditGalleryError('Minimum 3 images of the book are required.');
+            notifyEditListing('warning', 'Minimum 3 images of the book are required.');
+            return;
+        }
+
+        const originalText = editRentalSubmitBtn.innerHTML;
+        let shouldRestoreButton = true;
+        editRentalSubmitBtn.disabled = true;
+        editRentalSubmitBtn.innerHTML = 'Saving...';
+
+        try {
+            const formData = new FormData(editRentalListingForm);
+            formData.append('existingImages', JSON.stringify(
+                editListingImages
+                    .filter((image) => image.type === 'existing')
+                    .map((image) => image.url)
+            ));
+            formData.append('coverImageIndex', String(editCoverImageIndex));
+            editListingImages
+                .filter((image) => image.type === 'new')
+                .forEach((image) => formData.append('images', image.blob, image.name));
+
+            const response = await fetch('/profile/my-listings/<%= rental._id %>', {
+                method: 'PATCH',
+                headers: { 'Accept': 'application/json' },
+                body: formData
+            });
+            const result = await readEditJsonResponse(response);
+
+            if (result.success) {
+                shouldRestoreButton = false;
+                notifyEditListing('success', result.message || 'Rental listing updated.');
+                setTimeout(() => {
+                    window.location.href = result.redirectUrl || '/profile/my-listings';
+                }, 700);
+                return;
+            }
+
+            notifyEditListing('error', result.message || 'Could not update listing.');
+        } catch (error) {
+            notifyEditListing('error', 'Could not update listing.');
+        } finally {
+            if (shouldRestoreButton) {
+                editRentalSubmitBtn.disabled = false;
+                editRentalSubmitBtn.innerHTML = originalText;
+            }
+        }
+    });
+
+    renderEditImageGallery();
+</script>

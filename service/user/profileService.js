@@ -7,6 +7,11 @@ export const updateProfile = async (updateData, userId) => {
 };
 
 export const addNewAddressService = async (addressData, userId) => {
+  const existingAddresses = await addressDb.find({ userId: new mongoose.Types.ObjectId(userId) });
+  if (existingAddresses.length >= 5) {
+    throw new Error("You can only have up to 5 saved addresses.");
+  }
+
   const labelExists = await addressDb.findOne({
     userId: new mongoose.Types.ObjectId(userId),
     label: addressData.label,
@@ -15,8 +20,6 @@ export const addNewAddressService = async (addressData, userId) => {
     throw new Error("Address label already exists. Please choose a different label.");
   }
 
-  const existingAddresses = await addressDb.find({ userId: new mongoose.Types.ObjectId(userId) });
-
   const newAddress = new addressDb({
     userId: new mongoose.Types.ObjectId(userId),
     ...addressData,
@@ -24,7 +27,7 @@ export const addNewAddressService = async (addressData, userId) => {
   });
   await newAddress.save();
 
-  return true;
+  return newAddress;
 };
 
 export const setDefaultAddressService = async (addressId, userId) => {

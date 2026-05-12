@@ -1,5 +1,6 @@
 import { adminLoginService } from "../../service/admin/adminAuthService.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 
 export const adminLoginPage = async (req, res) => {
@@ -23,7 +24,7 @@ export const adminLoginHandler = async (req, res) => {
     console.error("Error in adminLoginHandler: ", err.message);
     return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: err.message,
+      message: getFriendlyErrorMessage(err, "Could not sign in. Please try again."),
     });
   }
 };
@@ -42,7 +43,7 @@ export const adminLogoutHandler = (req, res) => {
     console.error("Error in adminLogoutHandler: ", err.message);
     return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: err.message,
+      message: getFriendlyErrorMessage(err, "Could not log out. Please try again."),
     });
   }
 };

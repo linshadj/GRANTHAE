@@ -11,7 +11,9 @@
                 <span class="inline-flex items-center px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border
                     <%= order.orderStatus === 'Pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : '' %>
                     <%= order.orderStatus === 'Shipped' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : '' %>
+                    <%= order.orderStatus === 'Out for delivery' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : '' %>
                     <%= order.orderStatus === 'Delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' : '' %>
+                    <%= order.orderStatus === 'Returned' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : '' %>
                     <%= order.orderStatus === 'Cancelled' ? 'bg-red-500/10 text-red-500 border-red-500/20' : '' %>">
                     <%= order.orderStatus %>
                 </span>
@@ -72,7 +74,9 @@
                                             <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border
                                                 <%= item.itemStatus === 'Pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : '' %>
                                                 <%= item.itemStatus === 'Shipped' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : '' %>
+                                                <%= item.itemStatus === 'Out for delivery' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : '' %>
                                                 <%= item.itemStatus === 'Delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' : '' %>
+                                                <%= item.itemStatus === 'Return Requested' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : '' %>
                                                 <%= item.itemStatus === 'Cancelled' ? 'bg-red-500/10 text-red-500 border-red-500/20' : '' %>
                                                 <%= item.itemStatus === 'Returned' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : '' %>">
                                                 <%= item.itemStatus %>
@@ -82,16 +86,24 @@
                                                 <span class="text-[10px] text-red-500/60 font-bold uppercase tracking-widest flex items-center gap-2">
                                                     <span class="w-1 h-1 bg-red-500 rounded-full"></span> <%= item.cancellationReason %>
                                                 </span>
+                                            <% } else if (item.itemStatus === 'Return Requested' && item.returnReason) { %>
+                                                <span class="text-[10px] text-yellow-600/70 font-bold uppercase tracking-widest flex items-center gap-2">
+                                                    <span class="w-1 h-1 bg-yellow-500 rounded-full"></span> Awaiting admin review
+                                                </span>
                                             <% } else if (item.itemStatus === 'Returned' && item.returnReason) { %>
                                                 <span class="text-[10px] text-orange-500/60 font-bold uppercase tracking-widest flex items-center gap-2">
                                                     <span class="w-1 h-1 bg-orange-500 rounded-full"></span> <%= item.returnReason %>
+                                                </span>
+                                            <% } else if (item.returnRequestStatus === 'Rejected' && item.returnRejectionReason) { %>
+                                                <span class="text-[10px] text-red-500/60 font-bold uppercase tracking-widest flex items-center gap-2">
+                                                    <span class="w-1 h-1 bg-red-500 rounded-full"></span> Return rejected: <%= item.returnRejectionReason %>
                                                 </span>
                                             <% } %>
 
                                             <div class="flex-grow"></div>
 
                                             <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Delivered') { %>
-                                                <% if (item.itemStatus !== 'Cancelled' && item.itemStatus !== 'Returned') { %>
+                                                <% if (item.itemStatus !== 'Cancelled' && item.itemStatus !== 'Returned' && item.itemStatus !== 'Return Requested') { %>
                                                     <button onclick="cancelItem('<%= order._id %>', '<%= item._id %>')" 
                                                             class="text-[10px] font-bold text-red-500 uppercase tracking-widest hover:underline px-4 py-2 bg-red-500/5 rounded-xl transition-all border border-red-500/10">Withdraw Item</button>
                                                 <% } %>
@@ -153,13 +165,25 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Status</span>
-                        <span class="font-bold <%= order.paymentStatus === 'Success' ? 'text-green-500' : 'text-yellow-500' %>"><%= order.paymentStatus %></span>
+                        <span class="font-bold <%= order.paymentStatus === 'Success' ? 'text-green-500' : order.paymentStatus === 'Refunded' ? 'text-orange-500' : order.paymentStatus === 'Failed' ? 'text-red-500' : 'text-yellow-500' %>"><%= order.paymentStatus %></span>
                     </div>
                     <div class="h-px bg-white/5 my-6"></div>
                     <div class="flex justify-between items-center">
                         <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Subtotal</span>
-                        <span class="text-apple-dark">₹<%= order.totalAmount %></span>
+                        <span class="text-apple-dark">₹<%= order.subtotalAmount || (order.totalAmount + (order.discountAmount || 0)) %></span>
                     </div>
+                    <% if (order.discountAmount && order.discountAmount > 0) { %>
+                        <div class="flex justify-between items-center">
+                            <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Coupon <%= order.couponCode ? `(${order.couponCode})` : '' %></span>
+                            <span class="text-green-500 font-bold">-₹<%= order.discountAmount %></span>
+                        </div>
+                    <% } %>
+                    <% if (order.refundedAmount && order.refundedAmount > 0) { %>
+                        <div class="flex justify-between items-center">
+                            <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Wallet Refunds</span>
+                            <span class="text-orange-500 font-bold">-₹<%= order.refundedAmount %></span>
+                        </div>
+                    <% } %>
                     <div class="flex justify-between items-center">
                         <span class="text-apple-text-gray/40 uppercase tracking-widest text-[10px]">Shipping</span>
                         <span class="text-green-500 font-bold">Complimentary</span>
@@ -196,6 +220,13 @@
             customClass: {
                 popup: 'rounded-3xl border border-white/10 shadow-2xl backdrop-blur-xl',
                 input: 'bg-black/20 border border-white/10 rounded-xl text-apple-dark focus:border-apple-blue/50 text-sm'
+            },
+            preConfirm: (value) => {
+                if (!value || !value.trim()) {
+                    Swal.showValidationMessage('Please provide a cancellation reason.');
+                    return false;
+                }
+                return value.trim();
             }
         });
 

@@ -1,19 +1,144 @@
 import orderDb from "../../models/orderDb.js";
 import { Product } from "../../models/productDb.js";
+import { creditWallet } from "./walletService.js";
 import PDFDocument from "pdfkit";
 
-export const getUserOrders = async (userId, searchQuery = '') => {
-    let query = { user: userId };
-    
-    if (searchQuery) {
-        query.orderID = { $regex: searchQuery, $options: 'i' };
+const roundCurrency = (amount) => Math.round((Number(amount || 0) + Number.EPSILON) * 100) / 100;
+
+const isPaidOrder = (order) => order.paymentStatus === 'Success' || order.paymentMethod === 'Wallet';
+
+const getActiveItemsSubtotal = (order) => {
+    return roundCurrency(order.items.reduce((total, item) => {
+        if (item.itemStatus === 'Cancelled' || item.itemStatus === 'Returned') return total;
+        return total + (Number(item.price || 0) * Number(item.quantity || 0));
+    }, 0));
+};
+
+const calculateItemRefundAmount = (order, item) => {
+    const itemAmount = roundCurrency(Number(item.price || 0) * Number(item.quantity || 0));
+    const activeSubtotal = getActiveItemsSubtotal(order);
+
+    if (activeSubtotal <= 0) return 0;
+    const refundShare = itemAmount / activeSubtotal;
+    return roundCurrency(Math.min(itemAmount, Number(order.totalAmount || 0) * refundShare));
+};
+
+const applyFinancialAdjustment = (order, item, refundAmount, trackRefund = true) => {
+    const itemAmount = Number(item.price || 0) * Number(item.quantity || 0);
+
+    order.subtotalAmount = Math.max(0, roundCurrency(Number(order.subtotalAmount || 0) - itemAmount));
+    order.totalAmount = Math.max(0, roundCurrency(Number(order.totalAmount || 0) - refundAmount));
+    if (trackRefund) {
+        order.refundedAmount = roundCurrency(Number(order.refundedAmount || 0) + refundAmount);
+    }
+};
+
+const refundItemToWallet = async (order, item, reason, precomputedRefundAmount = null) => {
+    if (!isPaidOrder(order) || item.refundStatus === 'Completed') return 0;
+
+    const refundAmount = precomputedRefundAmount === null
+        ? calculateItemRefundAmount(order, item)
+        : roundCurrency(precomputedRefundAmount);
+    if (refundAmount <= 0) {
+        item.refundAmount = 0;
+        item.refundStatus = 'None';
+        applyFinancialAdjustment(order, item, 0, false);
+        return 0;
     }
 
+    await creditWallet(
+        order.user,
+        refundAmount,
+        `${reason} refund for order ${order.orderID}`,
+        "order_refund",
+        `${order._id}:${item._id}`
+    );
+
+    item.refundAmount = refundAmount;
+    item.refundStatus = 'Completed';
+    item.refundedAt = new Date();
+    applyFinancialAdjustment(order, item, refundAmount, true);
+
+    const refundableItemsRemaining = order.items.some((orderItem) => {
+        if (orderItem._id.toString() === item._id.toString()) return false;
+        return orderItem.itemStatus !== 'Cancelled' && orderItem.itemStatus !== 'Returned';
+    });
+
+    if (!refundableItemsRemaining && order.totalAmount === 0) {
+        order.paymentStatus = 'Refunded';
+    }
+
+    return refundAmount;
+};
+
+export const getUserOrders = async (userId, filters = {}) => {
+    const normalizedFilters = typeof filters === "string" ? { search: filters } : filters;
+    const {
+        search = "",
+        status = "all",
+        startDate = "",
+        endDate = "",
+        sort = "newest",
+        page = 1,
+        limit = 8
+    } = normalizedFilters;
+
+    const currentPage = Math.max(parseInt(page, 10) || 1, 1);
+    const pageLimit = Math.min(Math.max(parseInt(limit, 10) || 8, 1), 25);
+    const query = { user: userId };
+    
+    if (search && search.trim()) {
+        query.orderID = { $regex: search.trim(), $options: 'i' };
+    }
+
+    if (status && status !== "all") {
+        if (status === "Failed") {
+            query.paymentStatus = "Failed";
+        } else {
+            query.orderStatus = status;
+        }
+    }
+
+    const createdAt = {};
+    if (startDate) {
+        const parsedStartDate = new Date(startDate);
+        if (!Number.isNaN(parsedStartDate.getTime())) {
+            parsedStartDate.setHours(0, 0, 0, 0);
+            createdAt.$gte = parsedStartDate;
+        }
+    }
+    if (endDate) {
+        const parsedEndDate = new Date(endDate);
+        if (!Number.isNaN(parsedEndDate.getTime())) {
+            parsedEndDate.setHours(23, 59, 59, 999);
+            createdAt.$lte = parsedEndDate;
+        }
+    }
+    if (Object.keys(createdAt).length > 0) {
+        query.createdAt = createdAt;
+    }
+
+    const sortOptions = {
+        newest: { createdAt: -1 },
+        oldest: { createdAt: 1 },
+        price_desc: { totalAmount: -1 },
+        price_asc: { totalAmount: 1 }
+    };
+
+    const total = await orderDb.countDocuments(query);
     const orders = await orderDb.find(query)
         .populate('items.product')
-        .sort({ createdAt: -1 });
+        .sort(sortOptions[sort] || sortOptions.newest)
+        .skip((currentPage - 1) * pageLimit)
+        .limit(pageLimit);
     
-    return orders;
+    return {
+        orders,
+        total,
+        totalPages: Math.max(Math.ceil(total / pageLimit), 1),
+        currentPage,
+        limit: pageLimit
+    };
 };
 
 export const getOrderById = async (userId, orderId) => {
@@ -25,6 +150,8 @@ export const getOrderById = async (userId, orderId) => {
 };
 
 export const cancelOrderItem = async (userId, orderId, itemId, reason) => {
+    if (!reason || !reason.trim()) throw new Error("Cancellation reason is mandatory.");
+
     const order = await orderDb.findOne({ _id: orderId, user: userId });
     if (!order) throw new Error("Order not found");
 
@@ -39,24 +166,30 @@ export const cancelOrderItem = async (userId, orderId, itemId, reason) => {
         throw new Error("Item is already cancelled or returned.");
     }
 
+    const refundAmount = calculateItemRefundAmount(order, item);
     item.itemStatus = 'Cancelled';
-    item.cancellationReason = reason || 'User request';
+    item.cancellationReason = reason.trim();
 
-    // Subtract item cost from total amount
-    order.totalAmount -= (item.quantity * item.price);
-    if (order.totalAmount < 0) order.totalAmount = 0;
+    if (order.stockAdjusted !== false) {
+        if (item.variant) {
+            await Product.updateOne(
+                { _id: item.product, "variants.name": item.variant },
+                { $inc: { "variants.$.stock": item.quantity } }
+            );
+        } else {
+            await Product.updateOne(
+                { _id: item.product },
+                { $inc: { stock: item.quantity } }
+            );
+        }
+    }
 
-    // Increment stock
-    if (item.variant) {
-        await Product.updateOne(
-            { _id: item.product, "variants.name": item.variant },
-            { $inc: { "variants.$.stock": item.quantity } }
-        );
+    if (isPaidOrder(order)) {
+        await refundItemToWallet(order, item, 'Cancellation', refundAmount);
     } else {
-        await Product.updateOne(
-            { _id: item.product },
-            { $inc: { stock: item.quantity } }
-        );
+        item.refundAmount = 0;
+        item.refundStatus = 'None';
+        applyFinancialAdjustment(order, item, refundAmount, false);
     }
 
     // Check if all items are cancelled, then cancel the entire order
@@ -70,7 +203,7 @@ export const cancelOrderItem = async (userId, orderId, itemId, reason) => {
 };
 
 export const returnOrderItem = async (userId, orderId, itemId, reason) => {
-    if (!reason) throw new Error("Return reason is mandatory.");
+    if (!reason || !reason.trim()) throw new Error("Return reason is mandatory.");
     
     const order = await orderDb.findOne({ _id: orderId, user: userId });
     if (!order) throw new Error("Order not found");
@@ -82,33 +215,19 @@ export const returnOrderItem = async (userId, orderId, itemId, reason) => {
     const item = order.items.id(itemId);
     if (!item) throw new Error("Item not found in order");
 
+    if (item.itemStatus === 'Return Requested') {
+        throw new Error("Return request is already pending.");
+    }
+
     if (item.itemStatus !== 'Delivered') {
         throw new Error("Item must be delivered to be returned.");
     }
 
-    item.itemStatus = 'Returned';
-    item.returnReason = reason;
-
-    // Subtract item cost from total amount
-    order.totalAmount -= (item.quantity * item.price);
-    if (order.totalAmount < 0) order.totalAmount = 0;
-
-    // Increment stock
-    if (item.variant) {
-        await Product.updateOne(
-            { _id: item.product, "variants.name": item.variant },
-            { $inc: { "variants.$.stock": item.quantity } }
-        );
-    } else {
-        await Product.updateOne(
-            { _id: item.product },
-            { $inc: { stock: item.quantity } }
-        );
-    }
-
-    // Check if all items are returned/cancelled
-    const allItemsCancelledOrReturned = order.items.every(i => i.itemStatus === 'Cancelled' || i.itemStatus === 'Returned');
-    // If we want to change order status to Returned, we should add it to enum. Since it's not in enum, we leave it as Delivered or maybe Cancelled? We'll leave it as Delivered and let the individual items hold the Returned status.
+    item.itemStatus = 'Return Requested';
+    item.returnReason = reason.trim();
+    item.returnRequestStatus = 'Pending';
+    item.returnRequestedAt = new Date();
+    item.refundStatus = isPaidOrder(order) ? 'Pending' : 'None';
 
     await order.save();
     return order;
@@ -193,7 +312,16 @@ export const generateInvoicePDF = async (userId, orderId) => {
             y += 15;
 
             // Total
+            const subtotal = order.subtotalAmount || (order.totalAmount + (order.discountAmount || 0));
             doc.font('Helvetica-Bold');
+            doc.text('Subtotal:', 350, y);
+            doc.text(`Rs ${subtotal}`, 450, y, { width: 50, align: 'right' });
+            if (order.discountAmount && order.discountAmount > 0) {
+                y += 18;
+                doc.text(`Coupon Discount${order.couponCode ? ` (${order.couponCode})` : ''}:`, 300, y, { width: 150, align: 'right' });
+                doc.text(`-Rs ${order.discountAmount}`, 450, y, { width: 50, align: 'right' });
+            }
+            y += 18;
             doc.text('Total Amount:', 350, y);
             doc.text(`Rs ${order.totalAmount}`, 450, y, { width: 50, align: 'right' });
             doc.font('Helvetica');

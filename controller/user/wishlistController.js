@@ -1,4 +1,5 @@
 import * as wishlistService from "../../service/user/wishlistService.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 export const getWishlistPage = async (req, res) => {
     try {
@@ -69,7 +70,7 @@ export const addToWishlist = async (req, res) => {
         });
     } catch (error) {
         console.error("Add to wishlist error:", error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not update wishlist.") });
     }
 };
 

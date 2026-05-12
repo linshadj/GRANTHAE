@@ -21,25 +21,47 @@ import {
   googleAuthSuccess,
 } from "../controller/user/googleAuthController.js";
 import { ifAuth, isAuth, otpVerify, resetPassAuth } from "../middlewares/authMiddlewares.js";
-import { addNewAddress, deleteAddress, editAddress, editProfile, setDefaultAddress, viewEditProfile, viewProfile } from "../controller/user/profileController.js";
-import { upload } from "../middlewares/multerUpload.js";
+import { addNewAddress, deleteAddress, editAddress, editProfile, setDefaultAddress, viewDashboard, viewEditProfile, viewProfile } from "../controller/user/profileController.js";
+import { upload, uploadRental } from "../middlewares/multerUpload.js";
 import { changeEmail, changePassword, viewSettings } from "../controller/user/settingsController.js";
-import { listProducts, productDetails } from "../controller/user/shopController.js";
+import { listProducts, productDetails, submitProductReview } from "../controller/user/shopController.js";
 import { getCartPage, addToCart, updateQuantity, removeFromCart } from "../controller/user/cartController.js";
-import { getListRentalBookPage, submitRentalListing, rentalPlacePage, rentalDetailsPage, getMyListingsPage } from "../controller/user/rentalController.js";
-
-import multer from "multer";
-
-// Multer setup for Rentals
-const rentalStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "public/uploads/rentals");
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
-    }
-});
-const uploadRental = multer({ storage: rentalStorage });
+import {
+  completeRentalReturn,
+  confirmRentalRequest,
+  getEditRentalListingPage,
+  getListRentalBookPage,
+  getMyListingsPage,
+  getMyRentalsPage,
+  getRentalRequestsPage,
+  getRentalReturnPage,
+  rentalConfirmedPage,
+  rentalDetailsPage,
+  rentalPlacePage,
+  rentalReturnSuccessPage,
+  requestRentalBook,
+  rejectRentalRequest,
+  submitRentalListing,
+  submitRentalReturn,
+  submitRentalReview,
+  toggleRentalListing,
+  updateRentalListing
+} from "../controller/user/rentalController.js";
+import {
+  addCheckoutAddress,
+  applyCoupon,
+  getCheckoutPage,
+  markRazorpayPaymentFailed,
+  orderSuccessPage,
+  paymentFailurePage,
+  placeOrder,
+  removeCoupon,
+  retryRazorpayPayment,
+  verifyRazorpayPayment
+} from "../controller/user/checkoutController.js";
+import { getWishlistPage, addToWishlist, removeFromWishlist } from "../controller/user/wishlistController.js";
+import { addFunds, getWalletPage, getAddFundsPage, markAddFundsFailed, verifyAddFunds } from "../controller/user/walletController.js";
+import { listOrdersPage, orderDetailsPage, cancelProduct, returnProduct, downloadInvoice } from "../controller/user/orderController.js";
 
 
 const router = express.Router();
@@ -55,10 +77,14 @@ router.get("/home", homePage);
 router.get("/marketplace", listProducts);
 router.get("/shop", (req, res) => res.redirect("/marketplace"));
 router.get("/product/:id", productDetails);
+router.post("/product/:id/reviews", isAuth, submitProductReview);
 
 // Rental Place
 router.get("/rental-place", rentalPlacePage);
+router.post("/rentals/:rentalId/request", isAuth, requestRentalBook);
+router.get("/rentals/:rentalOrderId/confirmed", isAuth, rentalConfirmedPage);
 router.get("/rental/:id", rentalDetailsPage);
+router.post("/rental/:id/reviews", isAuth, submitRentalReview);
 router.get("/list-rental-book", isAuth, getListRentalBookPage);
 router.post("/list-rental-book", isAuth, uploadRental.array("images", 10), submitRentalListing);
 router.get("/list-book", (req, res) => res.redirect("/list-rental-book")); // Handle existing Sell link
@@ -71,16 +97,28 @@ router.patch("/cart/update", isAuth, updateQuantity);
 router.delete("/cart/remove", isAuth, removeFromCart);
 
 // Checkout
-import { getCheckoutPage, placeOrder, orderSuccessPage } from "../controller/user/checkoutController.js";
 router.get("/checkout", isAuth, getCheckoutPage);
+router.post("/checkout/address", isAuth, addCheckoutAddress);
+router.post("/checkout/apply-coupon", isAuth, applyCoupon);
+router.post("/checkout/remove-coupon", isAuth, removeCoupon);
 router.post("/checkout/place-order", isAuth, placeOrder);
+router.post("/checkout/razorpay/verify", isAuth, verifyRazorpayPayment);
+router.post("/checkout/razorpay/failure", isAuth, markRazorpayPaymentFailed);
+router.post("/checkout/razorpay/retry/:orderId", isAuth, retryRazorpayPayment);
 router.get("/order-success/:orderId", isAuth, orderSuccessPage);
+router.get("/payment-failure/:orderId", isAuth, paymentFailurePage);
 
 // Wishlist
-import { getWishlistPage, addToWishlist, removeFromWishlist } from "../controller/user/wishlistController.js";
 router.get("/wishlist", isAuth, getWishlistPage);
 router.post("/wishlist/add", isAuth, addToWishlist);
 router.delete("/wishlist/remove", isAuth, removeFromWishlist);
+
+// Wallet
+router.get("/wallet", isAuth, getWalletPage);
+router.get("/wallet/add-funds", isAuth, getAddFundsPage);
+router.post("/wallet/add-funds", isAuth, addFunds);
+router.post("/wallet/add-funds/verify", isAuth, verifyAddFunds);
+router.post("/wallet/add-funds/failure", isAuth, markAddFundsFailed);
 
 // Sign In
 router.route("/sign-in")
@@ -116,9 +154,20 @@ router.route("/reset-password")
 router.get("/password-changed", passwordChanged);
 
 // Profile
-import { listOrdersPage, orderDetailsPage, cancelProduct, returnProduct, downloadInvoice } from "../controller/user/orderController.js";
+router.get("/dashboard", isAuth, viewDashboard);
 router.get("/profile", isAuth, viewProfile);
+router.get("/profile/rentals", isAuth, getMyRentalsPage);
+router.get("/profile/rentals/:rentalOrderId/return", isAuth, getRentalReturnPage);
+router.post("/profile/rentals/:rentalOrderId/return", isAuth, submitRentalReturn);
+router.get("/profile/rentals/:rentalOrderId/return/success", isAuth, rentalReturnSuccessPage);
+router.patch("/profile/rentals/:rentalOrderId/confirm", isAuth, confirmRentalRequest);
+router.patch("/profile/rentals/:rentalOrderId/reject", isAuth, rejectRentalRequest);
+router.patch("/profile/rentals/:rentalOrderId/return/complete", isAuth, completeRentalReturn);
 router.get("/profile/my-listings", isAuth, getMyListingsPage);
+router.get("/profile/my-listings/rental-requests", isAuth, getRentalRequestsPage);
+router.get("/profile/my-listings/:id/edit", isAuth, getEditRentalListingPage);
+router.patch("/profile/my-listings/:id", isAuth, uploadRental.array("images", 10), updateRentalListing);
+router.patch("/profile/my-listings/:id/toggle", isAuth, toggleRentalListing);
 
 
 router.get("/profile/orders", isAuth, listOrdersPage);

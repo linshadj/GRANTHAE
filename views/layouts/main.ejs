@@ -47,14 +47,7 @@
                                 const data = await res.json();
                                 
                                 if (data.success) {
-                                    Swal.fire({
-                                        toast: true,
-                                        position: 'top-end',
-                                        icon: data.action === 'added' ? 'success' : 'info',
-                                        title: data.message,
-                                        showConfirmButton: false,
-                                        timer: 3000
-                                    });
+                                    showToast(data.action === 'added' ? 'success' : 'info', data.message);
 
                                     // Toggle UI state if btn is available
                                     if (btn) {
@@ -78,14 +71,7 @@
                                     if (res.status === 401 || (data.message && (data.message.toLowerCase().includes('login') || data.message.toLowerCase().includes('unauthorized')))) {
                                         window.location.href = '/sign-in';
                                     } else {
-                                        Swal.fire({
-                                            toast: true,
-                                            position: 'top-end',
-                                            icon: 'error',
-                                            title: data.message || 'Something went wrong',
-                                            showConfirmButton: false,
-                                            timer: 3000
-                                        });
+                                        showToast('error', data.message || 'Something went wrong');
                                     }
                                 }
                             } catch (err) {

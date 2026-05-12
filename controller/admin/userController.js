@@ -1,5 +1,6 @@
 import { toggleBlockUserService, userDetails, getUserById } from "../../service/admin/userService.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 
 export const usersPage = async (req, res) => {
@@ -24,7 +25,7 @@ export const toggleBlockUser = async (req, res) => {
     return res.status(STATUS_CODES.OK).json({ success: true, message: `User has been ${action}ed successfully.`, redirectUrl: "/admin/users?status=updated&&message=User+has+been+successfully+updated." });
   } catch (error) {
     console.error("Error in toggleBlockUser: ", error.message);
-    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
+    return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not update the user status.") });
   }
 }
 
@@ -43,7 +44,7 @@ export const liveUsersSearch = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: error.message });
+    res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not search users.") });
   }
 };
 
@@ -54,7 +55,6 @@ export const viewUserDetail = async (req, res) => {
     res.render("admin/user-details", { user, addresses, orders, title: "User Details", layout: "layouts/admin-panel" });
   } catch (error) {
     console.error("Error in viewUserDetail:", error.message);
-    res.status(error.status || STATUS_CODES.NOT_FOUND).render("pages/error", { title: "Error", message: error.message });
+    res.status(error.status || STATUS_CODES.NOT_FOUND).render("pages/error", { title: "Error", message: getFriendlyErrorMessage(error, "User not found.") });
   }
 };
-

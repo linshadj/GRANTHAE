@@ -1,5 +1,6 @@
 import { Category } from "../../models/categoryDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
+import { deleteCloudinaryUploads, uploadImageToCloudinary } from "../../utils/cloudinaryUploader.js";
 
 // Categories page
 export const categoriesPage = async (req, res, next) => {
@@ -71,6 +72,8 @@ export const getAddCategoryPage = async (req, res, next) => {
 };
 
 export const addCategory = async (req, res, next) => {
+    let uploadedImage = null;
+
     try {
         const { name, slug, description, featured, active } = req.body;
         
@@ -91,7 +94,8 @@ export const addCategory = async (req, res, next) => {
             return res.status(STATUS_CODES.CONFLICT).json({ success: false, message: "Slug already exists" });
         }
 
-        const coverImage = req.file ? `/uploads/categories/${req.file.filename}` : "";
+        uploadedImage = req.file ? await uploadImageToCloudinary(req.file, "categories") : null;
+        const coverImage = uploadedImage?.url || "";
 
         const newCategory = new Category({
             name: name.trim(),
@@ -106,6 +110,7 @@ export const addCategory = async (req, res, next) => {
         
         res.status(STATUS_CODES.CREATED).json({ success: true, message: "Category added successfully", redirectUrl: "/admin/categories" });
     } catch (error) {
+        if (uploadedImage) await deleteCloudinaryUploads([uploadedImage]);
         next(error);
     }
 };
@@ -128,6 +133,8 @@ export const getEditCategoryPage = async (req, res, next) => {
 };
 
 export const editCategory = async (req, res, next) => {
+    let uploadedImage = null;
+
     try {
         const { id } = req.params;
         const { name, slug, description, featured, active } = req.body;
@@ -161,7 +168,8 @@ export const editCategory = async (req, res, next) => {
         };
 
         if (req.file) {
-            updateData.coverImage = `/uploads/categories/${req.file.filename}`;
+            uploadedImage = await uploadImageToCloudinary(req.file, "categories");
+            updateData.coverImage = uploadedImage.url;
         }
 
         const category = await Category.findByIdAndUpdate(id, updateData, { new: true });
@@ -172,6 +180,7 @@ export const editCategory = async (req, res, next) => {
 
         res.status(STATUS_CODES.OK).json({ success: true, message: "Category updated successfully", redirectUrl: "/admin/categories" });
     } catch (error) {
+        if (uploadedImage) await deleteCloudinaryUploads([uploadedImage]);
         next(error);
     }
 };

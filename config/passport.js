@@ -2,6 +2,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import userDb from "../models/userDb.js";
 import dotenv from "dotenv";
+import { ensureReferralIdentity } from "../service/user/referralService.js";
 
 dotenv.config();
 
@@ -10,19 +11,19 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback",
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         let user = await userDb.findOne({ email: profile.emails[0].value });
         if (user) {
           if (user.isBlocked) {
-            return done(null, false, { message: "User is blocked by admin" });
+            return done(null, false, { message: "Your account has been blocked by admin." });
           }
           if (!user.googleId) {
             user.googleId = profile.id;
-            await user.save();
           }
+          await ensureReferralIdentity(user);
           return done(null, user);
         }
 
@@ -38,6 +39,8 @@ passport.use(
             avatar: avatar,
             googleId: profile.id,
         });
+        await ensureReferralIdentity(user);
+        user.$locals.isNewGoogleUser = true;
         return done(null, user);
       } catch (error) {
         return done(error, null);

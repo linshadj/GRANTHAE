@@ -1,11 +1,23 @@
 <div class="space-y-8">
+    <% const displayStatus = order.orderStatus === 'Cancelled' ? 'Cancelled' : order.paymentStatus === 'Failed' ? 'Failed' : order.orderStatus; %>
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
             <a href="/admin/orders" class="p-2 bg-white/5 text-apple-text-gray hover:text-white rounded-xl transition-all">
                 <i data-lucide="arrow-left" class="w-6 h-6"></i>
             </a>
             <div>
-                <h2 class="text-2xl font-bold text-white font-serif">Order Details</h2>
+                <h2 class="text-2xl font-bold text-white font-serif flex items-center gap-3">
+                    Order Details
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border border-current opacity-80
+                        <%= displayStatus === 'Pending' ? 'bg-yellow-500/10 text-yellow-400' : '' %>
+                        <%= displayStatus === 'Shipped' ? 'bg-blue-500/10 text-blue-400' : '' %>
+                        <%= displayStatus === 'Out for delivery' ? 'bg-purple-500/10 text-purple-400' : '' %>
+                        <%= displayStatus === 'Delivered' ? 'bg-green-500/10 text-green-400' : '' %>
+                        <%= displayStatus === 'Returned' ? 'bg-orange-500/10 text-orange-400' : '' %>
+                        <%= (displayStatus === 'Cancelled' || displayStatus === 'Failed') ? 'bg-red-500/10 text-red-400' : '' %>">
+                        <%= displayStatus %>
+                    </span>
+                </h2>
                 <p class="text-apple-text-gray text-sm font-mono"><%= order.orderID %></p>
             </div>
         </div>
@@ -62,11 +74,43 @@
                                                     else if (item.itemStatus === 'Out for delivery') itemStatusClass = 'bg-purple-500/10 text-purple-400';
                                                     else if (item.itemStatus === 'Delivered') itemStatusClass = 'bg-green-500/10 text-green-400';
                                                     else if (item.itemStatus === 'Cancelled') itemStatusClass = 'bg-red-500/10 text-red-400';
+                                                    else if (item.itemStatus === 'Return Requested') itemStatusClass = 'bg-yellow-500/10 text-yellow-400';
                                                     else if (item.itemStatus === 'Returned') itemStatusClass = 'bg-orange-500/10 text-orange-400';
                                                 %>
-                                                <span class="inline-flex w-max items-center px-2 py-0.5 mt-1 rounded text-[10px] font-bold <%= itemStatusClass %> border border-current opacity-80 uppercase tracking-widest">
-                                                    <%= item.itemStatus %>
-                                                </span>
+                                                <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                    <span class="inline-flex w-max items-center px-2 py-0.5 rounded text-[10px] font-bold <%= itemStatusClass %> border border-current opacity-80 uppercase tracking-widest">
+                                                        <%= item.itemStatus %>
+                                                    </span>
+                                                    <% if (item.returnRequestStatus === 'Rejected') { %>
+                                                        <span class="inline-flex w-max items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-current uppercase tracking-widest">
+                                                            Return Rejected
+                                                        </span>
+                                                    <% } %>
+                                                    <% if (item.refundStatus === 'Completed' && item.refundAmount > 0) { %>
+                                                        <span class="inline-flex w-max items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/10 text-green-400 border border-current uppercase tracking-widest">
+                                                            Refunded ₹<%= item.refundAmount.toLocaleString('en-IN') %>
+                                                        </span>
+                                                    <% } %>
+                                                </div>
+                                                <% if (item.itemStatus === 'Return Requested' && item.returnRequestStatus === 'Pending') { %>
+                                                    <div class="mt-3 flex flex-wrap gap-2">
+                                                        <button onclick="reviewReturn('<%= order._id %>', '<%= item._id %>', 'approve')" class="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 transition-all uppercase tracking-widest">
+                                                            Approve Return
+                                                        </button>
+                                                        <button onclick="reviewReturn('<%= order._id %>', '<%= item._id %>', 'reject')" class="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all uppercase tracking-widest">
+                                                            Reject
+                                                        </button>
+                                                    </div>
+                                                    <% if (item.returnReason) { %>
+                                                        <p class="mt-2 text-xs text-apple-text-gray max-w-sm">
+                                                            Reason: <span class="text-white"><%= item.returnReason %></span>
+                                                        </p>
+                                                    <% } %>
+                                                <% } else if (item.returnRequestStatus === 'Rejected' && item.returnRejectionReason) { %>
+                                                    <p class="mt-2 text-xs text-red-400 max-w-sm">
+                                                        Rejection reason: <%= item.returnRejectionReason %>
+                                                    </p>
+                                                <% } %>
                                             </div>
                                         </div>
                                     </td>
@@ -85,8 +129,16 @@
                         <tfoot class="bg-white/5">
                             <tr>
                                 <td colspan="3" class="px-6 py-4 text-right font-bold text-apple-text-gray">Subtotal</td>
-                                <td class="px-6 py-4 text-right text-white font-bold text-lg">₹<%= order.totalAmount.toLocaleString() %></td>
+                                <td class="px-6 py-4 text-right text-white font-bold text-lg">₹<%= (order.subtotalAmount || (order.totalAmount + (order.discountAmount || 0))).toLocaleString() %></td>
                             </tr>
+                            <% if (order.discountAmount && order.discountAmount > 0) { %>
+                                <tr>
+                                    <td colspan="3" class="px-6 py-4 text-right font-bold text-apple-text-gray">
+                                        Coupon Discount <%= order.couponCode ? `(${order.couponCode})` : '' %>
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-green-400 font-bold">-₹<%= order.discountAmount.toLocaleString() %></td>
+                                </tr>
+                            <% } %>
                             <tr>
                                 <td colspan="3" class="px-6 py-4 text-right font-bold text-apple-text-gray">Shipping</td>
                                 <td class="px-6 py-4 text-right text-green-400 font-bold">FREE</td>
@@ -116,13 +168,13 @@
                             <p class="text-xs text-apple-text-gray"><%= new Date(order.createdAt).toLocaleString() %></p>
                         </div>
                     </div>
-                    <% if (order.orderStatus !== 'Pending') { %>
+                    <% if (order.orderStatus !== 'Pending' || order.paymentStatus === 'Failed') { %>
                         <div class="relative flex items-center gap-6">
                             <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center z-10">
-                                <i data-lucide="package" class="w-5 h-5 text-white"></i>
+                                <i data-lucide="<%= order.paymentStatus === 'Failed' ? 'x-circle' : 'package' %>" class="w-5 h-5 text-white"></i>
                             </div>
                             <div>
-                                <p class="text-white font-bold"><%= order.orderStatus %></p>
+                                <p class="text-white font-bold"><%= displayStatus %></p>
                                 <p class="text-xs text-apple-text-gray">Updated on <%= new Date(order.updatedAt).toLocaleString() %></p>
                             </div>
                         </div>
@@ -184,7 +236,7 @@
                     </div>
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-apple-text-gray">Status</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest <%= order.paymentStatus === 'Success' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-500' %> border border-current">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest <%= order.paymentStatus === 'Success' ? 'bg-green-500/10 text-green-400' : order.paymentStatus === 'Refunded' ? 'bg-orange-500/10 text-orange-400' : order.paymentStatus === 'Failed' ? 'bg-red-500/10 text-red-400' : 'bg-yellow-500/10 text-yellow-500' %> border border-current">
                             <%= order.paymentStatus %>
                         </span>
                     </div>
@@ -209,7 +261,8 @@
             'Shipped': 2,
             'Out for delivery': 3,
             'Delivered': 4,
-            'Cancelled': 5
+            'Cancelled': 5,
+            'Returned': 6
         };
         const currentLevel = statusOrder[currentStatus];
         const allOptions = {
@@ -221,7 +274,7 @@
         };
         
         let allowedOptions = {};
-        if (currentStatus === 'Delivered' || currentStatus === 'Cancelled') {
+        if (currentStatus === 'Delivered' || currentStatus === 'Cancelled' || currentStatus === 'Returned') {
             allowedOptions[currentStatus] = currentStatus;
         } else {
             Object.keys(allOptions).forEach(key => {
@@ -258,5 +311,58 @@
                 }
             }
         });
+    }
+
+    async function reviewReturn(orderId, itemId, action) {
+        const isApproval = action === 'approve';
+        const options = {
+            title: isApproval ? 'Approve Return Request' : 'Reject Return Request',
+            text: isApproval
+                ? 'Stock will be incremented and the refundable amount will be credited to the customer wallet.'
+                : 'Please enter the reason that will be shown against this return request.',
+            icon: isApproval ? 'question' : 'warning',
+            showCancelButton: true,
+            confirmButtonText: isApproval ? 'Approve Return' : 'Reject Return',
+            confirmButtonColor: isApproval ? '#22c55e' : '#ef4444',
+            background: '#1a231e',
+            color: '#fff'
+        };
+
+        if (!isApproval) {
+            options.input = 'textarea';
+            options.inputPlaceholder = 'Reason for rejecting this return request';
+            options.inputValidator = (value) => {
+                if (!value || !value.trim()) return 'Rejection reason is required.';
+                return null;
+            };
+        }
+
+        const result = await Swal.fire(options);
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch(`/admin/orders/${orderId}/items/${itemId}/return-review`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action,
+                    rejectionReason: isApproval ? '' : result.value
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: isApproval ? 'Return Approved' : 'Return Rejected',
+                    text: data.message,
+                    background: '#1a231e',
+                    color: '#fff'
+                }).then(() => location.reload());
+            } else {
+                Swal.fire({ icon: 'error', title: 'Unable to Review', text: data.message, background: '#1a231e', color: '#fff' });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Could not update the return request.', background: '#1a231e', color: '#fff' });
+        }
     }
 </script>

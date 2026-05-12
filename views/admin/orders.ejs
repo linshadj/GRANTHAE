@@ -32,7 +32,7 @@
                     <button onclick="document.getElementById('orderFilterMenu').classList.toggle('hidden')" class="px-4 py-2 text-xs font-semibold bg-white/5 text-apple-text-gray rounded-lg hover:bg-white/10 transition-colors border border-white/5 flex items-center gap-1.5 h-10 min-w-max whitespace-nowrap">
                         <i data-lucide="filter" class="w-3.5 h-3.5"></i>
                         <span id="orderFilterLabel">
-                            <% const filterLabels = { 'all': 'All Status', 'Pending': 'Pending', 'Shipped': 'Shipped', 'Out for delivery': 'Out for Delivery', 'Delivered': 'Delivered', 'Cancelled': 'Cancelled' }; %>
+                            <% const filterLabels = { 'all': 'All Status', 'Pending': 'Pending', 'Shipped': 'Shipped', 'Out for delivery': 'Out for Delivery', 'Delivered': 'Delivered', 'Return Requested': 'Return Requested', 'Cancelled': 'Cancelled', 'Returned': 'Returned', 'Failed': 'Failed' }; %>
                             <%= typeof selectedFilter !== 'undefined' ? filterLabels[selectedFilter] || 'Filter By' : 'All Status' %>
                         </span>
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
@@ -44,7 +44,9 @@
                                 <% } else if(key==='Shipped') { %> <i data-lucide="truck" class="w-3.5 h-3.5 text-blue-400"></i>
                                 <% } else if(key==='Out for delivery') { %> <i data-lucide="package" class="w-3.5 h-3.5 text-purple-400"></i>
                                 <% } else if(key==='Delivered') { %> <i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-400"></i>
-                                <% } else if(key==='Cancelled') { %> <i data-lucide="x-circle" class="w-3.5 h-3.5 text-red-400"></i>
+                                <% } else if(key==='Return Requested') { %> <i data-lucide="undo-2" class="w-3.5 h-3.5 text-yellow-400"></i>
+                                <% } else if(key==='Returned') { %> <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-orange-400"></i>
+                                <% } else if(key==='Cancelled' || key==='Failed') { %> <i data-lucide="x-circle" class="w-3.5 h-3.5 text-red-400"></i>
                                 <% } else { %> <i data-lucide="layers" class="w-3.5 h-3.5"></i> <% } %>
                                 <%= filterLabels[key] %>
                             </a>
@@ -98,6 +100,8 @@
                         </tr>
                     <% } else { %>
                         <% orders.forEach(order => { %>
+                            <% const hasPendingReturn = order.items && order.items.some(item => item.itemStatus === 'Return Requested' && item.returnRequestStatus === 'Pending'); %>
+                            <% const displayStatus = order.orderStatus === 'Cancelled' ? 'Cancelled' : order.paymentStatus === 'Failed' ? 'Failed' : hasPendingReturn ? 'Return Requested' : order.orderStatus; %>
                             <tr class="hover:bg-white/5 transition-colors group">
                                 <td class="px-6 py-4 font-mono text-apple-gold">
                                     <%= order.orderID %>
@@ -117,14 +121,16 @@
                                 <td class="px-6 py-4">
                                     <% 
                                         let statusClass = 'bg-gray-500/10 text-gray-400';
-                                        if (order.orderStatus === 'Pending') statusClass = 'bg-yellow-500/10 text-yellow-400';
-                                        else if (order.orderStatus === 'Shipped') statusClass = 'bg-blue-500/10 text-blue-400';
-                                        else if (order.orderStatus === 'Out for delivery') statusClass = 'bg-purple-500/10 text-purple-400';
-                                        else if (order.orderStatus === 'Delivered') statusClass = 'bg-green-500/10 text-green-400';
-                                        else if (order.orderStatus === 'Cancelled') statusClass = 'bg-red-500/10 text-red-400';
+                                        if (displayStatus === 'Pending') statusClass = 'bg-yellow-500/10 text-yellow-400';
+                                        else if (displayStatus === 'Shipped') statusClass = 'bg-blue-500/10 text-blue-400';
+                                        else if (displayStatus === 'Out for delivery') statusClass = 'bg-purple-500/10 text-purple-400';
+                                        else if (displayStatus === 'Delivered') statusClass = 'bg-green-500/10 text-green-400';
+                                        else if (displayStatus === 'Return Requested') statusClass = 'bg-yellow-500/10 text-yellow-400';
+                                        else if (displayStatus === 'Returned') statusClass = 'bg-orange-500/10 text-orange-400';
+                                        else if (displayStatus === 'Cancelled' || displayStatus === 'Failed') statusClass = 'bg-red-500/10 text-red-400';
                                     %>
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold <%= statusClass %> border border-current opacity-80">
-                                        <%= order.orderStatus %>
+                                        <%= displayStatus %>
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
@@ -278,14 +284,15 @@
             'Shipped': 2,
             'Out for delivery': 3,
             'Delivered': 4,
-            'Cancelled': 5
+            'Cancelled': 5,
+            'Returned': 6
         };
         const currentLevel = statusOrder[currentStatus];
 
         document.querySelectorAll('input[name="orderStatus"]').forEach(radio => {
             const radioLevel = statusOrder[radio.value];
             
-            if (currentStatus === 'Delivered' || currentStatus === 'Cancelled') {
+            if (currentStatus === 'Delivered' || currentStatus === 'Cancelled' || currentStatus === 'Returned') {
                 radio.disabled = true;
                 radio.parentElement.classList.add('opacity-50', 'cursor-not-allowed');
             } else if (radio.value !== 'Cancelled' && radioLevel < currentLevel) {

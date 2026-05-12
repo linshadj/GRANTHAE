@@ -56,6 +56,72 @@
         </div>
     </div>
 
+    <% if (typeof referralData !== 'undefined' && referralData) { %>
+        <div class="glass-card p-8 relative overflow-hidden">
+            <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
+                <div>
+                    <h3 class="text-sm font-bold text-apple-text-gray uppercase tracking-[0.2em]">Referral Offers</h3>
+                    <p class="text-sm text-apple-text-gray mt-2">
+                        Invite a reader. You get &#8377;<%= referralData.referrerRewardAmount %>, and they get &#8377;<%= referralData.refereeRewardAmount %> in wallet rewards after signup.
+                    </p>
+                </div>
+                <div class="px-4 py-3 rounded-2xl bg-apple-blue/10 border border-apple-blue/20 text-center">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-apple-text-gray">Successful Referrals</p>
+                    <p class="text-2xl font-bold text-apple-blue"><%= referralData.referralCount %></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <p class="text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest mb-2">Referral Code</p>
+                    <div class="flex items-center gap-3">
+                        <code class="flex-1 px-3 py-2 rounded-xl bg-black/10 text-apple-dark font-bold tracking-widest"><%= referralData.code %></code>
+                        <button type="button" onclick="copyReferralValue('<%= referralData.code %>', 'Referral code copied')" class="w-10 h-10 rounded-xl bg-apple-blue/10 text-apple-blue hover:bg-apple-blue hover:text-white transition-colors flex items-center justify-center" aria-label="Copy referral code">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <p class="text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest mb-2">Code URL</p>
+                    <div class="flex items-center gap-3">
+                        <input readonly value="<%= referralData.referralUrl %>" class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-black/10 text-apple-dark text-xs outline-none">
+                        <button type="button" onclick="copyReferralValue('<%= referralData.referralUrl %>', 'Referral URL copied')" class="w-10 h-10 rounded-xl bg-apple-blue/10 text-apple-blue hover:bg-apple-blue hover:text-white transition-colors flex items-center justify-center" aria-label="Copy referral URL">
+                            <i data-lucide="link" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4 md:col-span-2">
+                    <p class="text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest mb-2">Token URL</p>
+                    <div class="flex items-center gap-3">
+                        <input readonly value="<%= referralData.tokenUrl %>" class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-black/10 text-apple-dark text-xs outline-none">
+                        <button type="button" onclick="copyReferralValue('<%= referralData.tokenUrl %>', 'Referral token URL copied')" class="w-10 h-10 rounded-xl bg-apple-blue/10 text-apple-blue hover:bg-apple-blue hover:text-white transition-colors flex items-center justify-center" aria-label="Copy referral token URL">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <% if (referralData.recentReferrals && referralData.recentReferrals.length > 0) { %>
+                <div class="mt-6 pt-6 border-t border-white/10">
+                    <p class="text-[10px] font-bold text-apple-text-gray/60 uppercase tracking-widest mb-3">Recent Referrals</p>
+                    <div class="space-y-2">
+                        <% referralData.recentReferrals.forEach(referral => { %>
+                            <div class="flex items-center justify-between gap-4 rounded-xl bg-white/5 border border-white/10 px-4 py-3">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold text-apple-dark truncate"><%= referral.referee?.firstName || 'Reader' %> <%= referral.referee?.lastName || '' %></p>
+                                    <p class="text-[10px] text-apple-text-gray truncate"><%= referral.referee?.email || '' %></p>
+                                </div>
+                                <span class="text-xs font-bold text-green-600">+&#8377;<%= referral.referrerReward %></span>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    <% } %>
+
     <!-- Addresses Section -->
     <div class="glass-card p-8 relative overflow-hidden">
         <div class="flex justify-between items-center mb-8 relative z-20">
@@ -98,12 +164,7 @@
             <% } %>
         </div>
     </div>
-
-    </div>
 </div>
-            </div>
-        </div>
-    </div>
 
 
     <!-- View Address Modal -->
@@ -276,6 +337,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    async function copyReferralValue(value, message) {
+        try {
+            await navigator.clipboard.writeText(value);
+            showToast('success', message);
+        } catch (error) {
+            showToast('error', 'Could not copy referral details.');
+        }
+    }
+
     const viewModal = document.getElementById('view-address-modal');
     const viewBackdrop = document.getElementById('view-modal-backdrop');
     const viewPanel = document.getElementById('view-modal-panel');

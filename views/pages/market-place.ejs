@@ -30,6 +30,12 @@
                     <% if (query.sort) { %>
                         <input type="hidden" name="sort" value="<%= query.sort %>">
                     <% } %>
+                    <% if (query.minPrice) { %>
+                        <input type="hidden" name="minPrice" value="<%= query.minPrice %>">
+                    <% } %>
+                    <% if (query.maxPrice) { %>
+                        <input type="hidden" name="maxPrice" value="<%= query.maxPrice %>">
+                    <% } %>
                     <input type="text" name="search" value="<%= query.search || '' %>"
                         placeholder="Search books..."
                         class="w-full pl-12 pr-10 py-2.5 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue transition-all shadow-xl group-hover:shadow-2xl text-sm text-apple-dark">

@@ -1,4 +1,11 @@
-<form action="/marketplace" method="GET" id="filterForm" class="space-y-8">
+<%
+    const activePriceRange = typeof priceRange !== 'undefined' && priceRange
+        ? priceRange
+        : { min: 0, max: 0, hasOfferPrice: false };
+    const formatFilterPrice = (amount) => Math.round(Number(amount || 0)).toLocaleString('en-IN');
+%>
+
+<form action="/marketplace" method="GET" class="space-y-8">
     <% if (query.search) { %>
         <input type="hidden" name="search" value="<%= query.search %>">
     <% } %>
@@ -28,18 +35,27 @@
     <div>
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-sm font-bold text-apple-dark uppercase tracking-wider">Price</h3>
-            <button type="button" onclick="resetPrice()" class="text-xs text-apple-blue hover:underline">Reset</button>
+            <button type="button" onclick="resetPrice(this)" class="text-xs text-apple-blue hover:underline">Reset</button>
         </div>
         <div class="space-y-4">
+            <div class="rounded-xl bg-white/5 border border-white/10 px-3 py-2">
+                <p class="text-[10px] uppercase tracking-widest text-apple-text-gray/70">Available Range</p>
+                <p class="text-sm font-bold text-apple-dark">
+                    ₹<%= formatFilterPrice(activePriceRange.min) %> - ₹<%= formatFilterPrice(activePriceRange.max) %>
+                </p>
+                <p class="text-[10px] text-apple-text-gray mt-1">
+                    Uses offer price when available, otherwise regular price.
+                </p>
+            </div>
             <div class="flex items-center gap-4">
                 <div class="flex-1">
                     <label class="text-[10px] text-apple-text-gray uppercase mb-1 block">Min</label>
-                    <input type="number" name="minPrice" value="<%= query.minPrice %>" placeholder="₹0"
+                    <input type="number" name="minPrice" value="<%= query.minPrice || '' %>" placeholder="₹<%= formatFilterPrice(activePriceRange.min) %>"
                         class="w-full text-sm border-white/10 rounded-xl focus:ring-apple-blue focus:border-apple-blue py-2.5 px-3 bg-white/5 text-apple-dark shadow-inner transition-all focus:bg-white/10">
                 </div>
                 <div class="flex-1">
                     <label class="text-[10px] text-apple-text-gray uppercase mb-1 block">Max</label>
-                    <input type="number" name="maxPrice" value="<%= query.maxPrice %>" placeholder="₹500+"
+                    <input type="number" name="maxPrice" value="<%= query.maxPrice || '' %>" placeholder="₹<%= formatFilterPrice(activePriceRange.max) %>"
                         class="w-full text-sm border-white/10 rounded-xl focus:ring-apple-blue focus:border-apple-blue py-2.5 px-3 bg-white/5 text-apple-dark shadow-inner transition-all focus:bg-white/10">
                 </div>
             </div>
@@ -58,8 +74,8 @@
         <select name="sort" onchange="this.form.submit()" 
             class="w-full text-sm border-white/10 rounded-xl focus:ring-apple-blue focus:border-apple-blue py-2.5 px-3 bg-white/5 text-apple-dark shadow-inner transition-all focus:bg-white/10">
             <option value="newest" <%= query.sort === 'newest' ? 'selected' : '' %>>Newest Arrivals</option>
-            <option value="price_asc" <%= query.sort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
-            <option value="price_desc" <%= query.sort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+            <option value="price_asc" <%= query.sort === 'price_asc' ? 'selected' : '' %>>Offer Price: Low to High</option>
+            <option value="price_desc" <%= query.sort === 'price_desc' ? 'selected' : '' %>>Offer Price: High to Low</option>
             <option value="name_asc" <%= query.sort === 'name_asc' ? 'selected' : '' %>>Name: A-Z</option>
             <option value="name_desc" <%= query.sort === 'name_desc' ? 'selected' : '' %>>Name: Z-A</option>
         </select>
@@ -75,8 +91,8 @@
 </form>
 
 <script>
-    function resetPrice() {
-        const form = document.getElementById('filterForm');
+    function resetPrice(button) {
+        const form = button.closest('form');
         form.querySelector('input[name="minPrice"]').value = '';
         form.querySelector('input[name="maxPrice"]').value = '';
         form.submit();

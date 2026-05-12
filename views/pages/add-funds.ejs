@@ -1,0 +1,239 @@
+<%
+    const formatAmount = (amount) => Number(amount || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+%>
+
+<div class="max-w-2xl mx-auto space-y-8 relative">
+    <a href="/wallet"
+        class="absolute -left-12 top-0 p-2 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors hidden lg:flex">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+    </a>
+
+    <div class="text-center">
+        <h1 class="text-3xl font-bold text-apple-dark mb-2">Add Funds</h1>
+        <p class="text-apple-text-gray">Top up wallet balance instantly.</p>
+    </div>
+
+    <div class="glass-card p-6 flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-apple-text-gray uppercase tracking-wider">Current Balance</p>
+            <p class="text-3xl font-bold text-apple-dark mt-1">&#8377;<%= formatAmount(wallet.balance) %></p>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-apple-gold/10 flex items-center justify-center text-apple-gold">
+            <i data-lucide="wallet" class="w-6 h-6"></i>
+        </div>
+    </div>
+
+    <form action="/wallet/add-funds" method="POST" class="space-y-8" id="addFundsForm">
+        <div>
+            <h3 class="text-lg font-bold text-apple-dark mb-4">Select Amount</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+                <% [100, 500, 1000, 2000, 5000].forEach(amount => { %>
+                    <button type="button" data-amount="<%= amount %>"
+                        class="amount-btn py-4 rounded-xl border border-gray-200 bg-white hover:border-apple-gold hover:text-apple-gold transition-all text-lg font-bold text-apple-dark">
+                        &#8377;<%= amount.toLocaleString('en-IN') %>
+                    </button>
+                <% }) %>
+                <div class="relative min-h-[58px]">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">&#8377;</span>
+                    <input type="number" id="custom-amount" placeholder="Custom" min="1" max="100000" step="0.01"
+                        class="w-full h-full pl-8 pr-4 rounded-xl border border-gray-200 bg-white focus:border-apple-gold focus:ring-1 focus:ring-apple-gold outline-none text-lg font-bold text-apple-dark transition-all">
+                </div>
+            </div>
+
+            <input type="hidden" name="amount" id="selected-amount" required>
+            <p class="text-xs text-apple-text-gray">Limit: &#8377;1 to &#8377;1,00,000 per top-up.</p>
+        </div>
+
+        <div>
+            <h3 class="text-lg font-bold text-apple-dark mb-4">Payment Method</h3>
+            <div class="flex items-center gap-4 p-5 rounded-2xl border <%= razorpayConfigured ? 'border-apple-blue/30 bg-apple-blue/5' : 'border-red-500/20 bg-red-500/5' %>">
+                <div class="w-12 h-12 rounded-2xl bg-apple-blue/10 flex items-center justify-center text-apple-blue shrink-0 border border-apple-blue/20">
+                    <i data-lucide="credit-card" class="w-6 h-6"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-bold text-apple-dark">Razorpay</p>
+                    <p class="text-xs text-apple-text-gray">Pay securely through Razorpay Checkout.</p>
+                </div>
+                <% if (razorpayConfigured) { %>
+                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-bold uppercase tracking-widest">
+                        <i data-lucide="shield-check" class="w-3 h-3"></i>
+                        Secure
+                    </span>
+                <% } else { %>
+                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-[10px] font-bold uppercase tracking-widest">
+                        Unavailable
+                    </span>
+                <% } %>
+            </div>
+            <% if (!razorpayConfigured) { %>
+                <p class="text-xs text-red-500 mt-3">Razorpay keys are not configured. Wallet top-up is unavailable.</p>
+            <% } %>
+        </div>
+
+        <button type="submit" id="addFundsSubmitBtn" class="w-full btn-primary py-4 text-lg shadow-xl shadow-apple-gold/20 <%= razorpayConfigured ? '' : 'opacity-60 cursor-not-allowed' %>" <%= razorpayConfigured ? '' : 'disabled' %>>
+            Pay with Razorpay
+        </button>
+    </form>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+    const selectedAmount = document.getElementById('selected-amount');
+    const customAmount = document.getElementById('custom-amount');
+    const amountButtons = document.querySelectorAll('.amount-btn');
+    const addFundsForm = document.getElementById('addFundsForm');
+    const addFundsSubmitBtn = document.getElementById('addFundsSubmitBtn');
+    const razorpayConfigured = <%= razorpayConfigured ? 'true' : 'false' %>;
+
+    function setSubmitLoading(isLoading) {
+        if (!addFundsSubmitBtn) return;
+        addFundsSubmitBtn.disabled = isLoading || !razorpayConfigured;
+        addFundsSubmitBtn.innerHTML = isLoading
+            ? '<span class="inline-flex items-center justify-center gap-2"><i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Processing...</span>'
+            : 'Pay with Razorpay';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    async function markWalletTopupFailed(transactionId, reason) {
+        if (!transactionId) return;
+
+        try {
+            await fetch('/wallet/add-funds/failure', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transactionId, reason })
+            });
+        } catch (error) {
+            console.error('Wallet top-up failure record failed:', error);
+        }
+    }
+
+    function openWalletRazorpay(data) {
+        let paymentFinished = false;
+        const options = {
+            key: data.razorpay.keyId,
+            amount: data.razorpay.amount,
+            currency: data.razorpay.currency,
+            name: data.razorpay.name,
+            description: data.razorpay.description,
+            order_id: data.razorpay.orderId,
+            prefill: data.razorpay.prefill,
+            theme: { color: '#2c3b32' },
+            handler: async function(response) {
+                paymentFinished = true;
+                try {
+                    const verifyResponse = await fetch('/wallet/add-funds/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            transactionId: data.transactionId,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature
+                        })
+                    });
+                    const verifyData = await verifyResponse.json();
+
+                    if (verifyData.success) {
+                        window.location.href = verifyData.redirectUrl || '/wallet?status=success&message=Funds%20added%20to%20wallet.';
+                        return;
+                    }
+
+                    showToast('error', verifyData.message || 'Payment verification failed.');
+                    setSubmitLoading(false);
+                } catch (error) {
+                    await markWalletTopupFailed(data.transactionId, 'Payment verification could not be completed.');
+                    showToast('error', 'Payment verification could not be completed.');
+                    setSubmitLoading(false);
+                }
+            },
+            modal: {
+                ondismiss: async function() {
+                    if (!paymentFinished) {
+                        await markWalletTopupFailed(data.transactionId, 'Payment window was closed before completion.');
+                        showToast('warning', 'Wallet top-up was cancelled.');
+                        setSubmitLoading(false);
+                    }
+                }
+            }
+        };
+
+        const razorpay = new Razorpay(options);
+        razorpay.on('payment.failed', async function(response) {
+            paymentFinished = true;
+            const reason = response.error && response.error.description ? response.error.description : 'Razorpay payment failed.';
+            await markWalletTopupFailed(data.transactionId, reason);
+            showToast('error', reason);
+            setSubmitLoading(false);
+        });
+        razorpay.open();
+    }
+
+    amountButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            selectedAmount.value = button.dataset.amount;
+            customAmount.value = '';
+
+            amountButtons.forEach(btn => {
+                btn.classList.remove('border-apple-gold', 'text-apple-gold', 'bg-orange-50');
+                btn.classList.add('border-gray-200', 'bg-white', 'text-apple-dark');
+            });
+
+            button.classList.remove('border-gray-200', 'bg-white', 'text-apple-dark');
+            button.classList.add('border-apple-gold', 'text-apple-gold', 'bg-orange-50');
+        });
+    });
+
+    customAmount.addEventListener('input', () => {
+        selectedAmount.value = customAmount.value;
+        amountButtons.forEach(btn => {
+            btn.classList.remove('border-apple-gold', 'text-apple-gold', 'bg-orange-50');
+            btn.classList.add('border-gray-200', 'bg-white', 'text-apple-dark');
+        });
+    });
+
+    addFundsForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if (!selectedAmount.value || Number(selectedAmount.value) <= 0) {
+            showToast('warning', 'Select or enter an amount.');
+            return;
+        }
+
+        if (!razorpayConfigured) {
+            showToast('error', 'Razorpay is not configured.');
+            return;
+        }
+
+        if (typeof Razorpay === 'undefined') {
+            showToast('error', 'Razorpay checkout could not be loaded. Please try again.');
+            return;
+        }
+
+        setSubmitLoading(true);
+
+        try {
+            const response = await fetch('/wallet/add-funds', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: selectedAmount.value })
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                showToast('error', data.message || 'Could not initialize wallet top-up.');
+                setSubmitLoading(false);
+                return;
+            }
+
+            openWalletRazorpay(data);
+        } catch (error) {
+            showToast('error', 'Could not initialize wallet top-up.');
+            setSubmitLoading(false);
+        }
+    });
+</script>

@@ -1,33 +1,36 @@
 import orderDb from "../models/orderDb.js";
 import { Rental } from "../models/rentalDb.js";
+import mongoose from "mongoose";
 
 
 export const adminNotificationMiddleware = async (req, res, next) => {
-    // Only fetch for admin routes
-    if (req.path.startsWith('/admin')) {
-        try {
-            // Count pending orders
-            const pendingOrdersCount = await orderDb.countDocuments({ orderStatus: 'Pending' });
-            
-            // Count pending return requests (items with status 'Returned')
-            // Using aggregation to count orders that have at least one 'Returned' item
-            const returnRequestsOrders = await orderDb.countDocuments({
-                "items.itemStatus": "Returned"
-            });
+    res.locals.adminNotifications = { orders: 0, requests: 0, rentals: 0 };
 
-            // Count pending rental requests
-            const pendingRentalsCount = await Rental.countDocuments({ status: 'Pending' });
- 
-            res.locals.adminNotifications = {
-                orders: pendingOrdersCount,
-                requests: returnRequestsOrders,
-                rentals: pendingRentalsCount
-            };
-
-        } catch (error) {
-            console.error("Error fetching admin notifications:", error);
-            res.locals.adminNotifications = { orders: 0, requests: 0 };
-        }
+    if (!req.path.startsWith("/admin") || req.path.startsWith("/admin/login") || !req.session?.isAdmin) {
+        return next();
     }
+
+    if (mongoose.connection.readyState !== 1) {
+        return next();
+    }
+
+    try {
+        const [pendingOrdersCount, returnRequestsOrders, pendingRentalsCount] = await Promise.all([
+            orderDb.countDocuments({ orderStatus: "Pending" }),
+            orderDb.countDocuments({
+                items: { $elemMatch: { itemStatus: "Return Requested", returnRequestStatus: "Pending" } }
+            }),
+            Rental.countDocuments({ status: "Pending" })
+        ]);
+
+        res.locals.adminNotifications = {
+            orders: pendingOrdersCount,
+            requests: returnRequestsOrders,
+            rentals: pendingRentalsCount
+        };
+    } catch (error) {
+        console.error("Error fetching admin notifications:", error.message);
+    }
+
     next();
 };

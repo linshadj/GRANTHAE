@@ -3,10 +3,13 @@ export function validateName(name) {
   return nameRegex.test(name);
 }
 
+export function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
 
 export function validateEmail(email) {
-  const emailRegex = /^[^/s@]+@[^/s@]+\.[^/s@]+$/;
-  return emailRegex.test(email);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  return emailRegex.test(normalizeEmail(email));
 }
 
 export function validatePassword(password) {

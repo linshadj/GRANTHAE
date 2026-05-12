@@ -1,4 +1,5 @@
 import { STATUS_CODES } from '../utils/statusCodes.js';
+import { getFriendlyErrorMessage } from '../utils/friendlyError.js';
 
 const notFound = (req, res, next) => {
     const error = new Error(`Not Found - ${req.originalUrl}`);
@@ -14,12 +15,16 @@ const errorHandler = (err, req, res, next) => {
     if (statusCode < STATUS_CODES.BAD_REQUEST) statusCode = STATUS_CODES.INTERNAL_SERVER_ERROR;
 
     res.status(statusCode);
+    const message = statusCode === STATUS_CODES.NOT_FOUND
+        ? 'Page not found.'
+        : getFriendlyErrorMessage(err);
 
     // If it's an API request, return JSON
-    if (req.xhr || req.headers.accept?.includes('application/json') || req.path.startsWith('/api')) {
+    const isMultipartRequest = req.headers['content-type']?.includes('multipart/form-data');
+    if (req.xhr || req.headers.accept?.includes('application/json') || req.path.startsWith('/api') || isMultipartRequest) {
         return res.json({
             success: false,
-            message: err.message,
+            message,
             stack: process.env.NODE_ENV === 'production' ? null : err.stack
         });
     }
@@ -29,7 +34,7 @@ const errorHandler = (err, req, res, next) => {
 
     res.render('pages/error', {
         title: `${statusCode} Error`,
-        message: err.message,
+        message,
         statusCode: statusCode,
         stack: process.env.NODE_ENV === 'production' ? null : err.stack,
         layout: layout

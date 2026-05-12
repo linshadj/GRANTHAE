@@ -104,7 +104,7 @@
                 <label class="inline-flex items-center gap-2 px-6 py-3 bg-apple-blue text-white rounded-xl cursor-pointer hover:bg-apple-blue/90 transition-all shadow-lg shadow-apple-blue/20 group">
                     <i data-lucide="plus" class="w-5 h-5 group-hover:rotate-90 transition-transform"></i>
                     <span class="font-bold">Add Images</span>
-                    <input type="file" id="imageInput" accept="image/jpeg, image/png, image/webp" class="hidden">
+                    <input type="file" id="imageInput" name="images" accept="image/jpeg, image/png, image/webp" multiple class="hidden">
                 </label>
             </div>
 
@@ -156,6 +156,7 @@
 
 <script>
     let cropper;
+    let pendingImageFiles = [];
     const croppedImagesBlobs = []; 
     let coverImageIndex = 0;
 
@@ -170,6 +171,27 @@
     const form = document.getElementById('rentalListingForm');
     const submitBtn = document.getElementById('submitBtn');
 
+    function showRentalAlert(options) {
+        if (window.Swal && typeof Swal.fire === 'function') {
+            return Swal.fire(options);
+        }
+        alert(options.text || options.title || 'Something went wrong.');
+        return Promise.resolve();
+    }
+
+    async function readJsonResponse(response) {
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            return response.json();
+        }
+
+        return {
+            success: false,
+            message: response.redirected ? 'Session expired. Please login again.' : 'Server returned an unexpected response.',
+            redirectUrl: response.redirected ? response.url : ''
+        };
+    }
+
     function resetCropper() {
         if(cropper) {
             cropper.destroy();
@@ -179,16 +201,11 @@
         cropperModal.classList.add('hidden');
     }
 
-    [closeCropperBtn, cancelCropBtn].forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
+    function openCropperForFile(file) {
+        if (!file) {
             resetCropper();
-        });
-    });
-
-    imageInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if(!file) return;
+            return;
+        }
 
         const url = URL.createObjectURL(file);
         cropperImage.src = url;
@@ -197,12 +214,39 @@
         if(cropper) cropper.destroy();
 
         cropper = new Cropper(cropperImage, {
-            aspectRatio: 3/4, // Book ratio
+            aspectRatio: 3/4,
             viewMode: 2,
             background: false,
             autoCropArea: 0.9,
             zoomable: true
         });
+    }
+
+    function cropNextQueuedImage() {
+        const nextFile = pendingImageFiles.shift();
+        if (!nextFile) {
+            resetCropper();
+            return;
+        }
+        openCropperForFile(nextFile);
+    }
+
+    [closeCropperBtn, cancelCropBtn].forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            pendingImageFiles = [];
+            resetCropper();
+        });
+    });
+
+    imageInput.addEventListener('change', function(e) {
+        pendingImageFiles = Array.from(e.target.files || []).filter(file => file.type.startsWith('image/'));
+        if(pendingImageFiles.length === 0) {
+            showRentalAlert({ icon: 'warning', title: 'Invalid Images', text: 'Please select JPEG, PNG, or WEBP image files.', background: '#1e2a22', color: '#E6CFA7' });
+            imageInput.value = '';
+            return;
+        }
+        cropNextQueuedImage();
     });
 
     confirmCropBtn.addEventListener('click', (e) => {
@@ -219,7 +263,11 @@
             croppedImagesBlobs.push(blob);
             if(croppedImagesBlobs.length === 1) coverImageIndex = 0;
             updateGallery();
-            resetCropper();
+            if (pendingImageFiles.length > 0) {
+                cropNextQueuedImage();
+            } else {
+                resetCropper();
+            }
         }, 'image/webp', 0.8);
     });
 
@@ -312,9 +360,9 @@
 
         if (Object.keys(errors).length > 0) {
             if (errors.gallery) {
-                Swal.fire({ icon: 'warning', title: 'Images Required', text: errors.gallery, background: '#1e2a22', color: '#E6CFA7' });
+                showRentalAlert({ icon: 'warning', title: 'Images Required', text: errors.gallery, background: '#1e2a22', color: '#E6CFA7' });
             } else {
-                Swal.fire({ icon: 'warning', title: 'Check Fields', text: 'Please fill all required fields correctly.', background: '#1e2a22', color: '#E6CFA7' });
+                showRentalAlert({ icon: 'warning', title: 'Check Fields', text: 'Please fill all required fields correctly.', background: '#1e2a22', color: '#E6CFA7' });
             }
             return false;
         }
@@ -346,16 +394,26 @@
         const origText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> Submitting...';
         submitBtn.disabled = true;
+        const submitController = new AbortController();
+        const submitTimeout = setTimeout(() => submitController.abort(), 75000);
 
         try {
             const res = await fetch('/list-rental-book', {
                 method: 'POST',
-                body: formData
+                headers: { 'Accept': 'application/json' },
+                body: formData,
+                signal: submitController.signal
             });
+            clearTimeout(submitTimeout);
             
-            const data = await res.json();
+            const data = await readJsonResponse(res);
+            if (res.status === 401 && data.redirectUrl) {
+                window.location.href = data.redirectUrl;
+                return;
+            }
+
             if(data.success) {
-                Swal.fire({ 
+                showRentalAlert({ 
                     icon: 'success', 
                     title: 'Submitted!', 
                     text: data.message, 
@@ -366,13 +424,23 @@
                     window.location.href = data.redirectUrl || '/home';
                 });
             } else {
-                Swal.fire({ icon: 'error', title: 'Error', text: data.message, background: '#1e2a22', color: '#E6CFA7' });
+                showRentalAlert({ icon: 'error', title: 'Error', text: data.message || 'Could not submit listing.', background: '#1e2a22', color: '#E6CFA7' });
                 submitBtn.innerHTML = origText;
                 submitBtn.disabled = false;
                 if(typeof lucide !== 'undefined') lucide.createIcons();
             }
         } catch (error) {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong. Please try again.', background: '#1e2a22', color: '#E6CFA7' });
+            clearTimeout(submitTimeout);
+            console.error('Rental listing submit failed:', error);
+            showRentalAlert({
+                icon: 'error',
+                title: 'Error',
+                text: error.name === 'AbortError'
+                    ? 'Image upload is taking too long. Please try again with smaller images.'
+                    : 'Something went wrong. Please try again.',
+                background: '#1e2a22',
+                color: '#E6CFA7'
+            });
             submitBtn.innerHTML = origText;
             submitBtn.disabled = false;
             if(typeof lucide !== 'undefined') lucide.createIcons();

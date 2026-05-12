@@ -1,5 +1,6 @@
-import { orderDetails, getOrderById, updateOrderStatusService } from "../../service/admin/orderService.js";
+import { orderDetails, getOrderById, reviewReturnRequestService, updateOrderStatusService } from "../../service/admin/orderService.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
+import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
 export const ordersPage = async (req, res, next) => {
     try {
@@ -63,7 +64,26 @@ export const updateOrderStatus = async (req, res, next) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message
+            message: getFriendlyErrorMessage(error, "Could not update order status.")
+        });
+    }
+};
+
+export const reviewReturnRequest = async (req, res) => {
+    try {
+        const { orderId, itemId } = req.params;
+        const { action, rejectionReason } = req.body;
+
+        await reviewReturnRequestService(orderId, itemId, action, rejectionReason);
+
+        res.status(STATUS_CODES.OK).json({
+            success: true,
+            message: action === "approve" ? "Return approved. Wallet refund completed for prepaid orders." : "Return request rejected."
+        });
+    } catch (error) {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+            success: false,
+            message: getFriendlyErrorMessage(error, "Could not review the return request.")
         });
     }
 };
@@ -83,7 +103,7 @@ export const liveOrdersSearch = async (req, res, next) => {
     } catch (error) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: error.message
+            message: getFriendlyErrorMessage(error, "Could not search orders.")
         });
     }
 };

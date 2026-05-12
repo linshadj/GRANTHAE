@@ -3,10 +3,12 @@ import userDb from "../../models/userDb.js";
 import bcrypt from "bcrypt";
 import { otpCreator } from "../../utils/otpGenerator.js";
 import { hashPass } from "../../utils/passHasher.js";
-import { validateEmail, validateName, validatePassword } from "../../utils/validator.js";
+import { normalizeEmail, validateEmail, validateName, validatePassword } from "../../utils/validator.js";
+import { applyReferralReward, ensureReferralIdentity, validateReferralForSignup } from "./referralService.js";
 
 export const signInVerify = async (userData) => {
-  const { email, password } = userData;
+  const { password } = userData;
+  const email = normalizeEmail(userData.email);
 
   const user = await userDb.findOne({ email });
 
@@ -17,7 +19,7 @@ export const signInVerify = async (userData) => {
     throw new Error("Email is registered using google, Please login using google.");
   }
   if (user.isBlocked) {
-    throw new Error("User has been blocked by admin.");
+    throw new Error("Your account has been blocked by admin.");
   }
 
   const isPassMatching = await bcrypt.compare(password, user.password);
@@ -30,7 +32,8 @@ export const signInVerify = async (userData) => {
 };
 
 export const signupVerify = async (userData) => {
-  const { firstName, lastName, email, password } = userData;
+  const { firstName, lastName, password, referralCode, referralToken } = userData;
+  const email = normalizeEmail(userData.email);
 
   if (!validateName(firstName)) throw new Error("First name should contain only letters.");
 
@@ -47,6 +50,7 @@ export const signupVerify = async (userData) => {
   if (existingEmail) {
     throw new Error("Email is already registered.");
   }
+  await validateReferralForSignup({ referralCode, referralToken, email });
   await otpCreator(firstName, email);
 };
 
@@ -68,6 +72,8 @@ export const resendOtpService = async (firstName, email) => {
 };
 
 export const forgotPassverify = async (email) => {
+  email = normalizeEmail(email);
+
   const user = await userDb.findOne({ email });
   if (!user) {
     throw new Error("Email has not been registered to a account yet.");
@@ -83,6 +89,7 @@ export const forgotPassverify = async (email) => {
 };
 
 export const updatePassword = async (email, newPassword) => {
+  email = normalizeEmail(email);
   const password = await bcrypt.hash(newPassword, 10);
 
   const updatedUser = await userDb.findOneAndUpdate(
@@ -99,10 +106,15 @@ export const updatePassword = async (email, newPassword) => {
 export const createNewUser = async (body) => {
   const hashedPass = await hashPass(body.password);
   const newUser = await userDb.create({
-    firstName: body.firstName,
-    lastName: body.lastName,
-    email: body.email,
+    firstName: body.firstName?.trim(),
+    lastName: body.lastName?.trim(),
+    email: normalizeEmail(body.email),
     password: hashedPass,
+  });
+  await ensureReferralIdentity(newUser);
+  await applyReferralReward(newUser, {
+    referralCode: body.referralCode,
+    referralToken: body.referralToken,
   });
   return newUser._id;
 };
