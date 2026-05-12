@@ -3,10 +3,8 @@ import { otpCreator } from "../../utils/otpGenerator.js";
 import bcrypt from "bcrypt";
 
 export const verifyEmail = async (user, newEmail) => {
-  console.log("service ", newEmail);
   const emailExists = await userDb.findOne({ email: newEmail });
   if (emailExists) {
-    console.log(emailExists);
     throw new Error("Email has already been registered to a account.");
   }
 

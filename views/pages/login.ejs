@@ -158,7 +158,7 @@
           backendError.textContent = data.message;
         }
       } catch (error) {
-        console.log("Error in signIn fetch:", error);
+        console.error("Error in signIn fetch:", error);
         resetSubmitButton();
         backendError.classList.remove("hidden");
         backendError.textContent = "Could not sign in. Please try again.";

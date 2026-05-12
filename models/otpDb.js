@@ -32,7 +32,7 @@ const sendVerificationMail = async (firstName, email, otp) => {
     try {
         await mailSender(
             email,
-            "GRANTHAE Otp verfication",
+            "GRANTHAE OTP Verification",
             `<!DOCTYPE html>
             <html>
 
@@ -199,17 +199,13 @@ const sendVerificationMail = async (firstName, email, otp) => {
             </html>`,
         );
 
-        console.log("otp stored and verfication email is sent");
-        console.log(otp)
     } catch (err) {
-        console.log("error in sendVerificationMail on otpDb");
+        console.error("Error sending OTP verification email:", err.message);
     }
 };
 
 otpSchema.pre("save", async function () {
-    console.log(`new document otp stored`);
     if (this.isNew) {
-        console.log(this.firstName, "otpDb");
         await sendVerificationMail(this.firstName, this.email, this.otp);
     }
 });

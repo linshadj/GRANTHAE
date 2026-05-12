@@ -70,7 +70,6 @@ export const toggleBlockUserService = async (userId, action) => {
   }
   if (action === "block") {
     user.isBlocked = true;
-    console.log("Blocking user:", userId);
   } else if (action === "unblock") {
     user.isBlocked = false;
   } else {

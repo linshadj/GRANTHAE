@@ -60,7 +60,7 @@
                         price: product.price, 
                         image: product.coverImage || (product.images.length > 0 ? product.images[0] : ''), 
                         genre: product.category ? product.category.name : 'Uncategorized', 
-                        rating: 4.5,
+                        rating: product.avgRating,
                         totalStock: product.totalStock
                     } }) %>
 

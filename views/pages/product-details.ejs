@@ -36,14 +36,14 @@
         </ol>
     </nav>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <aside class="space-y-6">
+    <div class="product-detail-grid">
+        <aside class="product-detail-gallery space-y-6">
             <div class="space-y-4">
-                <div id="product-image-viewer" class="aspect-[2/3] w-full rounded-3xl bg-white/5 border border-white/10 overflow-hidden shadow-2xl relative group">
+                <div id="product-image-viewer" class="aspect-square w-full rounded-3xl bg-white/5 border border-white/10 overflow-hidden shadow-2xl relative group">
                     <% if (productImages.length > 0) { %>
                         <button id="main-product-image-button" type="button" class="w-full h-full block cursor-zoom-in" aria-label="Zoom product image">
                             <img id="main-product-image" src="<%= productImages[0] %>" alt="<%= product.name %>"
-                                class="w-full h-full object-contain transition-transform duration-200 ease-out">
+                                class="w-full h-full object-cover object-center transition-transform duration-200 ease-out">
                         </button>
                         <div class="pointer-events-none absolute bottom-4 right-4 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-black/55 text-white text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
                             <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
@@ -66,7 +66,7 @@
                     <div class="grid grid-cols-4 gap-3">
                         <% productImages.slice(0, 4).forEach((img, index) => { %>
                             <button type="button" data-product-index="<%= index %>" onclick="updateProductImage(this, '<%= img %>')"
-                                class="thumbnail-btn aspect-[2/3] rounded-xl overflow-hidden border-2 p-0.5 transition-all <%= index === 0 ? 'border-apple-gold' : 'border-transparent hover:border-white/20' %>">
+                                class="thumbnail-btn aspect-square rounded-xl overflow-hidden border-2 p-0.5 transition-all <%= index === 0 ? 'border-apple-gold' : 'border-transparent hover:border-white/20' %>">
                                 <img src="<%= img %>" alt="Thumbnail <%= index + 1 %>" class="w-full h-full object-cover rounded-lg">
                             </button>
                         <% }) %>
@@ -88,7 +88,7 @@
             </div>
         </aside>
 
-        <section class="space-y-8">
+        <section class="product-detail-info space-y-8">
             <div>
                 <div class="flex flex-wrap items-center gap-3 mb-5">
                     <span class="px-3 py-1 rounded-lg bg-apple-blue/10 text-apple-blue text-xs font-bold uppercase tracking-wider"><%= categoryName %></span>
@@ -164,8 +164,8 @@
             </div>
         </section>
 
-        <aside>
-            <div class="lg:sticky lg:top-32 glass-card p-6 shadow-2xl">
+        <aside class="product-purchase-column">
+            <div class="product-purchase-panel glass-card p-6 shadow-2xl">
                 <div class="mb-6">
                     <div class="flex flex-wrap items-end gap-3">
                         <% if (selectedOriginalPrice > selectedPrice) { %>
@@ -194,7 +194,6 @@
                                         data-offer-title="<%= variant.offerTitle || '' %>"
                                         data-offer-discount="<%= variant.offerDiscountAmount || 0 %>"
                                         data-stock="<%= variant.stock %>"
-                                        data-sku="<%= variant.sku %>"
                                         <%= index === firstAvailableIndex || (firstAvailableIndex === -1 && index === 0) ? 'checked' : '' %>
                                         <%= Number(variant.stock) === 0 ? 'disabled' : '' %>>
                                     <div class="rounded-2xl border border-white/10 bg-white/5 p-4 transition-all peer-checked:border-apple-gold peer-checked:bg-apple-gold/10 hover:border-apple-gold/40">
@@ -225,11 +224,6 @@
                             <span><%= isPurchasable ? `In stock and ready (${totalStock} available)` : availabilityLabel %></span>
                         </div>
                     </div>
-
-                    <!-- <div id="displaySkuContainer" class="flex items-center justify-between text-sm text-apple-text-gray px-1">
-                        <span>Selected SKU:</span>
-                        <span id="displaySku" class="font-semibold text-apple-dark"><%= selectedVariant ? selectedVariant.sku : 'Default' %></span>
-                    </div> -->
                 </div>
 
                 <div class="space-y-3">
@@ -274,7 +268,7 @@
                         ...relBook,
                         title: relBook.name,
                         image: relBook.coverImage || (relBook.images && relBook.images[0]) || '',
-                        rating: relBook.avgRating || '4.5'
+                        rating: relBook.avgRating 
                     }}) %>
                 <% }) %>
             </div>
@@ -595,7 +589,6 @@
     const displayPrice = document.getElementById('displayPrice');
     const displayOriginalPrice = document.getElementById('displayOriginalPrice');
     const displayOffer = document.getElementById('displayOffer');
-    const displaySku = document.getElementById('displaySku');
     const displayStockContainer = document.getElementById('displayStockContainer');
     const addToCartBtn = document.getElementById('addToCartBtn');
 
@@ -608,7 +601,6 @@
         const offerTitle = selectedVariant.dataset.offerTitle || '';
         const offerDiscount = Number(selectedVariant.dataset.offerDiscount || 0);
         const stock = Number(selectedVariant.dataset.stock || 0);
-        const sku = selectedVariant.dataset.sku || 'Default';
 
         if (displayPrice) displayPrice.textContent = `₹${price}`;
         if (displayOriginalPrice) {
@@ -627,8 +619,6 @@
                 displayOffer.classList.add('hidden');
             }
         }
-        if (displaySku) displaySku.textContent = sku;
-
         if (displayStockContainer) {
             if (stock > 0) {
                 displayStockContainer.className = 'p-4 rounded-2xl border bg-green-500/10 text-green-500 border-green-500/20';

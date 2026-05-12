@@ -333,7 +333,7 @@
           }
         }
       } catch (error) {
-        console.log("Error in signup fetch:", error);
+        console.error("Error in signup fetch:", error);
         resetSubmitButton();
         backendError.classList.remove("hidden");
         backendError.textContent = "Could not create account. Please try again.";

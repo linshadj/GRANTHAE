@@ -38,7 +38,7 @@ export const signInData = async (req, res) => {
 
     return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: "/home" });
   } catch (error) {
-    console.log(error);
+    console.error("Error in signInData:", error.message);
     return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not sign in. Please try again.") });
   }
 };
@@ -65,7 +65,7 @@ export const signupData = async (req, res) => {
       redirectUrl: "/otp",
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error in signupData:", error.message);
     return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not create your account. Please check the details and try again.") });
   }
 };
@@ -109,7 +109,7 @@ export const otpHandler = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error("Error in otpHandler:", error.message);
     return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not verify the OTP. Please try again.") });
   }
 };
@@ -152,7 +152,7 @@ export const forgotPassData = async (req, res) => {
 
     return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: "/otp" });
   } catch (error) {
-    console.log("error in forgotPassData: ", error.message);
+    console.error("Error in forgotPassData:", error.message);
     return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not start password reset. Please try again.") });
   }
 };
@@ -181,7 +181,7 @@ export const setNewPassData = async (req, res) => {
 
     return res.status(STATUS_CODES.OK).json({ success: true, redirectUrl: "/password-changed" });
   } catch (error) {
-    console.log("Error in resetPassData: ", error);
+    console.error("Error in setNewPassData:", error.message);
     return res.status(error.status || STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not reset password. Please try again.") });
   }
 };
@@ -231,14 +231,14 @@ export const logout = (req, res) => {
   try {
     req.session.destroy((error) => {
       if (error) {
-        console.log(error);
+        console.error("Error destroying session:", error.message);
         return res.redirect("/profile?status=error&message=Failed to logout");
       }
       res.clearCookie("connect.sid");
       return res.redirect("/sign-in?status=success&message=Successfully logged out");
     });
   } catch (error) {
-    console.log("Error in logout: ", error);
+    console.error("Error in logout:", error.message);
     return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to logout" });
   }
 };

@@ -9,7 +9,11 @@ export const viewSettings = async (req, res) => {
         const user = await userDb.findById(req.session.user)
         res.render("pages/settings", {user, title: "Settings", layout: "layouts/user-panel"})
     }catch (err) {
-        console.log("Error in viewSettings")
+        console.error("Error in viewSettings:", err.message);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("pages/error", {
+            title: "Error",
+            message: "Could not load settings."
+        });
     }
 }
 
@@ -24,7 +28,7 @@ export const changeEmail = async (req, res) => {
     
         return res.status(STATUS_CODES.OK).json({ success: true, message: "Verification code sent to new email."});
       } catch (error) {
-        console.log("error in updateEmail: ", error.message);
+        console.error("Error in changeEmail:", error.message);
         return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not update email. Please try again.") });
       }
 }
@@ -38,7 +42,7 @@ export const changePassword = async (req, res) => {
 
         return res.status(STATUS_CODES.OK).json({ success: true, message: "Password updated successfully.", redirectUrl: "/settings?status=success&message=Password updated successfully." });
     } catch (error) {
-        console.log("Error in changePassword: ", error.message);
+        console.error("Error in changePassword:", error.message);
         return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: getFriendlyErrorMessage(error, "Could not update password. Please try again.") });
     }
 }
