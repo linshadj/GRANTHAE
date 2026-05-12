@@ -47,6 +47,21 @@ import {
   toggleRentalListing,
   updateRentalListing
 } from "../controller/user/rentalController.js";
+import {
+  addCheckoutAddress,
+  applyCoupon,
+  getCheckoutPage,
+  markRazorpayPaymentFailed,
+  orderSuccessPage,
+  paymentFailurePage,
+  placeOrder,
+  removeCoupon,
+  retryRazorpayPayment,
+  verifyRazorpayPayment
+} from "../controller/user/checkoutController.js";
+import { getWishlistPage, addToWishlist, removeFromWishlist } from "../controller/user/wishlistController.js";
+import { addFunds, getWalletPage, getAddFundsPage, markAddFundsFailed, verifyAddFunds } from "../controller/user/walletController.js";
+import { listOrdersPage, orderDetailsPage, cancelProduct, returnProduct, downloadInvoice } from "../controller/user/orderController.js";
 
 
 const router = express.Router();
@@ -82,18 +97,6 @@ router.patch("/cart/update", isAuth, updateQuantity);
 router.delete("/cart/remove", isAuth, removeFromCart);
 
 // Checkout
-import {
-  addCheckoutAddress,
-  applyCoupon,
-  getCheckoutPage,
-  markRazorpayPaymentFailed,
-  orderSuccessPage,
-  paymentFailurePage,
-  placeOrder,
-  removeCoupon,
-  retryRazorpayPayment,
-  verifyRazorpayPayment
-} from "../controller/user/checkoutController.js";
 router.get("/checkout", isAuth, getCheckoutPage);
 router.post("/checkout/address", isAuth, addCheckoutAddress);
 router.post("/checkout/apply-coupon", isAuth, applyCoupon);
@@ -106,13 +109,11 @@ router.get("/order-success/:orderId", isAuth, orderSuccessPage);
 router.get("/payment-failure/:orderId", isAuth, paymentFailurePage);
 
 // Wishlist
-import { getWishlistPage, addToWishlist, removeFromWishlist } from "../controller/user/wishlistController.js";
 router.get("/wishlist", isAuth, getWishlistPage);
 router.post("/wishlist/add", isAuth, addToWishlist);
 router.delete("/wishlist/remove", isAuth, removeFromWishlist);
 
 // Wallet
-import { addFunds, getWalletPage, getAddFundsPage, markAddFundsFailed, verifyAddFunds } from "../controller/user/walletController.js";
 router.get("/wallet", isAuth, getWalletPage);
 router.get("/wallet/add-funds", isAuth, getAddFundsPage);
 router.post("/wallet/add-funds", isAuth, addFunds);
@@ -153,7 +154,6 @@ router.route("/reset-password")
 router.get("/password-changed", passwordChanged);
 
 // Profile
-import { listOrdersPage, orderDetailsPage, cancelProduct, returnProduct, downloadInvoice } from "../controller/user/orderController.js";
 router.get("/dashboard", isAuth, viewDashboard);
 router.get("/profile", isAuth, viewProfile);
 router.get("/profile/rentals", isAuth, getMyRentalsPage);
