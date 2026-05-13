@@ -16,7 +16,7 @@ import { downloadSalesReport, reportsPage } from "../controller/admin/reportCont
 const router = express.Router();
 
 router.get("/", (req, res) => {
-  return res.redirect("login");
+  return res.redirect("/admin/login");
 });
 
 router.route("/login")
