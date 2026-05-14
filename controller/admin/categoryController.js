@@ -1,6 +1,7 @@
 import { Category } from "../../models/categoryDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 import { deleteCloudinaryUploads, uploadImageToCloudinary } from "../../utils/cloudinaryUploader.js";
+import { escapeRegex, normalizeSearchTerm, safeContainsRegex } from "../../utils/search.js";
 
 // Categories page
 export const categoriesPage = async (req, res, next) => {
@@ -10,12 +11,13 @@ export const categoriesPage = async (req, res, next) => {
         const skip = (page - 1) * limit;
 
         const searchQuery = req.query.search || '';
+        const normalizedSearch = normalizeSearchTerm(searchQuery);
         const sortOption = req.query.sort || 'newest';
         const filterOption = req.query.filter || 'all';
         
         let query = {};
-        if (searchQuery) {
-            query.name = { $regex: searchQuery, $options: 'i' };
+        if (normalizedSearch) {
+            query.name = safeContainsRegex(normalizedSearch);
         }
 
         if (filterOption === 'active') {
@@ -84,7 +86,10 @@ export const addCategory = async (req, res, next) => {
             return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: "Slug is required" });
         }
 
-        const existingName = await Category.findOne({ name: { $regex: new RegExp('^' + name.trim() + '$', 'i') } });
+        const normalizedName = name.trim();
+        const existingName = await Category.findOne({
+            name: { $regex: `^${escapeRegex(normalizedName)}$`, $options: 'i' }
+        });
         if (existingName) {
             return res.status(STATUS_CODES.CONFLICT).json({ success: false, message: "Category name already exists" });
         }
@@ -144,7 +149,7 @@ export const editCategory = async (req, res, next) => {
         }
 
         const existingName = await Category.findOne({ 
-            name: { $regex: new RegExp('^' + name.trim() + '$', 'i') }, 
+            name: { $regex: `^${escapeRegex(name.trim())}$`, $options: 'i' }, 
             _id: { $ne: id } 
         });
         if (existingName) {
@@ -209,11 +214,12 @@ export const toggleCategoryStatus = async (req, res, next) => {
 export const liveCategoriesSearch = async (req, res, next) => {
     try {
         const searchQuery = req.query.search || '';
+        const normalizedSearch = normalizeSearchTerm(searchQuery);
         const sortOption = req.query.sort || 'newest';
         
         let query = {};
-        if (searchQuery) {
-            query.name = { $regex: searchQuery, $options: 'i' };
+        if (normalizedSearch) {
+            query.name = safeContainsRegex(normalizedSearch);
         }
 
         let sortCriteria = {};

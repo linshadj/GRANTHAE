@@ -1,3 +1,8 @@
+<%
+    const encodedSearchQuery = encodeURIComponent(searchQuery || '');
+    const encodedSelectedSort = encodeURIComponent(selectedSort || '');
+    const encodedSelectedFilter = encodeURIComponent(typeof selectedFilter !== 'undefined' ? selectedFilter : 'all');
+%>
 <div class="space-y-8">
     <div class="flex items-center justify-between">
         <div class="flex gap-2">
@@ -32,16 +37,16 @@
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                     </button>
                     <div id="catFilterMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
-                        <a href="/admin/categories?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=all" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/categories?page=1&sort=<%= encodedSelectedSort %>&search=<%= encodedSearchQuery %>&filter=all" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="layers" class="w-3.5 h-3.5"></i> All
                         </a>
-                        <a href="/admin/categories?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=active" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/categories?page=1&sort=<%= encodedSelectedSort %>&search=<%= encodedSearchQuery %>&filter=active" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-400"></i> Active
                         </a>
-                        <a href="/admin/categories?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=inactive" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/categories?page=1&sort=<%= encodedSelectedSort %>&search=<%= encodedSearchQuery %>&filter=inactive" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="x-circle" class="w-3.5 h-3.5 text-orange-400"></i> Inactive
                         </a>
-                        <a href="/admin/categories?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=deleted" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/categories?page=1&sort=<%= encodedSelectedSort %>&search=<%= encodedSearchQuery %>&filter=deleted" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="trash" class="w-3.5 h-3.5 text-red-400"></i> Soft Deleted
                         </a>
                     </div>
@@ -58,17 +63,17 @@
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                     </button>
                     <div id="catSortMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
-                        <a href="/admin/categories?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=a-z" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/categories?page=<%= currentPage %>&search=<%= encodedSearchQuery %>&filter=<%= encodedSelectedFilter %>&sort=a-z" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="a-arrow-down" class="w-3.5 h-3.5"></i> Name (A-Z)
                         </a>
-                        <a href="/admin/categories?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=z-a" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/categories?page=<%= currentPage %>&search=<%= encodedSearchQuery %>&filter=<%= encodedSelectedFilter %>&sort=z-a" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="a-arrow-up" class="w-3.5 h-3.5"></i> Name (Z-A)
                         </a>
                         <div class="border-t border-white/5 my-1"></div>
-                        <a href="/admin/categories?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=newest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/categories?page=<%= currentPage %>&search=<%= encodedSearchQuery %>&filter=<%= encodedSelectedFilter %>&sort=newest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> Newest First
                         </a>
-                        <a href="/admin/categories?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=oldest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/categories?page=<%= currentPage %>&search=<%= encodedSearchQuery %>&filter=<%= encodedSelectedFilter %>&sort=oldest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Oldest First
                         </a>
                     </div>
@@ -162,7 +167,7 @@
             </p>
             <div class="flex items-center gap-1">
                 <% for(let i=1; i <=totalPages; i++) { %>
-                    <a href="/admin/categories?page=<%= i %>&sort=<%= selectedSort || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&search=<%= searchQuery || '' %>"
+                    <a href="/admin/categories?page=<%= i %>&sort=<%= encodedSelectedSort %>&filter=<%= encodedSelectedFilter %>&search=<%= encodedSearchQuery %>"
                         class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors <%= i === currentPage ? 'bg-apple-gold text-[#1a231e] font-bold' : 'text-apple-text-gray hover:bg-white/10' %>">
                         <%= i %>
                     </a>
@@ -198,12 +203,8 @@
         const sort = '<%= selectedSort || '' %>';
         const filter = '<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>';
         
-        if(query === '') {
-            window.location.href = `/admin/categories?page=1&sort=${sort}&filter=${filter}&search=`;
-            return;
-        }
-
-        window.location.href = `/admin/categories?page=1&sort=${sort}&filter=${filter}&search=${encodeURIComponent(query)}`;
+        const params = new URLSearchParams({ page: '1', sort, filter, search: query });
+        window.location.href = `/admin/categories?${params.toString()}`;
     }
 
     const debouncedSearch = debounce(liveSearch, 600);
@@ -219,7 +220,8 @@
             e.preventDefault();
             searchInput.value = '';
             const filter = '<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>';
-            window.location.href = `/admin/categories?page=1&sort=<%= selectedSort || '' %>&filter=${filter}&search=`;
+            const params = new URLSearchParams({ page: '1', sort: '<%= selectedSort || '' %>', filter, search: '' });
+            window.location.href = `/admin/categories?${params.toString()}`;
         });
     }
 

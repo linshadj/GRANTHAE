@@ -19,7 +19,7 @@ export const getCheckoutPage = async (req, res) => {
         if (req.session.checkoutCoupon?.code) {
             try {
                 appliedCoupon = await checkoutService.applyCouponToCheckout(userId, req.session.checkoutCoupon.code);
-            } catch (couponError) {
+            } catch {
                 delete req.session.checkoutCoupon;
             }
         }

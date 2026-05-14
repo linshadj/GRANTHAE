@@ -74,4 +74,8 @@ function arrayLimit(val) {
     return val.length >= 3;
 }
 
+productSchema.index({ isDeleted: 1, isBlocked: 1, category: 1, createdAt: -1 });
+productSchema.index({ isDeleted: 1, name: 1 });
+productSchema.index({ isDeleted: 1, category: 1, price: 1 });
+
 export const Product = mongoose.model("Product", productSchema);

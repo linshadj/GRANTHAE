@@ -1,3 +1,8 @@
+<%
+    const encodedUserSearchQuery = encodeURIComponent(userDb.searchQuery || '');
+    const encodedUserSort = encodeURIComponent(userDb.selectedSort || '');
+    const encodedUserFilter = encodeURIComponent(userDb.selectedFilter || '');
+%>
 <div class="space-y-8">
     <!-- Stat Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -73,20 +78,20 @@
                     </button>
                     <div id="userSortMenu"
                         class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
-                        <a href="/admin/users?page=<%= userDb.currentPage %>&filter=<%= userDb.selectedFilter || '' %>&search=<%= userDb.searchQuery || '' %>&sort=a-z"
+                        <a href="/admin/users?page=<%= userDb.currentPage %>&filter=<%= encodedUserFilter %>&search=<%= encodedUserSearchQuery %>&sort=a-z"
                             class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="a-arrow-down" class="w-3.5 h-3.5"></i> Name (A-Z)
                         </a>
-                        <a href="/admin/users?page=<%= userDb.currentPage %>&filter=<%= userDb.selectedFilter || '' %>&search=<%= userDb.searchQuery || '' %>&sort=z-a"
+                        <a href="/admin/users?page=<%= userDb.currentPage %>&filter=<%= encodedUserFilter %>&search=<%= encodedUserSearchQuery %>&sort=z-a"
                             class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="a-arrow-up" class="w-3.5 h-3.5"></i> Name (Z-A)
                         </a>
                         <div class="border-t border-white/5 my-1"></div>
-                        <a href="/admin/users?page=<%= userDb.currentPage %>&filter=<%= userDb.selectedFilter || '' %>&search=<%= userDb.searchQuery || '' %>&sort=newest"
+                        <a href="/admin/users?page=<%= userDb.currentPage %>&filter=<%= encodedUserFilter %>&search=<%= encodedUserSearchQuery %>&sort=newest"
                             class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> Newest First
                         </a>
-                        <a href="/admin/users?page=<%= userDb.currentPage %>&filter=<%= userDb.selectedFilter || '' %>&search=<%= userDb.searchQuery || '' %>&sort=oldest"
+                        <a href="/admin/users?page=<%= userDb.currentPage %>&filter=<%= encodedUserFilter %>&search=<%= encodedUserSearchQuery %>&sort=oldest"
                             class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Oldest First
                         </a>
@@ -108,24 +113,24 @@
                     </button>
                     <div id="userFilterMenu"
                         class="hidden absolute right-0 mt-2 w-40 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
-                        <a href="/admin/users?page=1&sort=<%= userDb.selectedSort || '' %>&search=<%= userDb.searchQuery || '' %>&filter=all"
+                        <a href="/admin/users?page=1&sort=<%= encodedUserSort %>&search=<%= encodedUserSearchQuery %>&filter=all"
                             class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="layers" class="w-3.5 h-3.5"></i> All
                         </a>
-                        <a href="/admin/users?page=1&sort=<%= userDb.selectedSort || '' %>&search=<%= userDb.searchQuery || '' %>&filter=active"
+                        <a href="/admin/users?page=1&sort=<%= encodedUserSort %>&search=<%= encodedUserSearchQuery %>&filter=active"
                             class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-400"></i> Active
                         </a>
-                        <a href="/admin/users?page=1&sort=<%= userDb.selectedSort || '' %>&search=<%= userDb.searchQuery || '' %>&filter=blocked"
+                        <a href="/admin/users?page=1&sort=<%= encodedUserSort %>&search=<%= encodedUserSearchQuery %>&filter=blocked"
                             class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="ban" class="w-3.5 h-3.5 text-red-400"></i> Blocked
                         </a>
                         <div class="border-t border-white/5 my-1"></div>
-                        <a href="/admin/users?page=1&sort=<%= userDb.selectedSort || '' %>&search=<%= userDb.searchQuery || '' %>&filter=user"
+                        <a href="/admin/users?page=1&sort=<%= encodedUserSort %>&search=<%= encodedUserSearchQuery %>&filter=user"
                             class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="user" class="w-3.5 h-3.5 text-blue-400"></i> User
                         </a>
-                        <a href="/admin/users?page=1&sort=<%= userDb.selectedSort || '' %>&search=<%= userDb.searchQuery || '' %>&filter=admin"
+                        <a href="/admin/users?page=1&sort=<%= encodedUserSort %>&search=<%= encodedUserSearchQuery %>&filter=admin"
                             class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="shield" class="w-3.5 h-3.5 text-purple-400"></i> Admin
                         </a>
@@ -221,7 +226,7 @@
             </p>
             <div class="flex items-center gap-1">
                 <% for(let i=1; i <= userDb.totalPages; i++) { %>
-                    <a href="/admin/users?page=<%= i %>&sort=<%= userDb.selectedSort || '' %>&filter=<%= userDb.selectedFilter || '' %>&search=<%= userDb.searchQuery || '' %>"
+                    <a href="/admin/users?page=<%= i %>&sort=<%= encodedUserSort %>&filter=<%= encodedUserFilter %>&search=<%= encodedUserSearchQuery %>"
                         class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors 
                         <%= i === userDb.currentPage ? 'bg-apple-gold text-[#1a231e] font-bold shadow-lg shadow-apple-gold/20' : 'text-apple-text-gray hover:bg-white/10' %>">
                         <%= i %>
@@ -237,6 +242,17 @@
     const clearSearchBtn = document.getElementById('clearSearchBtn');
     const usersTableBody = document.getElementById("usersTableBody");
     const paginationSection = document.querySelector(".p-4.border-t");
+    const liveHtmlEscapeMap = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    };
+
+    function escapeLiveHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (char) => liveHtmlEscapeMap[char]);
+    }
 
     function updateClearBtnVisibility() {
         if (!clearSearchBtn) return;
@@ -260,7 +276,7 @@
         const currentFilter = "<%= userDb.selectedFilter || '' %>";
 
         try {
-            const res = await fetch(`/admin/users/live?search=${encodeURIComponent(searchQuery)}&sort=${currentSort}&filter=${currentFilter}`);
+            const res = await fetch(`/admin/users/live?search=${encodeURIComponent(searchQuery)}&sort=${encodeURIComponent(currentSort)}&filter=${encodeURIComponent(currentFilter)}`);
             const data = await res.json();
 
             usersTableBody.innerHTML = "";
@@ -273,25 +289,30 @@
 
             data.users.forEach(user => {
                 const date = new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const firstName = escapeLiveHtml(user.firstName);
+                const lastName = escapeLiveHtml(user.lastName);
+                const email = escapeLiveHtml(user.email);
+                const role = escapeLiveHtml(user.role);
+                const userId = escapeLiveHtml(user._id);
                 const avatarContent = user.avatar 
-                    ? `<img src="${user.avatar}" class="w-full h-full object-cover">`
-                    : `<div class="w-full h-full bg-apple-gold/10 flex items-center justify-center text-apple-gold font-bold text-lg">${user.firstName.charAt(0).toUpperCase()}</div>`;
+                    ? `<img src="${escapeLiveHtml(user.avatar)}" class="w-full h-full object-cover">`
+                    : `<div class="w-full h-full bg-apple-gold/10 flex items-center justify-center text-apple-gold font-bold text-lg">${firstName.charAt(0).toUpperCase()}</div>`;
 
                 usersTableBody.innerHTML += `
-                    <tr data-userid="${user._id}" class="group hover:bg-white/5 transition-colors">
+                    <tr data-userid="${userId}" class="group hover:bg-white/5 transition-colors">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center shadow-inner">
                                     ${avatarContent}
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="font-semibold text-white group-hover:text-apple-gold transition-colors">${user.firstName} ${user.lastName}</span>
-                                    <span class="text-xs text-apple-text-gray">${user.email}</span>
+                                    <span class="font-semibold text-white group-hover:text-apple-gold transition-colors">${firstName} ${lastName}</span>
+                                    <span class="text-xs text-apple-text-gray">${email}</span>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="capitalize px-2 py-1 bg-white/5 rounded-md text-apple-text-gray border border-white/5 text-xs">${user.role}</span>
+                            <span class="capitalize px-2 py-1 bg-white/5 rounded-md text-apple-text-gray border border-white/5 text-xs">${role}</span>
                         </td>
                         <td class="px-6 py-4">
                             <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${user.isBlocked ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-green-500/10 text-green-500 border-green-500/20'} uppercase tracking-wider">
@@ -306,7 +327,7 @@
                                     title="${user.isBlocked ? 'Unblock' : 'Block'} User">
                                     <i data-lucide="${user.isBlocked ? 'shield-check' : 'ban'}" class="w-4 h-4"></i>
                                 </button>
-                                <a href="/admin/users/view/${user._id}" class="p-2 bg-white/5 text-apple-gold hover:bg-white/10 rounded-lg transition-colors border border-white/5" title="View Details">
+                                <a href="/admin/users/view/${userId}" class="p-2 bg-white/5 text-apple-gold hover:bg-white/10 rounded-lg transition-colors border border-white/5" title="View Details">
                                     <i data-lucide="eye" class="w-4 h-4"></i>
                                 </a>
                             </div>
@@ -330,7 +351,13 @@
         clearSearchBtn.addEventListener('click', function () {
             searchInput.value = '';
             updateClearBtnVisibility();
-            window.location.href = `/admin/users?page=1&sort=<%= userDb.selectedSort || '' %>&filter=<%= userDb.selectedFilter || '' %>&search=`;
+            const params = new URLSearchParams({
+                page: '1',
+                sort: '<%= userDb.selectedSort || '' %>',
+                filter: '<%= userDb.selectedFilter || '' %>',
+                search: ''
+            });
+            window.location.href = `/admin/users?${params.toString()}`;
         });
     }
 
