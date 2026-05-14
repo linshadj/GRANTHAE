@@ -21,6 +21,7 @@ import {
   googleAuthSuccess,
 } from "../controller/user/googleAuthController.js";
 import { ifAuth, isAuth, otpVerify, resetPassAuth } from "../middlewares/authMiddlewares.js";
+import { authLimiter, checkoutLimiter, otpLimiter, writeLimiter } from "../middlewares/securityMiddleware.js";
 import { addNewAddress, deleteAddress, editAddress, editProfile, setDefaultAddress, viewDashboard, viewEditProfile, viewProfile } from "../controller/user/profileController.js";
 import { upload, uploadRental } from "../middlewares/multerUpload.js";
 import { changeEmail, changePassword, viewSettings } from "../controller/user/settingsController.js";
@@ -77,58 +78,58 @@ router.get("/home", homePage);
 router.get("/marketplace", listProducts);
 router.get("/shop", (req, res) => res.redirect("/marketplace"));
 router.get("/product/:id", productDetails);
-router.post("/product/:id/reviews", isAuth, submitProductReview);
+router.post("/product/:id/reviews", isAuth, writeLimiter, submitProductReview);
 
 // Rental Place
 router.get("/rental-place", rentalPlacePage);
-router.post("/rentals/:rentalId/request", isAuth, requestRentalBook);
+router.post("/rentals/:rentalId/request", isAuth, writeLimiter, requestRentalBook);
 router.get("/rentals/:rentalOrderId/confirmed", isAuth, rentalConfirmedPage);
 router.get("/rental/:id", rentalDetailsPage);
-router.post("/rental/:id/reviews", isAuth, submitRentalReview);
+router.post("/rental/:id/reviews", isAuth, writeLimiter, submitRentalReview);
 router.get("/list-rental-book", isAuth, getListRentalBookPage);
-router.post("/list-rental-book", isAuth, uploadRental.array("images", 10), submitRentalListing);
+router.post("/list-rental-book", isAuth, writeLimiter, uploadRental.array("images", 10), submitRentalListing);
 router.get("/list-book", (req, res) => res.redirect("/list-rental-book")); // Handle existing Sell link
 
 
 // Cart
 router.get("/cart", isAuth, getCartPage);
-router.post("/cart/add", isAuth, addToCart);
-router.patch("/cart/update", isAuth, updateQuantity);
-router.delete("/cart/remove", isAuth, removeFromCart);
+router.post("/cart/add", isAuth, writeLimiter, addToCart);
+router.patch("/cart/update", isAuth, writeLimiter, updateQuantity);
+router.delete("/cart/remove", isAuth, writeLimiter, removeFromCart);
 
 // Checkout
 router.get("/checkout", isAuth, getCheckoutPage);
-router.post("/checkout/address", isAuth, addCheckoutAddress);
-router.post("/checkout/apply-coupon", isAuth, applyCoupon);
-router.post("/checkout/remove-coupon", isAuth, removeCoupon);
-router.post("/checkout/place-order", isAuth, placeOrder);
-router.post("/checkout/razorpay/verify", isAuth, verifyRazorpayPayment);
-router.post("/checkout/razorpay/failure", isAuth, markRazorpayPaymentFailed);
-router.post("/checkout/razorpay/retry/:orderId", isAuth, retryRazorpayPayment);
+router.post("/checkout/address", isAuth, checkoutLimiter, addCheckoutAddress);
+router.post("/checkout/apply-coupon", isAuth, checkoutLimiter, applyCoupon);
+router.post("/checkout/remove-coupon", isAuth, checkoutLimiter, removeCoupon);
+router.post("/checkout/place-order", isAuth, checkoutLimiter, placeOrder);
+router.post("/checkout/razorpay/verify", isAuth, checkoutLimiter, verifyRazorpayPayment);
+router.post("/checkout/razorpay/failure", isAuth, checkoutLimiter, markRazorpayPaymentFailed);
+router.post("/checkout/razorpay/retry/:orderId", isAuth, checkoutLimiter, retryRazorpayPayment);
 router.get("/order-success/:orderId", isAuth, orderSuccessPage);
 router.get("/payment-failure/:orderId", isAuth, paymentFailurePage);
 
 // Wishlist
 router.get("/wishlist", isAuth, getWishlistPage);
-router.post("/wishlist/add", isAuth, addToWishlist);
-router.delete("/wishlist/remove", isAuth, removeFromWishlist);
+router.post("/wishlist/add", isAuth, writeLimiter, addToWishlist);
+router.delete("/wishlist/remove", isAuth, writeLimiter, removeFromWishlist);
 
 // Wallet
 router.get("/wallet", isAuth, getWalletPage);
 router.get("/wallet/add-funds", isAuth, getAddFundsPage);
-router.post("/wallet/add-funds", isAuth, addFunds);
-router.post("/wallet/add-funds/verify", isAuth, verifyAddFunds);
-router.post("/wallet/add-funds/failure", isAuth, markAddFundsFailed);
+router.post("/wallet/add-funds", isAuth, checkoutLimiter, addFunds);
+router.post("/wallet/add-funds/verify", isAuth, checkoutLimiter, verifyAddFunds);
+router.post("/wallet/add-funds/failure", isAuth, checkoutLimiter, markAddFundsFailed);
 
 // Sign In
 router.route("/sign-in")
   .get(ifAuth, signIn)
-  .post(ifAuth, signInData);
+  .post(ifAuth, authLimiter, signInData);
 
 // Sign Up
 router.route("/sign-up")
   .get(ifAuth, signUp)
-  .post(ifAuth, signupData);
+  .post(ifAuth, authLimiter, signupData);
 
 // Google Auth
 router.get("/auth/google", googleAuth);
@@ -137,19 +138,19 @@ router.get("/auth/google/callback", googleAuthCallbackMiddleware, googleAuthSucc
 // OTP
 router.route("/otp")
   .get(otpVerify, otpPage)
-  .post(otpVerify, otpHandler);
+  .post(otpVerify, otpLimiter, otpHandler);
 
-router.post("/resend-otp", resendOtp);
+router.post("/resend-otp", otpLimiter, resendOtp);
 
 // Forgot Password
 router.route("/forgot-password")
   .get(ifAuth, forgotPassword)
-  .post(ifAuth, forgotPassData);
+  .post(ifAuth, authLimiter, forgotPassData);
 
 // Reset Password
 router.route("/reset-password")
   .get(resetPassAuth, setNewPass)
-  .patch(resetPassAuth, setNewPassData);
+  .patch(resetPassAuth, authLimiter, setNewPassData);
 
 router.get("/password-changed", passwordChanged);
 
@@ -158,40 +159,40 @@ router.get("/dashboard", isAuth, viewDashboard);
 router.get("/profile", isAuth, viewProfile);
 router.get("/profile/rentals", isAuth, getMyRentalsPage);
 router.get("/profile/rentals/:rentalOrderId/return", isAuth, getRentalReturnPage);
-router.post("/profile/rentals/:rentalOrderId/return", isAuth, submitRentalReturn);
+router.post("/profile/rentals/:rentalOrderId/return", isAuth, writeLimiter, submitRentalReturn);
 router.get("/profile/rentals/:rentalOrderId/return/success", isAuth, rentalReturnSuccessPage);
-router.patch("/profile/rentals/:rentalOrderId/confirm", isAuth, confirmRentalRequest);
-router.patch("/profile/rentals/:rentalOrderId/reject", isAuth, rejectRentalRequest);
-router.patch("/profile/rentals/:rentalOrderId/return/complete", isAuth, completeRentalReturn);
+router.patch("/profile/rentals/:rentalOrderId/confirm", isAuth, writeLimiter, confirmRentalRequest);
+router.patch("/profile/rentals/:rentalOrderId/reject", isAuth, writeLimiter, rejectRentalRequest);
+router.patch("/profile/rentals/:rentalOrderId/return/complete", isAuth, writeLimiter, completeRentalReturn);
 router.get("/profile/my-listings", isAuth, getMyListingsPage);
 router.get("/profile/my-listings/rental-requests", isAuth, getRentalRequestsPage);
 router.get("/profile/my-listings/:id/edit", isAuth, getEditRentalListingPage);
-router.patch("/profile/my-listings/:id", isAuth, uploadRental.array("images", 10), updateRentalListing);
-router.patch("/profile/my-listings/:id/toggle", isAuth, toggleRentalListing);
+router.patch("/profile/my-listings/:id", isAuth, writeLimiter, uploadRental.array("images", 10), updateRentalListing);
+router.patch("/profile/my-listings/:id/toggle", isAuth, writeLimiter, toggleRentalListing);
 
 
 router.get("/profile/orders", isAuth, listOrdersPage);
-router.patch("/profile/orders/cancel", isAuth, cancelProduct);
-router.patch("/profile/orders/return", isAuth, returnProduct);
+router.patch("/profile/orders/cancel", isAuth, writeLimiter, cancelProduct);
+router.patch("/profile/orders/return", isAuth, writeLimiter, returnProduct);
 router.get("/profile/orders/:orderId", isAuth, orderDetailsPage);
 router.get("/profile/orders/:orderId/invoice", isAuth, downloadInvoice);
 
 router.route("/profile/edit")
   .get(isAuth, viewEditProfile)
-  .patch(isAuth, upload.single("avatar"), editProfile);
+  .patch(isAuth, writeLimiter, upload.single("avatar"), editProfile);
 
-router.post("/profile/edit/add-new-address", isAuth, addNewAddress);
+router.post("/profile/edit/add-new-address", isAuth, writeLimiter, addNewAddress);
 
-router.patch("/profile/set-default-address", isAuth, setDefaultAddress);
+router.patch("/profile/set-default-address", isAuth, writeLimiter, setDefaultAddress);
 
-router.patch("/profile/edit/address/:id", isAuth, editAddress);
+router.patch("/profile/edit/address/:id", isAuth, writeLimiter, editAddress);
 
-router.delete("/profile/delete-address", isAuth, deleteAddress);
+router.delete("/profile/delete-address", isAuth, writeLimiter, deleteAddress);
   
 // Settings
 router.get("/settings", isAuth, viewSettings);
-router.patch("/settings/change-email", isAuth, changeEmail)
-router.patch("/settings/change-password", isAuth, changePassword);
+router.patch("/settings/change-email", isAuth, writeLimiter, changeEmail)
+router.patch("/settings/change-password", isAuth, writeLimiter, changePassword);
 
 // Logout
 router.get("/logout", isAuth, logout);
