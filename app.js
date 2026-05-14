@@ -8,6 +8,7 @@ import userRoutes from './routes/userRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js'
 import { adminNotificationMiddleware } from './middlewares/adminNotificationMiddleware.js'
+import { generalLimiter, securityHeaders } from './middlewares/securityMiddleware.js'
 import cors from 'cors';
 import dotenv from 'dotenv'
 import { connectDb } from './config/dbConnect.js'
@@ -23,6 +24,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
+app.set('trust proxy', 1)
 
 const allowedOrigins = [
     'http://localhost:5001',
@@ -43,6 +45,7 @@ const corsOptions = {
     optionsSuccessStatus: 200
 }
 
+app.use(securityHeaders)
 app.use(cors(corsOptions))
 
 app.use(session({
@@ -74,6 +77,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(generalLimiter)
 app.use(expressLayouts);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
