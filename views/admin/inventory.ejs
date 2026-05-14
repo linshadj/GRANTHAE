@@ -1,3 +1,8 @@
+<%
+    const encodedSearchQuery = encodeURIComponent(searchQuery || '');
+    const encodedSelectedSort = encodeURIComponent(selectedSort || 'newest');
+    const encodedSelectedFilter = encodeURIComponent(typeof selectedFilter !== 'undefined' ? selectedFilter : 'all');
+%>
 <div class="space-y-8">
     <div class="flex items-center justify-between">
         <h2 class="text-2xl font-bold text-white font-serif">Inventory management</h2>
@@ -66,16 +71,16 @@
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                     </button>
                     <div id="invFilterMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
-                        <a href="/admin/inventory?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=all" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/inventory?page=1&sort=<%= encodedSelectedSort %>&search=<%= encodedSearchQuery %>&filter=all" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="layers" class="w-3.5 h-3.5"></i> All
                         </a>
-                        <a href="/admin/inventory?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=in-stock" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/inventory?page=1&sort=<%= encodedSelectedSort %>&search=<%= encodedSearchQuery %>&filter=in-stock" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-400"></i> In Stock
                         </a>
-                        <a href="/admin/inventory?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=low-stock" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/inventory?page=1&sort=<%= encodedSelectedSort %>&search=<%= encodedSearchQuery %>&filter=low-stock" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-yellow-400"></i> Low Stock
                         </a>
-                        <a href="/admin/inventory?page=1&sort=<%= selectedSort || '' %>&search=<%= searchQuery || '' %>&filter=out-of-stock" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/inventory?page=1&sort=<%= encodedSelectedSort %>&search=<%= encodedSearchQuery %>&filter=out-of-stock" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="x-circle" class="w-3.5 h-3.5 text-red-400"></i> Out of Stock
                         </a>
                     </div>
@@ -92,13 +97,13 @@
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                     </button>
                     <div id="invSortMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#1e2a22] border border-white/10 rounded-xl shadow-2xl z-50 py-1">
-                        <a href="/admin/inventory?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=newest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/inventory?page=<%= currentPage %>&search=<%= encodedSearchQuery %>&filter=<%= encodedSelectedFilter %>&sort=newest" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> Newest First
                         </a>
-                        <a href="/admin/inventory?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=stock-low" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/inventory?page=<%= currentPage %>&search=<%= encodedSearchQuery %>&filter=<%= encodedSelectedFilter %>&sort=stock-low" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i> Stock: Low to High
                         </a>
-                        <a href="/admin/inventory?page=<%= currentPage %>&search=<%= searchQuery || '' %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=stock-high" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
+                        <a href="/admin/inventory?page=<%= currentPage %>&search=<%= encodedSearchQuery %>&filter=<%= encodedSelectedFilter %>&sort=stock-high" class="w-full text-left px-4 py-2 text-xs text-apple-text-gray hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2">
                             <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i> Stock: High to Low
                         </a>
                     </div>
@@ -175,8 +180,11 @@
                             <td class="px-6 py-4">
                                 <div class="flex justify-end">
                                     <% if (product.variants && product.variants.length > 0) { %>
-                                        <button onclick="showVariantStockManager('<%= product._id %>', '<%= product.name.replace(/'/g, "\\'") %>', <%= JSON.stringify(product.variants) %>)" 
-                                                class="w-10 h-10 flex items-center justify-center bg-white/5 text-apple-gold border border-white/10 rounded-xl hover:bg-apple-gold hover:text-[#1a231e] hover:border-apple-gold transition-all shadow-lg group"
+                                        <button type="button"
+                                                class="js-edit-variant-stock w-10 h-10 flex items-center justify-center bg-white/5 text-apple-gold border border-white/10 rounded-xl hover:bg-apple-gold hover:text-[#1a231e] hover:border-apple-gold transition-all shadow-lg group"
+                                                data-product-id="<%= product._id %>"
+                                                data-product-name="<%= product.name %>"
+                                                data-variants="<%= JSON.stringify(product.variants || []) %>"
                                                 title="Edit Variant Stock">
                                             <i data-lucide="edit-3" class="w-5 h-5 transition-transform group-hover:scale-110"></i>
                                         </button>
@@ -199,7 +207,7 @@
                 </p>
                 <div class="flex gap-1">
                     <% for(let i = 1; i <= totalPages; i++) { %>
-                        <a href="?page=<%= i %>&search=<%= searchQuery %>&filter=<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>&sort=<%= selectedSort %>" 
+                        <a href="?page=<%= i %>&search=<%= encodedSearchQuery %>&filter=<%= encodedSelectedFilter %>&sort=<%= encodedSelectedSort %>" 
                            class="w-8 h-8 flex items-center justify-center rounded-lg border border-white/5 transition-all text-xs
                            <%= i === currentPage ? 'bg-apple-gold text-[#1a231e] font-bold' : 'bg-white/5 text-white hover:bg-white/10' %>">
                            <%= i %>
@@ -212,27 +220,44 @@
 </div>
 
 <script>
+    const htmlEscapeMap = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    };
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (char) => htmlEscapeMap[char]);
+    }
+
     async function showVariantStockManager(productId, productName, variants) {
-        let variantsHtml = variants.map(v => `
+        const variantList = Array.isArray(variants) ? variants : [];
+        const variantsHtml = variantList.map((v, index) => {
+            const stock = Number(v.stock || 0);
+            return `
             <div class="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl mb-2 hover:border-apple-gold/30 transition-colors">
                 <div class="flex flex-col items-start">
-                    <span class="text-white font-bold text-sm">${v.name}</span>
-                    <span class="text-[10px] text-apple-text-gray uppercase tracking-wider">Current: <span class="${v.stock <= 5 ? 'text-red-400' : 'text-green-400'} font-black">${v.stock}</span></span>
+                    <span class="text-white font-bold text-sm">${escapeHtml(v.name)}</span>
+                    <span class="text-[10px] text-apple-text-gray uppercase tracking-wider">Current: <span class="${stock <= 5 ? 'text-red-400' : 'text-green-400'} font-black">${stock}</span></span>
                 </div>
-                <button onclick="window.pendingVariantUpdate = {id: '${productId}', stock: '${v.stock}', name: '${productName.replace(/'/g, "\\'")}', variant: '${v.name}'}; Swal.clickConfirm();" 
-                        class="px-3 py-1.5 bg-apple-gold text-[#1a231e] rounded-lg text-[10px] font-black uppercase hover:bg-white transition-colors">
+                <button type="button"
+                        data-variant-index="${index}"
+                        class="variant-stock-option px-3 py-1.5 bg-apple-gold text-[#1a231e] rounded-lg text-[10px] font-black uppercase hover:bg-white transition-colors">
                     Edit Stock
                 </button>
             </div>
-        `).join('');
+            `;
+        }).join('');
 
-        const { isConfirmed } = await Swal.fire({
+        await Swal.fire({
             title: '<span class="font-serif">Manage Inventory</span>',
             html: `
                 <div class="mt-4">
-                    <p class="text-[10px] text-apple-text-gray mb-6 text-left uppercase tracking-widest font-bold">Select a variant for <strong>${productName}</strong></p>
+                    <p class="text-[10px] text-apple-text-gray mb-6 text-left uppercase tracking-widest font-bold">Select a variant for <strong>${escapeHtml(productName)}</strong></p>
                     <div class="max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-                        ${variantsHtml}
+                        ${variantsHtml || '<p class="text-sm text-apple-text-gray text-left">No variants found.</p>'}
                     </div>
                 </div>
             `,
@@ -244,14 +269,18 @@
             customClass: {
                 popup: 'rounded-3xl border border-white/10 shadow-2xl',
                 cancelButton: 'bg-white/5 border border-white/10 text-white rounded-xl px-6 py-2 text-xs font-bold'
+            },
+            didOpen: (popup) => {
+                popup.querySelectorAll('.variant-stock-option').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const variant = variantList[Number(button.dataset.variantIndex)];
+                        if (!variant) return;
+                        Swal.close();
+                        quickUpdateStock(productId, variant.stock, `${productName} (${variant.name})`, variant.name);
+                    });
+                });
             }
         });
-
-        if (window.pendingVariantUpdate) {
-            const data = window.pendingVariantUpdate;
-            window.pendingVariantUpdate = null;
-            quickUpdateStock(data.id, data.stock, `${data.name} (${data.variant})`, data.variant);
-        }
     }
 
     async function quickUpdateStock(id, currentStock, name, variantName = null) {
@@ -322,13 +351,35 @@
         }
     });
 
+    document.querySelectorAll('.js-edit-variant-stock').forEach((button) => {
+        button.addEventListener('click', () => {
+            let variants = [];
+            try {
+                variants = JSON.parse(button.dataset.variants || '[]');
+            } catch (error) {
+                variants = [];
+            }
+
+            showVariantStockManager(
+                button.dataset.productId,
+                button.dataset.productName || '',
+                variants
+            );
+        });
+    });
+
     const inventorySearch = document.getElementById('inventorySearch');
     
     const triggerUpdate = () => {
-        const search = inventorySearch.value;
         const sort = '<%= typeof selectedSort !== 'undefined' ? selectedSort : 'newest' %>';
         const filter = '<%= typeof selectedFilter !== 'undefined' ? selectedFilter : 'all' %>';
-        window.location.href = `/admin/inventory?page=1&search=${search}&sort=${sort}&filter=${filter}`;
+        const params = new URLSearchParams({
+            page: '1',
+            search: inventorySearch.value,
+            sort,
+            filter
+        });
+        window.location.href = `/admin/inventory?${params.toString()}`;
     };
 
     inventorySearch.addEventListener('keypress', (e) => {

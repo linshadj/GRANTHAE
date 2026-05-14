@@ -70,4 +70,8 @@ offerSchema.virtual("status").get(function () {
   return "Active";
 });
 
+offerSchema.index({ isDeleted: 1, isActive: 1, startDate: 1, endDate: 1, appliesTo: 1 });
+offerSchema.index({ appliesTo: 1, products: 1 });
+offerSchema.index({ appliesTo: 1, categories: 1 });
+
 export const Offer = mongoose.model("Offer", offerSchema);

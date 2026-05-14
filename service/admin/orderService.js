@@ -1,8 +1,7 @@
 import orderDb from "../../models/orderDb.js";
 import { Product } from "../../models/productDb.js";
 import { creditWallet } from "../user/walletService.js";
-
-const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+import { safeWhitespaceRegex } from "../../utils/search.js";
 
 const roundCurrency = (amount) => Math.round((Number(amount || 0) + Number.EPSILON) * 100) / 100;
 
@@ -60,7 +59,7 @@ export const orderDetails = async (page = 1, search = "", sort = "newest", filte
     // Search by orderID or user name (needs population)
     const normalizedSearch = search.trim();
     if (normalizedSearch) {
-        const searchPattern = escapeRegex(normalizedSearch).replace(/\s+/g, "\\s+");
+        const searchPattern = safeWhitespaceRegex(normalizedSearch);
 
         query.$or = [
             { orderID: { $regex: searchPattern, $options: "i" } },

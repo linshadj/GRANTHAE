@@ -1,12 +1,14 @@
 import { Product } from "../../models/productDb.js";
+import { normalizeSearchTerm, safeContainsRegex } from "../../utils/search.js";
 
 export const getProductsForInventory = async (page = 1, search = "", sort = "newest", filter = "all") => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
     let matchQuery = { isDeleted: false };
-    if (search) {
-        matchQuery.name = { $regex: search, $options: "i" };
+    const normalizedSearch = normalizeSearchTerm(search);
+    if (normalizedSearch) {
+        matchQuery.name = safeContainsRegex(normalizedSearch);
     }
 
     const pipeline = [

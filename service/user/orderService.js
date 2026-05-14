@@ -2,6 +2,7 @@ import orderDb from "../../models/orderDb.js";
 import { Product } from "../../models/productDb.js";
 import { creditWallet } from "./walletService.js";
 import PDFDocument from "pdfkit";
+import { normalizeSearchTerm, safeContainsRegex } from "../../utils/search.js";
 
 const roundCurrency = (amount) => Math.round((Number(amount || 0) + Number.EPSILON) * 100) / 100;
 
@@ -87,8 +88,9 @@ export const getUserOrders = async (userId, filters = {}) => {
     const pageLimit = Math.min(Math.max(parseInt(limit, 10) || 8, 1), 25);
     const query = { user: userId };
     
-    if (search && search.trim()) {
-        query.orderID = { $regex: search.trim(), $options: 'i' };
+    const normalizedSearch = normalizeSearchTerm(search);
+    if (normalizedSearch) {
+        query.orderID = safeContainsRegex(normalizedSearch);
     }
 
     if (status && status !== "all") {
@@ -328,7 +330,7 @@ export const generateInvoicePDF = async (userId, orderId) => {
             
             doc.end();
             
-        } catch (error) {
+        } catch {
             reject(new Error("Failed to generate PDF. Make sure pdfkit is installed (npm install pdfkit)."));
         }
     });
