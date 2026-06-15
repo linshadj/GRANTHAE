@@ -4655,6 +4655,28 @@
   .loading-screen-active {
     cursor: progress;
   }
+  .cart-count-badge {
+    position: absolute;
+    top: -0.35rem;
+    right: -0.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 0.28rem;
+    border-radius: 999px;
+    border: 1px solid rgba(230, 207, 167, 0.92);
+    background: #1e2a22;
+    color: #e6cfa7;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+    font-size: 0.6875rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    line-height: 1;
+    pointer-events: none;
+  }
   @keyframes granthae-loader-spin {
     to {
       transform: rotate(360deg);
