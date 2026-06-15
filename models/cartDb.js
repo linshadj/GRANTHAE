@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { MAX_CART_QUANTITY_PER_ITEM } from "../utils/cartLimits.js";
 
 const cartItemSchema = new mongoose.Schema({
     product: {
@@ -14,7 +15,7 @@ const cartItemSchema = new mongoose.Schema({
         type: Number,
         required: true,
         min: 1,
-        max: 5, // Maximum quantity limit per item
+        max: MAX_CART_QUANTITY_PER_ITEM,
         default: 1
     }
 });

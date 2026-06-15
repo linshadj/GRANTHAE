@@ -3,6 +3,7 @@ import { Product } from "../../models/productDb.js";
 import { creditWallet } from "./walletService.js";
 import PDFDocument from "pdfkit";
 import { normalizeSearchTerm, safeContainsRegex } from "../../utils/search.js";
+import { getInvoiceOrderStatus, syncFinalOrderStatus } from "../../utils/orderStatus.js";
 
 const roundCurrency = (amount) => Math.round((Number(amount || 0) + Number.EPSILON) * 100) / 100;
 
@@ -157,8 +158,8 @@ export const cancelOrderItem = async (userId, orderId, itemId, reason) => {
     const order = await orderDb.findOne({ _id: orderId, user: userId });
     if (!order) throw new Error("Order not found");
 
-    if (order.orderStatus === 'Delivered' || order.orderStatus === 'Cancelled') {
-        throw new Error("Cannot cancel an item in a Delivered or Cancelled order.");
+    if (order.orderStatus === 'Delivered' || order.orderStatus === 'Cancelled' || order.orderStatus === 'Returned') {
+        throw new Error(`Cannot cancel an item in a ${order.orderStatus} order.`);
     }
 
     const item = order.items.id(itemId);
@@ -194,10 +195,63 @@ export const cancelOrderItem = async (userId, orderId, itemId, reason) => {
         applyFinancialAdjustment(order, item, refundAmount, false);
     }
 
-    // Check if all items are cancelled, then cancel the entire order
-    const allItemsCancelledOrReturned = order.items.every(i => i.itemStatus === 'Cancelled' || i.itemStatus === 'Returned');
-    if (allItemsCancelledOrReturned) {
-        order.orderStatus = 'Cancelled';
+    syncFinalOrderStatus(order);
+
+    await order.save();
+    return order;
+};
+
+export const cancelOrder = async (userId, orderId, reason) => {
+    if (!reason || !reason.trim()) throw new Error("Cancellation reason is mandatory.");
+
+    const order = await orderDb.findOne({ _id: orderId, user: userId });
+    if (!order) throw new Error("Order not found");
+
+    if (order.orderStatus === 'Delivered' || order.orderStatus === 'Cancelled' || order.orderStatus === 'Returned') {
+        throw new Error(`Cannot cancel a ${order.orderStatus} order.`);
+    }
+
+    const cancellableItems = order.items.filter((item) => {
+        return item.itemStatus !== 'Cancelled'
+            && item.itemStatus !== 'Returned'
+            && item.itemStatus !== 'Return Requested';
+    });
+
+    if (cancellableItems.length === 0) {
+        throw new Error("There are no cancellable items in this order.");
+    }
+
+    for (const item of cancellableItems) {
+        const refundAmount = calculateItemRefundAmount(order, item);
+        item.itemStatus = 'Cancelled';
+        item.cancellationReason = reason.trim();
+
+        if (order.stockAdjusted !== false) {
+            if (item.variant) {
+                await Product.updateOne(
+                    { _id: item.product, "variants.name": item.variant },
+                    { $inc: { "variants.$.stock": item.quantity } }
+                );
+            } else {
+                await Product.updateOne(
+                    { _id: item.product },
+                    { $inc: { stock: item.quantity } }
+                );
+            }
+        }
+
+        if (isPaidOrder(order)) {
+            await refundItemToWallet(order, item, 'Cancellation', refundAmount);
+        } else {
+            item.refundAmount = 0;
+            item.refundStatus = 'None';
+            applyFinancialAdjustment(order, item, refundAmount, false);
+        }
+    }
+
+    syncFinalOrderStatus(order);
+    if (isPaidOrder(order) && Number(order.totalAmount || 0) <= 0) {
+        order.paymentStatus = 'Refunded';
     }
 
     await order.save();
@@ -239,7 +293,10 @@ export const generateInvoicePDF = async (userId, orderId) => {
     const order = await orderDb.findOne({ _id: orderId, user: userId }).populate('items.product');
     
     if (!order) throw new Error("Order not found");
-    if (order.orderStatus !== 'Delivered') throw new Error("Invoice is only available for delivered orders");
+    const invoiceStatus = getInvoiceOrderStatus(order);
+    if (!['Delivered', 'Returned'].includes(invoiceStatus)) {
+        throw new Error("Invoice is only available for delivered orders");
+    }
 
     return new Promise((resolve, reject) => {
         try {
@@ -263,7 +320,7 @@ export const generateInvoicePDF = async (userId, orderId) => {
             // Order Data
             doc.fontSize(10).text(`Order ID: ${order.orderID}`);
             doc.text(`Date: ${order.updatedAt.toDateString()}`);
-            doc.text(`Status: ${order.orderStatus}`);
+            doc.text(`Status: ${invoiceStatus}`);
             doc.moveDown();
 
             // Billing Address

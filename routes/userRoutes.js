@@ -62,7 +62,7 @@ import {
 } from "../controller/user/checkoutController.js";
 import { getWishlistPage, addToWishlist, removeFromWishlist } from "../controller/user/wishlistController.js";
 import { addFunds, getWalletPage, getAddFundsPage, markAddFundsFailed, verifyAddFunds } from "../controller/user/walletController.js";
-import { listOrdersPage, orderDetailsPage, cancelProduct, returnProduct, downloadInvoice } from "../controller/user/orderController.js";
+import { listOrdersPage, orderDetailsPage, cancelProduct, cancelOrder, returnProduct, downloadInvoice } from "../controller/user/orderController.js";
 
 
 const router = express.Router();
@@ -88,7 +88,7 @@ router.get("/rental/:id", rentalDetailsPage);
 router.post("/rental/:id/reviews", isAuth, writeLimiter, submitRentalReview);
 router.get("/list-rental-book", isAuth, getListRentalBookPage);
 router.post("/list-rental-book", isAuth, writeLimiter, uploadRental.array("images", 10), submitRentalListing);
-router.get("/list-book", (req, res) => res.redirect("/list-rental-book")); // Handle existing Sell link
+router.get("/list-book", (req, res) => res.redirect("/list-rental-book")); 
 
 
 // Cart
@@ -173,6 +173,7 @@ router.patch("/profile/my-listings/:id/toggle", isAuth, writeLimiter, toggleRent
 
 router.get("/profile/orders", isAuth, listOrdersPage);
 router.patch("/profile/orders/cancel", isAuth, writeLimiter, cancelProduct);
+router.patch("/profile/orders/cancel-all", isAuth, writeLimiter, cancelOrder);
 router.patch("/profile/orders/return", isAuth, writeLimiter, returnProduct);
 router.get("/profile/orders/:orderId", isAuth, orderDetailsPage);
 router.get("/profile/orders/:orderId/invoice", isAuth, downloadInvoice);

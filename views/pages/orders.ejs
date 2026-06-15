@@ -31,7 +31,16 @@
         });
         return `/profile/orders?${params.toString()}`;
     };
-    const getPurchaseStatus = (order) => order.orderStatus === 'Cancelled' ? 'Cancelled' : order.paymentStatus === 'Failed' ? 'Failed' : order.orderStatus;
+    const getDerivedPurchaseOrderStatus = (order) => {
+        const items = Array.isArray(order.items) ? order.items : [];
+        const allItemsFinal = items.length > 0 && items.every(item => ['Cancelled', 'Returned'].includes(item.itemStatus));
+        if (!allItemsFinal) return order.orderStatus;
+        return items.some(item => item.itemStatus === 'Returned') ? 'Returned' : 'Cancelled';
+    };
+    const getPurchaseStatus = (order) => {
+        const derivedStatus = getDerivedPurchaseOrderStatus(order);
+        return derivedStatus === 'Cancelled' ? 'Cancelled' : order.paymentStatus === 'Failed' ? 'Failed' : derivedStatus;
+    };
     const getStatusClass = (status) => {
         if (status === 'Delivered' || status === 'Active' || status === 'Returned') return 'bg-green-500/10 text-green-500 border-green-500/20';
         if (status === 'Shipped') return 'bg-blue-500/10 text-blue-500 border-blue-500/20';

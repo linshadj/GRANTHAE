@@ -68,7 +68,8 @@ export const getCartPage = async (req, res) => {
             title: "Shopping Cart | GRANTHAE.",
             user: req.user,
             cartItems,
-            cartTotal
+            cartTotal,
+            maxCartQuantity: cartService.maxQuantityPerItem
         });
     } catch (error) {
         console.error("Get Cart Page error:", error);
@@ -81,8 +82,9 @@ export const addToCart = async (req, res) => {
         const userId = req.user._id;
         const { productId, variant, quantity } = req.body;
 
-        await cartService.addToCart(userId, productId, variant, quantity);
-        res.status(200).json({ success: true, message: "Added to cart successfully." });
+        const cart = await cartService.addToCart(userId, productId, variant, quantity);
+        const cartCount = cart.items.reduce((total, item) => total + Number(item.quantity || 0), 0);
+        res.status(200).json({ success: true, message: "Added to cart successfully.", cartCount });
     } catch (error) {
         console.error("Add to cart error:", error);
         res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not add this item to the cart.") });
@@ -114,6 +116,9 @@ export const updateQuantity = async (req, res) => {
             quantity: item.quantity,
             itemTotal: itemPrice * item.quantity,
             cartTotal,
+            cartCount: await cartService.getCartCount(userId),
+            maxQuantity: cartService.maxQuantityPerItem,
+            stock: item.product.variants?.find(v => v.name === item.variant)?.stock || 0,
             message: "Quantity updated." 
         });
     } catch (error) {
@@ -127,8 +132,9 @@ export const removeFromCart = async (req, res) => {
         const userId = req.user._id;
         const { productId, variant } = req.body;
 
-        await cartService.removeFromCart(userId, productId, variant);
-        res.status(200).json({ success: true, message: "Item removed from cart." });
+        const cart = await cartService.removeFromCart(userId, productId, variant);
+        const cartCount = cart ? cart.items.reduce((total, item) => total + Number(item.quantity || 0), 0) : 0;
+        res.status(200).json({ success: true, message: "Item removed from cart.", cartCount });
     } catch (error) {
         console.error("Remove from cart error:", error);
         res.status(500).json({ success: false, message: "Failed to remove item." });
