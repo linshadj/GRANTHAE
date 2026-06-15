@@ -1,3 +1,4 @@
+<% const cartBadgeCount = typeof cartCount !== 'undefined' ? Number(cartCount || 0) : 0; %>
 <div class="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8">
     <nav
         class="max-w-5xl mx-auto bg-apple-card/70 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl transition-all duration-300">
@@ -31,7 +32,10 @@
                         class="p-2 transition-colors rounded-full relative group <%= path === '/cart' ? 'bg-white/10 text-apple-dark' : 'text-apple-dark/70 hover:text-apple-dark hover:bg-white/10' %>">
                         <i data-lucide="shopping-bag" class="w-4 h-4"></i>
                         <span
-                            class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-apple-blue rounded-full border border-apple-card opacity-100 transition-opacity"></span>
+                            data-cart-count-badge
+                            class="absolute -top-1 -right-1 min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-apple-blue text-white text-[10px] leading-none font-bold border border-apple-card flex items-center justify-center shadow-sm <%= cartBadgeCount > 0 ? '' : 'hidden' %>">
+                            <%= cartBadgeCount > 99 ? '99+' : cartBadgeCount %>
+                        </span>
                     </a>
 
                     <!-- Wishlist (Icon) -->
@@ -155,6 +159,14 @@
     const searchInput = document.getElementById('navbar-search-input');
     const searchClose = document.getElementById('navbar-search-close');
     const searchForm = document.getElementById('navbar-search-form');
+
+    window.updateCartCountBadge = function updateCartCountBadge(count) {
+        const badge = document.querySelector('[data-cart-count-badge]');
+        if (!badge) return;
+        const normalizedCount = Math.max(Number(count || 0), 0);
+        badge.textContent = normalizedCount > 99 ? '99+' : String(normalizedCount);
+        badge.classList.toggle('hidden', normalizedCount < 1);
+    };
 
     if (mobileBtn && mobileMenu) {
         mobileBtn.addEventListener('click', () => {

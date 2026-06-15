@@ -1,5 +1,4 @@
 import { Rental } from "../../models/rentalDb.js";
-import userDb from "../../models/userDb.js";
 
 
 export const getAllRentalRequests = async (query = {}) => {

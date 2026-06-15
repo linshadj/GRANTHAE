@@ -38,6 +38,17 @@ export const resetPassAuth = (req, res, next) => {
 
 export const isAuth = async (req, res, next) => {
   const wantsJson = wantsJsonResponse(req);
+  if (req.blockedAccountMessage) {
+    const message = req.blockedAccountMessage;
+    if (wantsJson) {
+      return res.status(403).json({
+        success: false,
+        message,
+        redirectUrl: `/sign-in?status=error&message=${encodeURIComponent(message)}`
+      });
+    }
+    return res.redirect(`/sign-in?status=error&message=${encodeURIComponent(message)}`);
+  }
 
   if (req.session.user) {
     const user = await userDb.findById(req.session.user);

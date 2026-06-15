@@ -2,7 +2,10 @@ import wishlistDb from "../../models/wishlistDb.js";
 import { Product } from "../../models/productDb.js";
 
 export const getWishlist = async (userId) => {
-    let wishlist = await wishlistDb.findOne({ user: userId }).populate('items.product');
+    let wishlist = await wishlistDb.findOne({ user: userId }).populate({
+        path: 'items.product',
+        populate: { path: 'category' }
+    });
     
     if (!wishlist) {
         wishlist = await wishlistDb.create({ user: userId, items: [] });
@@ -12,9 +15,12 @@ export const getWishlist = async (userId) => {
 };
 
 export const addToWishlist = async (userId, productId, variant = "") => {
-    const product = await Product.findById(productId);
-    if (!product || product.isDeleted) {
+    const product = await Product.findById(productId).populate('category');
+    if (!product || product.isDeleted || product.isBlocked) {
         throw new Error("Product is no longer available.");
+    }
+    if (product.category && (product.category.isBlocked || product.category.isDeleted)) {
+        throw new Error("Product category is disabled.");
     }
 
     let wishlist = await wishlistDb.findOne({ user: userId });

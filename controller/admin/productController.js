@@ -2,6 +2,7 @@ import { Product } from "../../models/productDb.js";
 import { Category } from "../../models/categoryDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 import { deleteCloudinaryUploads, uploadImagesToCloudinary } from "../../utils/cloudinaryUploader.js";
+import { normalizeSearchTerm, safeContainsRegex } from "../../utils/search.js";
 
 export const productsPage = async (req, res, next) => {
     try {
@@ -10,12 +11,13 @@ export const productsPage = async (req, res, next) => {
         const skip = (page - 1) * limit;
 
         const searchQuery = req.query.search || '';
+        const normalizedSearch = normalizeSearchTerm(searchQuery);
         const sortOption = req.query.sort || 'newest';
         const filterOption = req.query.filter || 'all';
         
         let query = {};
-        if (searchQuery) {
-            query.name = { $regex: searchQuery, $options: 'i' };
+        if (normalizedSearch) {
+            query.name = safeContainsRegex(normalizedSearch);
         }
 
         if (filterOption === 'active') {
@@ -79,14 +81,14 @@ export const addProduct = async (req, res, next) => {
         
         let parsedVariants = [];
         if (req.body.variants) {
-            try { parsedVariants = JSON.parse(req.body.variants); } catch (e) { parsedVariants = []; }
+            try { parsedVariants = JSON.parse(req.body.variants); } catch { parsedVariants = []; }
         }
 
         let parsedHighlights = [];
         if (highlights) {
             try { 
                 parsedHighlights = Array.isArray(highlights) ? highlights : JSON.parse(highlights); 
-            } catch (e) { 
+            } catch { 
                 parsedHighlights = highlights.split(',').map(h => h.trim()).filter(h => h !== ""); 
             }
         }
@@ -159,14 +161,14 @@ export const editProduct = async (req, res, next) => {
         
         let parsedVariants = [];
         if (req.body.variants) {
-            try { parsedVariants = JSON.parse(req.body.variants); } catch (e) { parsedVariants = []; }
+            try { parsedVariants = JSON.parse(req.body.variants); } catch { parsedVariants = []; }
         }
 
         let parsedHighlights = [];
         if (highlights) {
             try { 
                 parsedHighlights = Array.isArray(highlights) ? highlights : JSON.parse(highlights); 
-            } catch (e) { 
+            } catch { 
                 parsedHighlights = highlights.split(',').map(h => h.trim()).filter(h => h !== ""); 
             }
         }
@@ -247,9 +249,10 @@ export const toggleProductStatus = async (req, res, next) => {
 export const liveProductsSearch = async (req, res, next) => {
     try {
         const searchQuery = req.query.search || '';
+        const normalizedSearch = normalizeSearchTerm(searchQuery);
         let query = {};
-        if (searchQuery) {
-            query.name = { $regex: searchQuery, $options: 'i' };
+        if (normalizedSearch) {
+            query.name = safeContainsRegex(normalizedSearch);
         }
         const products = await Product.find(query).populate('category', 'name').limit(10);
         res.status(STATUS_CODES.OK).json({ success: true, products });

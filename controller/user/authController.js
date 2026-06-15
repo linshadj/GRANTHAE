@@ -126,7 +126,7 @@ export const resendOtp = async (req, res) => {
 
     const data = await resendOtpService(firstName, email);
     return res.status(STATUS_CODES.OK).json({ success: true, message: data.message });
-  } catch (error) {
+  } catch {
     return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "An error occurred while resending OTP. Please try again later.",

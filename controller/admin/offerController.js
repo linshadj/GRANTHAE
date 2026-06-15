@@ -2,6 +2,7 @@ import { Category } from "../../models/categoryDb.js";
 import { Offer } from "../../models/offerDb.js";
 import { Product } from "../../models/productDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
+import { normalizeSearchTerm, safeContainsRegex } from "../../utils/search.js";
 
 const parseNumber = (value, fallback = 0) => {
   const parsed = Number(value);
@@ -31,11 +32,12 @@ const normalizeIdList = (value) => {
 const buildOfferQuery = ({ search = "", filter = "all" }) => {
   const now = new Date();
   const query = {};
+  const normalizedSearch = normalizeSearchTerm(search);
 
-  if (search) {
+  if (normalizedSearch) {
     query.$or = [
-      { title: { $regex: search, $options: "i" } },
-      { description: { $regex: search, $options: "i" } },
+      { title: safeContainsRegex(normalizedSearch) },
+      { description: safeContainsRegex(normalizedSearch) },
     ];
   }
 

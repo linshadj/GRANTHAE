@@ -7,6 +7,7 @@ import userDb from "../../models/userDb.js";
 import { verifyRazorpaySignature } from "./razorpayService.js";
 import { debitWallet, getWallet } from "./walletService.js";
 import { getBestOfferForProduct } from "./offerPricingService.js";
+import { MAX_CART_QUANTITY_PER_ITEM } from "../../utils/cartLimits.js";
 import crypto from "crypto";
 
 const ONLINE_PAYMENT_METHODS = new Set(["Razorpay", "Online"]);
@@ -26,6 +27,9 @@ export const getCheckoutData = async (userId) => {
 
     for (let item of cart.items) {
         const product = item.product;
+        if (Number(item.quantity || 0) > MAX_CART_QUANTITY_PER_ITEM) {
+            throw new Error(`Maximum quantity limit of ${MAX_CART_QUANTITY_PER_ITEM} reached for "${product.name}".`);
+        }
         
         if (product.isBlocked || product.isDeleted) {
             throw new Error(`Product "${product.name}" is no longer available.`);
@@ -200,6 +204,9 @@ const isRazorpayPayment = (paymentMethod) => ONLINE_PAYMENT_METHODS.has(paymentM
 const validateOrderStock = async (items) => {
     for (let item of items) {
         const product = await Product.findById(item.product).populate("category");
+        if (Number(item.quantity || 0) > MAX_CART_QUANTITY_PER_ITEM) {
+            throw new Error(`Maximum quantity limit of ${MAX_CART_QUANTITY_PER_ITEM} reached for "${product?.name || "Unknown"}".`);
+        }
 
         if (!product || product.isBlocked || product.isDeleted) {
             throw new Error(`Product "${product?.name || "Unknown"}" is unavailable.`);
@@ -274,6 +281,9 @@ export const placeOrder = async (userId, addressId, paymentMethod, couponCode = 
     // Verify stock one last time and build order items
     for (let item of cart.items) {
         const product = await Product.findById(item.product._id).populate('category');
+        if (Number(item.quantity || 0) > MAX_CART_QUANTITY_PER_ITEM) {
+             throw new Error(`Maximum quantity limit of ${MAX_CART_QUANTITY_PER_ITEM} reached for "${product?.name || 'Unknown'}".`);
+        }
         
         if (!product || product.isBlocked || product.isDeleted) {
              throw new Error(`Product "${product?.name || 'Unknown'}" is unavailable.`);

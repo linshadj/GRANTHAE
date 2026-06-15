@@ -78,6 +78,20 @@ export const cancelProduct = async (req, res) => {
     }
 };
 
+export const cancelOrder = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { orderId, reason } = req.body;
+
+        await orderService.cancelOrder(userId, orderId, reason);
+        
+        res.status(200).json({ success: true, message: "Order cancelled successfully." });
+    } catch (error) {
+        console.error("Cancel Order Error:", error);
+        res.status(400).json({ success: false, message: getFriendlyErrorMessage(error, "Could not cancel this order.") });
+    }
+};
+
 export const returnProduct = async (req, res) => {
     try {
         const userId = req.user._id;

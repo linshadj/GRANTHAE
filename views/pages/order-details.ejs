@@ -1,3 +1,12 @@
+<%
+    const allOrderItemsFinal = order.items.length > 0 && order.items.every(item => ['Cancelled', 'Returned'].includes(item.itemStatus));
+    const displayOrderStatus = allOrderItemsFinal
+        ? (order.items.some(item => item.itemStatus === 'Returned') ? 'Returned' : 'Cancelled')
+        : order.orderStatus;
+    const canCancelOrder = !['Delivered', 'Cancelled', 'Returned'].includes(displayOrderStatus)
+        && order.items.some(item => !['Cancelled', 'Returned', 'Return Requested'].includes(item.itemStatus));
+    const canDownloadInvoice = ['Delivered', 'Returned'].includes(displayOrderStatus);
+%>
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-24 min-h-[80vh]">
     <div class="mb-10 flex flex-col md:flex-row justify-between items-end gap-6 relative">
         <div class="absolute -top-10 -left-10 w-40 h-40 bg-apple-blue/5 rounded-full blur-3xl"></div>
@@ -9,23 +18,30 @@
             <h1 class="text-4xl font-bold text-apple-dark font-luxury flex items-center gap-4">
                 Order Details
                 <span class="inline-flex items-center px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border
-                    <%= order.orderStatus === 'Pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : '' %>
-                    <%= order.orderStatus === 'Shipped' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : '' %>
-                    <%= order.orderStatus === 'Out for delivery' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : '' %>
-                    <%= order.orderStatus === 'Delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' : '' %>
-                    <%= order.orderStatus === 'Returned' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : '' %>
-                    <%= order.orderStatus === 'Cancelled' ? 'bg-red-500/10 text-red-500 border-red-500/20' : '' %>">
-                    <%= order.orderStatus %>
+                    <%= displayOrderStatus === 'Pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : '' %>
+                    <%= displayOrderStatus === 'Shipped' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : '' %>
+                    <%= displayOrderStatus === 'Out for delivery' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : '' %>
+                    <%= displayOrderStatus === 'Delivered' ? 'bg-green-500/10 text-green-500 border-green-500/20' : '' %>
+                    <%= displayOrderStatus === 'Returned' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : '' %>
+                    <%= displayOrderStatus === 'Cancelled' ? 'bg-red-500/10 text-red-500 border-red-500/20' : '' %>">
+                    <%= displayOrderStatus %>
                 </span>
             </h1>
             <p class="text-apple-text-gray mt-2 text-sm uppercase tracking-widest font-medium opacity-60">Identification: <span class="text-apple-dark">#<%= order.orderID %></span> &bull; Placed on <%= order.createdAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></p>
         </div>
 
-        <% if (order.orderStatus === 'Delivered') { %>
-            <a href="/profile/orders/<%= order._id %>/invoice" class="px-6 py-3 bg-apple-blue text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-xl shadow-apple-blue/20 hover:scale-105 active:scale-95 flex items-center gap-2">
-                <i data-lucide="scroll-text" class="w-4 h-4"></i> Official Invoice
-            </a>
-        <% } %>
+        <div class="flex flex-wrap justify-end gap-3">
+            <% if (canCancelOrder) { %>
+                <button type="button" onclick="cancelOrderAll('<%= order._id %>')" class="px-6 py-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all hover:bg-red-500/20 active:scale-95 flex items-center gap-2">
+                    <i data-lucide="x-circle" class="w-4 h-4"></i> Cancel Order
+                </button>
+            <% } %>
+            <% if (canDownloadInvoice) { %>
+                <a href="/profile/orders/<%= order._id %>/invoice" class="px-6 py-3 bg-apple-blue text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-xl shadow-apple-blue/20 hover:scale-105 active:scale-95 flex items-center gap-2">
+                    <i data-lucide="scroll-text" class="w-4 h-4"></i> Official Invoice
+                </a>
+            <% } %>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
@@ -204,6 +220,69 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+    async function cancelOrderAll(orderId) {
+        const { value: reason } = await Swal.fire({
+            title: 'Cancel Order',
+            html: '<p class="text-xs text-apple-text-gray mb-4 uppercase tracking-widest">This will cancel every cancellable item in this order.</p>',
+            input: 'textarea',
+            inputPlaceholder: 'Type your cancellation reason...',
+            showCancelButton: true,
+            confirmButtonText: 'Cancel Order',
+            cancelButtonText: 'Keep Order',
+            background: '#1C211E',
+            color: '#D1D1D1',
+            confirmButtonColor: '#ff3b30',
+            buttonsStyling: true,
+            customClass: {
+                popup: 'rounded-3xl border border-white/10 shadow-2xl backdrop-blur-xl',
+                input: 'bg-black/20 border border-white/10 rounded-xl text-apple-dark focus:border-apple-blue/50 text-sm'
+            },
+            preConfirm: (value) => {
+                if (!value || !value.trim()) {
+                    Swal.showValidationMessage('Please provide a cancellation reason.');
+                    return false;
+                }
+                return value.trim();
+            }
+        });
+
+        if (reason === undefined) return;
+
+        try {
+            const res = await fetch('/profile/orders/cancel-all', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId, reason })
+            });
+            const data = await res.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Order Cancelled',
+                    text: data.message,
+                    background: '#1C211E',
+                    color: '#D1D1D1'
+                }).then(() => window.location.reload());
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: data.message,
+                    background: '#1C211E',
+                    color: '#D1D1D1'
+                });
+            }
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Something went wrong.',
+                background: '#1C211E',
+                color: '#D1D1D1'
+            });
+        }
+    }
+
     async function cancelItem(orderId, itemId) {
         const { value: reason } = await Swal.fire({
             title: 'Withdraw Item',

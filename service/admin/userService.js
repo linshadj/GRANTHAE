@@ -1,16 +1,18 @@
 import userDb from "../../models/userDb.js";
 import addressDb from "../../models/addressDb.js";
 import orderDb from "../../models/orderDb.js";
+import { normalizeSearchTerm, safeContainsRegex } from "../../utils/search.js";
 
 export const userDetails = async (page, searchQuery, sort, filter) => {
   const limit = 3;
   const skip = (page - 1) * limit;
+  const normalizedSearch = normalizeSearchTerm(searchQuery);
 
   const searchFilter = {};
-  if (searchQuery) {
+  if (normalizedSearch) {
     searchFilter.$or = [
-      { firstName: { $regex: searchQuery, $options: "i" } },
-      { lastName: { $regex: searchQuery, $options: "i" } },
+      { firstName: safeContainsRegex(normalizedSearch) },
+      { lastName: safeContainsRegex(normalizedSearch) },
     ];
   }
 

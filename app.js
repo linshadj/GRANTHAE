@@ -8,12 +8,14 @@ import userRoutes from './routes/userRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js'
 import { adminNotificationMiddleware } from './middlewares/adminNotificationMiddleware.js'
+import { generalLimiter, securityHeaders } from './middlewares/securityMiddleware.js'
 import cors from 'cors';
 import dotenv from 'dotenv'
 import { connectDb } from './config/dbConnect.js'
 import passport from 'passport'
 import './config/passport.js'
 import userDb from './models/userDb.js'
+import cartDb from './models/cartDb.js'
 
 dotenv.config()
 const PORT = process.env.PORT || 3000
@@ -23,6 +25,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
+app.set('trust proxy', 1)
 
 const allowedOrigins = [
     'http://localhost:5001',
@@ -43,6 +46,7 @@ const corsOptions = {
     optionsSuccessStatus: 200
 }
 
+app.use(securityHeaders)
 app.use(cors(corsOptions))
 
 app.use(session({
@@ -54,10 +58,26 @@ app.use(session({
 // Middleware to make current path and user available to all views
 app.use(async (req, res, next) => {
     res.locals.path = req.path;
+    res.locals.cartCount = 0;
     try {
         if (req.session.user && mongoose.connection.readyState === 1) {
-            const user = await userDb.findById(req.session.user);
+            const [user, cart] = await Promise.all([
+                userDb.findById(req.session.user),
+                cartDb.findOne({ user: req.session.user }).select("items.quantity")
+            ]);
+            if (user?.isBlocked) {
+                req.blockedAccountMessage = "Your account has been blocked by admin.";
+                delete req.session.user;
+                delete req.session.isAuth;
+                delete req.session.passport;
+                res.locals.user = null;
+                res.locals.cartCount = 0;
+                return next();
+            }
             res.locals.user = user;
+            res.locals.cartCount = cart
+                ? cart.items.reduce((total, item) => total + Number(item.quantity || 0), 0)
+                : 0;
         } else {
             res.locals.user = null;
         }
@@ -74,6 +94,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(generalLimiter)
 app.use(expressLayouts);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

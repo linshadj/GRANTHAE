@@ -1,8 +1,8 @@
 import orderDb from "../../models/orderDb.js";
 import { Product } from "../../models/productDb.js";
 import { creditWallet } from "../user/walletService.js";
-
-const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+import { safeWhitespaceRegex } from "../../utils/search.js";
+import { syncFinalOrderStatus } from "../../utils/orderStatus.js";
 
 const roundCurrency = (amount) => Math.round((Number(amount || 0) + Number.EPSILON) * 100) / 100;
 
@@ -60,7 +60,7 @@ export const orderDetails = async (page = 1, search = "", sort = "newest", filte
     // Search by orderID or user name (needs population)
     const normalizedSearch = search.trim();
     if (normalizedSearch) {
-        const searchPattern = escapeRegex(normalizedSearch).replace(/\s+/g, "\\s+");
+        const searchPattern = safeWhitespaceRegex(normalizedSearch);
 
         query.$or = [
             { orderID: { $regex: searchPattern, $options: "i" } },
@@ -263,12 +263,9 @@ export const reviewReturnRequestService = async (orderId, itemId, action, reject
 
     applyFinancialAdjustment(order, item, refundAmount, isPaidOrder(order));
 
-    const allItemsFinal = order.items.every(i => i.itemStatus === 'Cancelled' || i.itemStatus === 'Returned');
-    if (allItemsFinal) {
-        order.orderStatus = order.items.every(i => i.itemStatus === 'Returned') ? 'Returned' : order.orderStatus;
-        if (order.totalAmount === 0 && isPaidOrder(order)) {
-            order.paymentStatus = 'Refunded';
-        }
+    const finalStatus = syncFinalOrderStatus(order);
+    if ((finalStatus === 'Returned' || finalStatus === 'Cancelled') && Number(order.totalAmount || 0) <= 0 && isPaidOrder(order)) {
+        order.paymentStatus = 'Refunded';
     }
 
     await order.save();

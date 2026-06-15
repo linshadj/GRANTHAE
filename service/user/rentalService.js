@@ -1,7 +1,9 @@
 import { Rental } from "../../models/rentalDb.js";
 import { Category } from "../../models/categoryDb.js";
 import rentalOrderDb from "../../models/rentalOrderDb.js";
+import "../../models/userDb.js";
 import { creditWallet, debitWallet } from "./walletService.js";
+import { normalizeSearchTerm, safeContainsRegex } from "../../utils/search.js";
 
 const roundCurrency = (amount) => Math.round((Number(amount || 0) + Number.EPSILON) * 100) / 100;
 
@@ -63,10 +65,11 @@ export const getApprovedRentals = async (query = {}) => {
         filter.category = category;
     }
 
-    if (search) {
+    const normalizedSearch = normalizeSearchTerm(search);
+    if (normalizedSearch) {
         filter.$or = [
-            { bookTitle: { $regex: search, $options: 'i' } },
-            { author: { $regex: search, $options: 'i' } }
+            { bookTitle: safeContainsRegex(normalizedSearch) },
+            { author: safeContainsRegex(normalizedSearch) }
         ];
     }
 
@@ -274,11 +277,12 @@ export const getRentalsByRenter = async (userId, searchQuery = "") => {
     const filter = { renter: userId };
     let rentalFilter = null;
 
-    if (searchQuery) {
+    const normalizedSearch = normalizeSearchTerm(searchQuery);
+    if (normalizedSearch) {
         rentalFilter = {
             $or: [
-                { bookTitle: { $regex: searchQuery, $options: "i" } },
-                { author: { $regex: searchQuery, $options: "i" } }
+                { bookTitle: safeContainsRegex(normalizedSearch) },
+                { author: safeContainsRegex(normalizedSearch) }
             ]
         };
     }
@@ -340,33 +344,48 @@ export const getRenterOrdersForOrdersPage = async (userId, filters = {}) => {
         price_asc: { totalAmount: 1 }
     };
 
-    let rentalOrders = await rentalOrderDb.find(query)
-        .populate({
-            path: "rental",
-            populate: { path: "category" }
-        })
-        .populate("owner", "firstName lastName email")
-        .sort(sortOptions[sort] || sortOptions.newest);
+    const normalizedSearch = normalizeSearchTerm(search);
+    const searchMatch = normalizedSearch
+        ? {
+            $or: [
+                { rentalCode: safeContainsRegex(normalizedSearch) },
+                { "rental.bookTitle": safeContainsRegex(normalizedSearch) },
+                { "rental.author": safeContainsRegex(normalizedSearch) }
+            ]
+        }
+        : null;
 
-    rentalOrders = rentalOrders.filter((rentalOrder) => rentalOrder.rental);
+    const [result = {}] = await rentalOrderDb.aggregate([
+        { $match: query },
+        {
+            $lookup: {
+                from: Rental.collection.name,
+                localField: "rental",
+                foreignField: "_id",
+                as: "rental"
+            }
+        },
+        { $unwind: "$rental" },
+        ...(searchMatch ? [{ $match: searchMatch }] : []),
+        {
+            $facet: {
+                rentalOrders: [
+                    { $sort: sortOptions[sort] || sortOptions.newest },
+                    { $skip: (currentPage - 1) * pageLimit },
+                    { $limit: pageLimit }
+                ],
+                meta: [{ $count: "total" }]
+            }
+        }
+    ]).collation({ locale: "en", strength: 2 });
 
-    if (search && search.trim()) {
-        const searchTerm = search.trim().toLowerCase();
-        rentalOrders = rentalOrders.filter((rentalOrder) => {
-            const rental = rentalOrder.rental || {};
-            return [
-                rentalOrder.rentalCode,
-                rental.bookTitle,
-                rental.author
-            ].some((value) => String(value || "").toLowerCase().includes(searchTerm));
-        });
-    }
+    const rentalOrders = result.rentalOrders || [];
+    await rentalOrderDb.populate(rentalOrders, { path: "owner", select: "firstName lastName email" });
 
-    const total = rentalOrders.length;
-    const start = (currentPage - 1) * pageLimit;
+    const total = result.meta?.[0]?.total || 0;
 
     return {
-        rentalOrders: rentalOrders.slice(start, start + pageLimit),
+        rentalOrders,
         total,
         totalPages: Math.max(Math.ceil(total / pageLimit), 1),
         currentPage,

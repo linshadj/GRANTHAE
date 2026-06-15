@@ -1,7 +1,9 @@
 import { Product } from "../../models/productDb.js";
 import { Category } from "../../models/categoryDb.js";
 import { Review } from "../../models/reviewDb.js";
+import { Offer } from "../../models/offerDb.js";
 import { applyOfferToProductObject, applyOffersToProductObjects } from "./offerPricingService.js";
+import { normalizeSearchTerm, safeContainsRegex } from "../../utils/search.js";
 
 const productReviewFilter = (productId) => ({
     product: productId,
@@ -14,40 +16,175 @@ const parsePriceFilter = (value) => {
     return Number.isFinite(price) && price >= 0 ? price : null;
 };
 
-const getEffectivePrice = (product) => Number(product.effectivePrice ?? product.offerPrice ?? product.price ?? 0);
-
-const getEffectivePriceRange = (products = []) => {
-    const prices = products
-        .map(getEffectivePrice)
-        .filter((price) => Number.isFinite(price));
-
-    if (!prices.length) {
-        return { min: 0, max: 0, hasOfferPrice: false };
-    }
-
-    return {
-        min: Math.min(...prices),
-        max: Math.max(...prices),
-        hasOfferPrice: products.some((product) => Number(product.offerDiscountAmount || 0) > 0),
-    };
-};
-
-const sortProducts = (products, sort) => {
-    const sortedProducts = [...products];
-
+const buildProductSort = (sort) => {
     switch (sort) {
         case "price_asc":
-            return sortedProducts.sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
+            return { effectivePrice: 1, createdAt: -1, _id: 1 };
         case "price_desc":
-            return sortedProducts.sort((a, b) => getEffectivePrice(b) - getEffectivePrice(a));
+            return { effectivePrice: -1, createdAt: -1, _id: 1 };
         case "name_asc":
-            return sortedProducts.sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+            return { name: 1, _id: 1 };
         case "name_desc":
-            return sortedProducts.sort((a, b) => String(b.name || "").localeCompare(String(a.name || "")));
+            return { name: -1, _id: 1 };
         case "newest":
         default:
-            return sortedProducts.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            return { createdAt: -1, _id: 1 };
     }
+};
+
+const buildPriceMatch = (minPriceValue, maxPriceValue) => {
+    const effectivePrice = {};
+    if (minPriceValue !== null) effectivePrice.$gte = minPriceValue;
+    if (maxPriceValue !== null) effectivePrice.$lte = maxPriceValue;
+    return Object.keys(effectivePrice).length ? { effectivePrice } : null;
+};
+
+const buildOfferPricingStages = (now = new Date()) => [
+    {
+        $lookup: {
+            from: Offer.collection.name,
+            let: {
+                productId: "$_id",
+                categoryId: "$category",
+                productPrice: { $ifNull: ["$price", 0] }
+            },
+            pipeline: [
+                {
+                    $match: {
+                        isDeleted: false,
+                        isActive: true,
+                        startDate: { $lte: now },
+                        endDate: { $gte: now },
+                    }
+                },
+                {
+                    $match: {
+                        $expr: {
+                            $or: [
+                                { $eq: ["$appliesTo", "all"] },
+                                {
+                                    $and: [
+                                        { $eq: ["$appliesTo", "products"] },
+                                        { $in: ["$$productId", { $ifNull: ["$products", []] }] }
+                                    ]
+                                },
+                                {
+                                    $and: [
+                                        { $eq: ["$appliesTo", "categories"] },
+                                        { $in: ["$$categoryId", { $ifNull: ["$categories", []] }] }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        discountAmount: {
+                            $round: [
+                                {
+                                    $min: [
+                                        {
+                                            $max: [
+                                                {
+                                                    $cond: [
+                                                        { $eq: ["$discountType", "percentage"] },
+                                                        {
+                                                            $multiply: [
+                                                                "$$productPrice",
+                                                                { $divide: [{ $ifNull: ["$discountValue", 0] }, 100] }
+                                                            ]
+                                                        },
+                                                        { $ifNull: ["$discountValue", 0] }
+                                                    ]
+                                                },
+                                                0
+                                            ]
+                                        },
+                                        "$$productPrice"
+                                    ]
+                                },
+                                2
+                            ]
+                        }
+                    }
+                },
+                { $match: { discountAmount: { $gt: 0 } } },
+                {
+                    $addFields: {
+                        finalPrice: {
+                            $round: [{ $subtract: ["$$productPrice", "$discountAmount"] }, 2]
+                        }
+                    }
+                },
+                { $sort: { discountAmount: -1, createdAt: -1, _id: 1 } },
+                { $limit: 1 },
+                {
+                    $project: {
+                        _id: 0,
+                        title: 1,
+                        discountType: 1,
+                        discountValue: 1,
+                        appliesTo: 1,
+                        discountAmount: 1,
+                        finalPrice: 1
+                    }
+                }
+            ],
+            as: "bestOfferCandidates"
+        }
+    },
+    {
+        $set: {
+            bestOffer: { $arrayElemAt: ["$bestOfferCandidates", 0] }
+        }
+    },
+    {
+        $set: {
+            originalPrice: { $round: [{ $ifNull: ["$price", 0] }, 2] },
+            offerDiscountAmount: { $ifNull: ["$bestOffer.discountAmount", 0] },
+            offerPrice: { $ifNull: ["$bestOffer.finalPrice", { $round: [{ $ifNull: ["$price", 0] }, 2] }] },
+            effectivePrice: { $ifNull: ["$bestOffer.finalPrice", { $round: [{ $ifNull: ["$price", 0] }, 2] }] },
+            hasOffer: { $gt: [{ $ifNull: ["$bestOffer.discountAmount", 0] }, 0] },
+            totalStock: { $sum: "$variants.stock" }
+        }
+    },
+    { $project: { bestOfferCandidates: 0 } }
+];
+
+const addReviewStats = async (products = []) => {
+    if (!products.length) return products;
+
+    const productIds = products.map((product) => product._id);
+    const reviewStats = await Review.aggregate([
+        {
+            $match: {
+                product: { $in: productIds },
+                $or: [{ targetType: "product" }, { targetType: { $exists: false } }]
+            }
+        },
+        {
+            $group: {
+                _id: "$product",
+                avgRating: { $avg: "$rating" },
+                reviewCount: { $sum: 1 }
+            }
+        }
+    ]);
+
+    const statsByProductId = new Map(
+        reviewStats.map((stats) => [stats._id.toString(), stats])
+    );
+
+    return products.map((product) => {
+        const stats = statsByProductId.get(product._id.toString());
+        return {
+            ...product,
+            avgRating: stats ? Number(stats.avgRating.toFixed(1)) : 0,
+            reviewCount: stats ? stats.reviewCount : 0,
+            totalStock: Number(product.totalStock || 0)
+        };
+    });
 };
 
 export const getFilteredProducts = async (query) => {
@@ -61,15 +198,11 @@ export const getFilteredProducts = async (query) => {
         limit = 12
     } = query;
 
-    // Build the filter object
     const filter = {
         isBlocked: false,
         isDeleted: false
     };
 
-    // 1. Category Filter (and ensure category is not blocked)
-    const activeCategories = await Category.find({ isBlocked: false, isDeleted: false }).select('_id');
-    const activeCategoryIds = activeCategories.map(c => c._id);
     const requestedCategoryIds = Array.isArray(category)
         ? category.filter(Boolean)
         : category
@@ -84,52 +217,75 @@ export const getFilteredProducts = async (query) => {
         }).select("_id");
         filter.category = { $in: selectedCategories.map((selectedCategory) => selectedCategory._id) };
     } else {
+        const activeCategories = await Category.find({ isBlocked: false, isDeleted: false }).select('_id');
+        const activeCategoryIds = activeCategories.map(c => c._id);
         filter.category = { $in: activeCategoryIds };
     }
 
-    // 2. Search Filter (by name or author)
-    if (search) {
+    const normalizedSearch = normalizeSearchTerm(search);
+    if (normalizedSearch) {
         filter.$or = [
-            { name: { $regex: search, $options: 'i' } },
-            { author: { $regex: search, $options: 'i' } }
+            { name: safeContainsRegex(normalizedSearch) },
+            { author: safeContainsRegex(normalizedSearch) }
         ];
     }
 
     const minPriceValue = parsePriceFilter(minPrice);
     const maxPriceValue = parsePriceFilter(maxPrice);
-    const currentPage = Math.max(Number(page) || 1, 1);
-    const pageLimit = Math.max(Number(limit) || 12, 1);
-
-    const products = await Product.find(filter).populate('category');
-    const pricedProducts = await applyOffersToProductObjects(products);
-    const priceRange = getEffectivePriceRange(pricedProducts);
-
-    const priceFilteredProducts = pricedProducts.filter((product) => {
-        const effectivePrice = getEffectivePrice(product);
-        if (minPriceValue !== null && effectivePrice < minPriceValue) return false;
-        if (maxPriceValue !== null && effectivePrice > maxPriceValue) return false;
-        return true;
-    });
-
-    const sortedProducts = sortProducts(priceFilteredProducts, sort);
-    const totalProducts = sortedProducts.length;
+    const currentPage = Math.max(parseInt(page, 10) || 1, 1);
+    const pageLimit = Math.min(Math.max(parseInt(limit, 10) || 12, 1), 48);
     const skip = (currentPage - 1) * pageLimit;
-    const paginatedProducts = sortedProducts.slice(skip, skip + pageLimit);
+    const priceMatch = buildPriceMatch(minPriceValue, maxPriceValue);
+    const priceMatchStages = priceMatch ? [{ $match: priceMatch }] : [];
 
-    // Calculate ratings for each product (simplified for now, ideally pre-aggregated)
-    const productsWithRatings = await Promise.all(paginatedProducts.map(async (product) => {
-        const reviews = await Review.find(productReviewFilter(product._id));
-        const avgRating = reviews.length > 0 
-            ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-            : 0;
-        const totalStock = product.variants ? product.variants.reduce((acc, v) => acc + v.stock, 0) : 0;
-        return {
-            ...product,
-            avgRating,
-            reviewCount: reviews.length,
-            totalStock
-        };
-    }));
+    const [result = {}] = await Product.aggregate([
+        { $match: filter },
+        ...buildOfferPricingStages(),
+        {
+            $facet: {
+                products: [
+                    ...priceMatchStages,
+                    { $sort: buildProductSort(sort) },
+                    { $skip: skip },
+                    { $limit: pageLimit }
+                ],
+                meta: [
+                    ...priceMatchStages,
+                    { $count: "total" }
+                ],
+                priceRange: [
+                    {
+                        $group: {
+                            _id: null,
+                            min: { $min: "$effectivePrice" },
+                            max: { $max: "$effectivePrice" },
+                            hasOfferPrice: {
+                                $max: {
+                                    $cond: [{ $gt: ["$offerDiscountAmount", 0] }, 1, 0]
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ])
+        .collation({ locale: "en", strength: 2 })
+        .allowDiskUse(true);
+
+    const paginatedProducts = result.products || [];
+    await Product.populate(paginatedProducts, { path: 'category' });
+
+    const productsWithRatings = await addReviewStats(paginatedProducts);
+    const totalProducts = result.meta?.[0]?.total || 0;
+    const rawPriceRange = result.priceRange?.[0];
+    const priceRange = rawPriceRange
+        ? {
+            min: rawPriceRange.min || 0,
+            max: rawPriceRange.max || 0,
+            hasOfferPrice: Boolean(rawPriceRange.hasOfferPrice)
+        }
+        : { min: 0, max: 0, hasOfferPrice: false };
 
     return {
         products: productsWithRatings,
@@ -177,9 +333,11 @@ export const getRelatedProducts = async (categoryId, excludeProductId) => {
     .limit(4);
 
     const pricedProducts = await applyOffersToProductObjects(relatedProducts);
-    return pricedProducts.map((product) => ({
+    const products = pricedProducts.map((product) => ({
         ...product,
         totalStock: product.variants ? product.variants.reduce((acc, variant) => acc + Number(variant.stock || 0), 0) : 0,
         avgRating: product.avgRating || 0,
     }));
+
+    return addReviewStats(products);
 };

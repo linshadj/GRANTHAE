@@ -233,7 +233,9 @@
                     </div>
                 </div>
 
-                <button id="place-order-btn" class="btn-primary w-full py-5 text-lg font-bold flex justify-center items-center gap-3 shadow-2xl relative group overflow-hidden" <%= (!addresses || addresses.length === 0) ? 'disabled' : '' %>>
+                <p id="checkout-order-error" class="hidden mb-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300"></p>
+
+                <button id="place-order-btn" class="btn-primary w-full py-5 text-lg font-bold flex justify-center items-center gap-3 shadow-2xl relative group overflow-hidden">
                     <span class="relative z-10 flex items-center gap-3">
                         <i data-lucide="shield-check" class="w-5 h-5 transition-transform group-hover:scale-110"></i> 
                         Complete Purchase
@@ -328,6 +330,7 @@
     const checkoutAddressList = document.getElementById('checkout-address-list');
     const checkoutEmptyAddress = document.getElementById('checkout-empty-address');
     const placeOrderBtn = document.getElementById('place-order-btn');
+    const checkoutOrderError = document.getElementById('checkout-order-error');
 
     function formatCurrency(amount) {
         return `₹${Number(amount).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -348,6 +351,37 @@
     function closeCheckoutAddressModal() {
         checkoutAddressModal?.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
+    }
+
+    function showCheckoutOrderError(message) {
+        if (checkoutOrderError) {
+            checkoutOrderError.textContent = message;
+            checkoutOrderError.classList.remove('hidden');
+        }
+    }
+
+    function clearCheckoutOrderError() {
+        checkoutOrderError?.classList.add('hidden');
+        if (checkoutOrderError) checkoutOrderError.textContent = '';
+    }
+
+    function showAddressRequiredError() {
+        const message = 'Please add and select a shipping address before completing your purchase.';
+        showCheckoutOrderError(message);
+        checkoutEmptyAddress?.classList.add('border-red-500/30', 'bg-red-500/10');
+        (checkoutEmptyAddress || checkoutAddressList)?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'Address Required',
+            text: message,
+            confirmButtonColor: '#e6cfa7',
+            background: '#2c3b32',
+            color: '#e6cfa7'
+        });
     }
 
     function escapeHtml(value) {
@@ -393,6 +427,8 @@
         checkoutAddressList.querySelectorAll('input[name="selectedAddress"]').forEach(input => input.checked = false);
         checkoutAddressList.prepend(label);
         if (placeOrderBtn) placeOrderBtn.disabled = false;
+        checkoutEmptyAddress?.classList.remove('border-red-500/30', 'bg-red-500/10');
+        clearCheckoutOrderError();
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -655,17 +691,11 @@
         const paymentMethodEl = document.querySelector('input[name="paymentMethod"]:checked');
 
         if (!selectedAddressEl) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Address Required',
-                text: 'Please select a shipping address for your order.',
-                confirmButtonColor: '#e6cfa7',
-                background: '#2c3b32',
-                color: '#e6cfa7'
-            });
+            showAddressRequiredError();
             return;
         }
 
+        clearCheckoutOrderError();
         const addressId = selectedAddressEl.value;
         const paymentMethod = paymentMethodEl.value;
 

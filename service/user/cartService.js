@@ -1,8 +1,9 @@
 import cartDb from "../../models/cartDb.js";
 import wishlistDb from "../../models/wishlistDb.js";
 import { Product } from "../../models/productDb.js";
+import { MAX_CART_QUANTITY_PER_ITEM, normalizeCartQuantity } from "../../utils/cartLimits.js";
 
-const maxQuantityPerItem = 10;
+export const maxQuantityPerItem = MAX_CART_QUANTITY_PER_ITEM;
 
 export const getCart = async (userId) => {
     let cart = await cartDb.findOne({ user: userId }).populate({
@@ -16,6 +17,8 @@ export const getCart = async (userId) => {
 };
 
 export const addToCart = async (userId, productId, variant = "", quantity = 1) => {
+    const requestedQuantity = normalizeCartQuantity(quantity);
+
     // Prevent adding blocked/unlisted/deleted products
     const product = await Product.findOne({ _id: productId, isBlocked: false, isDeleted: false }).populate('category');
     if (!product) {
@@ -43,7 +46,7 @@ export const addToCart = async (userId, productId, variant = "", quantity = 1) =
         availableStock = 0;
     }
     
-    if (availableStock < quantity) {
+    if (availableStock < requestedQuantity) {
         throw new Error(`Only ${availableStock} items in stock.`);
     }
 
@@ -57,10 +60,7 @@ export const addToCart = async (userId, productId, variant = "", quantity = 1) =
     if (itemIndex > -1) {
         throw new Error("This item is already in your cart. Update the quantity from the cart page.");
     } else {
-        if (quantity > maxQuantityPerItem) {
-             throw new Error(`Maximum quantity limit of ${maxQuantityPerItem} reached for this item.`);
-        }
-        cart.items.push({ product: productId, variant, quantity });
+        cart.items.push({ product: productId, variant, quantity: requestedQuantity });
     }
 
     await cart.save();
@@ -116,4 +116,10 @@ export const removeFromCart = async (userId, productId, variant = "") => {
         { $pull: { items: { product: productId, variant: variant } } },
         { new: true }
     );
+};
+
+export const getCartCount = async (userId) => {
+    const cart = await cartDb.findOne({ user: userId }).select("items.quantity");
+    if (!cart) return 0;
+    return cart.items.reduce((total, item) => total + Number(item.quantity || 0), 0);
 };

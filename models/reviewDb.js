@@ -52,5 +52,7 @@ reviewSchema.index(
     { rental: 1, user: 1 },
     { unique: true, partialFilterExpression: { rental: { $exists: true } } }
 );
+reviewSchema.index({ product: 1, targetType: 1 });
+reviewSchema.index({ rental: 1, targetType: 1 });
 
 export const Review = mongoose.model("Review", reviewSchema);

@@ -1,5 +1,11 @@
 <div class="space-y-8">
-    <% const displayStatus = order.orderStatus === 'Cancelled' ? 'Cancelled' : order.paymentStatus === 'Failed' ? 'Failed' : order.orderStatus; %>
+    <%
+        const allOrderItemsFinal = order.items.length > 0 && order.items.every(item => ['Cancelled', 'Returned'].includes(item.itemStatus));
+        const derivedOrderStatus = allOrderItemsFinal
+            ? (order.items.some(item => item.itemStatus === 'Returned') ? 'Returned' : 'Cancelled')
+            : order.orderStatus;
+        const displayStatus = derivedOrderStatus === 'Cancelled' ? 'Cancelled' : order.paymentStatus === 'Failed' ? 'Failed' : derivedOrderStatus;
+    %>
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
             <a href="/admin/orders" class="p-2 bg-white/5 text-apple-text-gray hover:text-white rounded-xl transition-all">
@@ -26,7 +32,7 @@
                 <i data-lucide="printer" class="w-4 h-4"></i>
                 Invoice
             </button>
-            <button onclick="openStatusModal('<%= order._id %>', '<%= order.orderStatus %>')" class="px-4 py-2 bg-apple-gold text-[#1a231e] rounded-xl hover:bg-yellow-600 font-bold transition-all text-sm flex items-center gap-2 shadow-lg shadow-apple-gold/20">
+            <button onclick="openStatusModal('<%= order._id %>', '<%= derivedOrderStatus %>')" class="px-4 py-2 bg-apple-gold text-[#1a231e] rounded-xl hover:bg-yellow-600 font-bold transition-all text-sm flex items-center gap-2 shadow-lg shadow-apple-gold/20">
                 <i data-lucide="edit-3" class="w-4 h-4"></i>
                 Change Status
             </button>

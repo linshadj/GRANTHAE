@@ -1,5 +1,6 @@
 <div
     class="glass-card group relative p-3 flex flex-col h-full overflow-hidden hover:scale-[1.02] transition-all duration-500">
+    <% const formatBookOfferValue = (offer) => offer ? (offer.discountType === 'percentage' ? `${offer.discountValue}% OFF` : `₹${offer.discountValue} OFF`) : ''; %>
     <div class="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-gray-100">
         <% let displayImg = book.coverImage || book.image || (book.images && book.images.length > 0 ? book.images[0] : '/images/default-book.jpg'); %>
         <% let displayTitle = book.name || book.title || 'Untitled'; %>
@@ -47,7 +48,7 @@
         </p>
         <% if (book.hasOffer && book.bestOffer) { %>
             <p class="mt-2 text-[10px] font-bold text-green-600 uppercase tracking-widest">
-                <%= book.bestOffer.title %>
+                <%= book.bestOffer.title %> · <%= formatBookOfferValue(book.bestOffer) %>
             </p>
         <% } %>
 
