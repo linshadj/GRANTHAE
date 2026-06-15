@@ -12,6 +12,7 @@ export const getWishlistPage = async (req, res) => {
             let stock = 0;
             const hasVariants = product.variants && product.variants.length > 0;
             const needsVariantSelection = hasVariants && !item.variant;
+            const isCategoryUnavailable = product.category && (product.category.isBlocked || product.category.isDeleted);
 
             // Handle variants if requested
             if (item.variant && hasVariants) {
@@ -40,7 +41,8 @@ export const getWishlistPage = async (req, res) => {
                 hasVariants,
                 needsVariantSelection,
                 isBlocked: product.isBlocked,
-                isDeleted: product.isDeleted
+                isDeleted: product.isDeleted,
+                isCategoryUnavailable
             };
         });
 

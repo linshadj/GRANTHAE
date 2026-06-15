@@ -15,6 +15,7 @@ import { connectDb } from './config/dbConnect.js'
 import passport from 'passport'
 import './config/passport.js'
 import userDb from './models/userDb.js'
+import cartDb from './models/cartDb.js'
 
 dotenv.config()
 const PORT = process.env.PORT || 3000
@@ -57,10 +58,26 @@ app.use(session({
 // Middleware to make current path and user available to all views
 app.use(async (req, res, next) => {
     res.locals.path = req.path;
+    res.locals.cartCount = 0;
     try {
         if (req.session.user && mongoose.connection.readyState === 1) {
-            const user = await userDb.findById(req.session.user);
+            const [user, cart] = await Promise.all([
+                userDb.findById(req.session.user),
+                cartDb.findOne({ user: req.session.user }).select("items.quantity")
+            ]);
+            if (user?.isBlocked) {
+                req.blockedAccountMessage = "Your account has been blocked by admin.";
+                delete req.session.user;
+                delete req.session.isAuth;
+                delete req.session.passport;
+                res.locals.user = null;
+                res.locals.cartCount = 0;
+                return next();
+            }
             res.locals.user = user;
+            res.locals.cartCount = cart
+                ? cart.items.reduce((total, item) => total + Number(item.quantity || 0), 0)
+                : 0;
         } else {
             res.locals.user = null;
         }

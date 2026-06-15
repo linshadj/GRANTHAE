@@ -20,6 +20,143 @@
   }
 }
 
+@layer components {
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+    background:
+      radial-gradient(circle at 50% 36%, rgba(251, 191, 36, 0.14), transparent 28rem),
+      rgba(30, 42, 34, 0.78);
+    backdrop-filter: blur(18px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 180ms ease, visibility 180ms ease;
+  }
+
+  .loading-screen.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .loading-screen__panel {
+    width: min(22rem, calc(100vw - 2rem));
+    min-height: 13.5rem;
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1.5rem;
+    background: rgba(44, 59, 50, 0.88);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+    color: #e6cfa7;
+    transform: translateY(0.75rem) scale(0.98);
+    transition: transform 220ms ease;
+  }
+
+  .loading-screen.is-visible .loading-screen__panel {
+    transform: translateY(0) scale(1);
+  }
+
+  .loading-screen__mark {
+    width: 3.25rem;
+    height: 3.25rem;
+    display: grid;
+    place-items: center;
+    border-radius: 1.125rem;
+    background: rgba(251, 191, 36, 0.12);
+    border: 1px solid rgba(251, 191, 36, 0.28);
+    box-shadow: 0 14px 34px rgba(251, 191, 36, 0.12);
+  }
+
+  .loading-screen__icon {
+    width: 1.55rem;
+    height: 1.55rem;
+    color: #fbbf24;
+  }
+
+  .loading-screen__ring {
+    width: 3.75rem;
+    height: 3.75rem;
+    border-radius: 999px;
+    border: 3px solid rgba(230, 207, 167, 0.18);
+    border-top-color: #fbbf24;
+    border-right-color: rgba(251, 191, 36, 0.62);
+    animation: granthae-loader-spin 760ms linear infinite;
+  }
+
+  .loading-screen__copy {
+    display: grid;
+    gap: 0.25rem;
+    text-align: center;
+  }
+
+  .loading-screen__message {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  .loading-screen__subtext {
+    color: #d1d5db;
+    font-size: 0.875rem;
+  }
+
+  .loading-screen__bar {
+    width: 100%;
+    height: 0.25rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .loading-screen__bar span {
+    display: block;
+    width: 42%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, transparent, #fbbf24, transparent);
+    animation: granthae-loader-bar 1.2s ease-in-out infinite;
+  }
+
+  .loading-screen-active {
+    cursor: progress;
+  }
+
+  @keyframes granthae-loader-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes granthae-loader-bar {
+    0% {
+      transform: translateX(-120%);
+    }
+
+    100% {
+      transform: translateX(260%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loading-screen,
+    .loading-screen__panel,
+    .loading-screen__ring,
+    .loading-screen__bar span {
+      animation: none;
+      transition: none;
+    }
+  }
+}
+
 @layer utilities {
   .glass-panel {
     @apply bg-apple-card/60 backdrop-blur-xl border-b border-white/5 shadow-lg;

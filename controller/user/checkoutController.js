@@ -39,7 +39,7 @@ export const getCheckoutPage = async (req, res) => {
         if (error.message === 'Cart is empty') {
             return res.redirect('/cart');
         }
-        if (error.message.includes('no longer available') || error.message.includes('Insufficient stock') || error.message.includes('unavailable')) {
+        if (error.message.includes('no longer available') || error.message.includes('Insufficient stock') || error.message.includes('unavailable') || error.message.includes('Maximum quantity')) {
             // Can add flash message here if using express-flash
             return res.redirect('/cart');
         }
