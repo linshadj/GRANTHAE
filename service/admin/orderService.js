@@ -2,11 +2,19 @@ import orderDb from "../../models/orderDb.js";
 import { Product } from "../../models/productDb.js";
 import { creditWallet } from "../user/walletService.js";
 import { safeWhitespaceRegex } from "../../utils/search.js";
-import { syncFinalOrderStatus } from "../../utils/orderStatus.js";
+import { syncOrderStatusFromItems } from "../../utils/orderStatus.js";
 
 const roundCurrency = (amount) => Math.round((Number(amount || 0) + Number.EPSILON) * 100) / 100;
 
 const isPaidOrder = (order) => order.paymentStatus === 'Success' || order.paymentMethod === 'Wallet';
+const ITEM_STATUS_ORDER = {
+    Pending: 1,
+    Shipped: 2,
+    "Out for delivery": 3,
+    Delivered: 4,
+};
+const ADMIN_ITEM_STATUSES = new Set([...Object.keys(ITEM_STATUS_ORDER), "Cancelled"]);
+const FINAL_ITEM_STATUSES = new Set(["Cancelled", "Returned"]);
 
 const getActiveItemsSubtotal = (order) => {
     return roundCurrency(order.items.reduce((total, item) => {
@@ -44,6 +52,26 @@ const incrementItemStock = async (item) => {
             { $inc: { stock: item.quantity } }
         );
     }
+};
+
+const refundCancelledItem = async (order, item, refundAmount) => {
+    if (isPaidOrder(order) && item.refundStatus !== 'Completed' && refundAmount > 0) {
+        await creditWallet(
+            order.user,
+            refundAmount,
+            `Cancellation refund for order ${order.orderID}`,
+            "order_refund",
+            `${order._id}:${item._id}`
+        );
+        item.refundAmount = refundAmount;
+        item.refundStatus = 'Completed';
+        item.refundedAt = new Date();
+    } else {
+        item.refundAmount = 0;
+        item.refundStatus = 'None';
+    }
+
+    applyFinancialAdjustment(order, item, refundAmount, isPaidOrder(order));
 };
 
 export const orderDetails = async (page = 1, search = "", sort = "newest", filter = "all", userId = null) => {
@@ -204,6 +232,76 @@ export const updateOrderStatusService = async (orderId, status) => {
         order.paymentStatus = 'Success';
         order.paidAt = new Date();
     }
+    syncOrderStatusFromItems(order);
+    await order.save();
+    return order;
+};
+
+export const updateOrderItemStatusService = async (orderId, itemId, status, cancellationReason = "") => {
+    if (!ADMIN_ITEM_STATUSES.has(status)) {
+        throw new Error("Invalid item status.");
+    }
+
+    const order = await orderDb.findById(orderId);
+    if (!order) {
+        throw new Error("Order not found");
+    }
+
+    const item = order.items.id(itemId);
+    if (!item) {
+        throw new Error("Item not found in order");
+    }
+
+    if (FINAL_ITEM_STATUSES.has(item.itemStatus)) {
+        throw new Error(`Item is already ${item.itemStatus} and cannot be modified.`);
+    }
+
+    if (item.itemStatus === "Return Requested") {
+        throw new Error("Review the pending return request before changing this item.");
+    }
+
+    if (item.itemStatus === status) {
+        throw new Error(`Item is already ${status}.`);
+    }
+
+    if ((order.paymentMethod === 'Razorpay' || order.paymentMethod === 'Online') && order.paymentStatus !== 'Success' && status !== 'Cancelled') {
+        throw new Error("Online payment must be completed before progressing this item.");
+    }
+
+    if (status !== "Cancelled") {
+        const currentLevel = ITEM_STATUS_ORDER[item.itemStatus] || ITEM_STATUS_ORDER.Pending;
+        const nextLevel = ITEM_STATUS_ORDER[status];
+
+        if (!nextLevel || nextLevel <= currentLevel) {
+            throw new Error(`Cannot move item status backward from ${item.itemStatus} to ${status}.`);
+        }
+
+        item.itemStatus = status;
+    } else {
+        if (item.itemStatus === "Delivered") {
+            throw new Error("Delivered items must be handled through the return flow.");
+        }
+
+        const refundAmount = calculateItemRefundAmount(order, item);
+        item.itemStatus = "Cancelled";
+        item.cancellationReason = String(cancellationReason || "").trim() || "Cancelled by Admin";
+
+        if (order.stockAdjusted !== false) {
+            await incrementItemStock(item);
+        }
+
+        await refundCancelledItem(order, item, refundAmount);
+    }
+
+    const derivedStatus = syncOrderStatusFromItems(order);
+    if (derivedStatus === "Delivered" && order.paymentMethod === "COD" && order.paymentStatus === "Pending") {
+        order.paymentStatus = "Success";
+        order.paidAt = new Date();
+    }
+    if ((derivedStatus === "Returned" || derivedStatus === "Cancelled") && Number(order.totalAmount || 0) <= 0 && isPaidOrder(order)) {
+        order.paymentStatus = "Refunded";
+    }
+
     await order.save();
     return order;
 };
@@ -227,6 +325,7 @@ export const reviewReturnRequestService = async (orderId, itemId, action, reject
         item.returnRejectionReason = reason;
         item.returnReviewedAt = new Date();
         item.refundStatus = 'None';
+        syncOrderStatusFromItems(order);
         await order.save();
         return order;
     }
@@ -263,7 +362,7 @@ export const reviewReturnRequestService = async (orderId, itemId, action, reject
 
     applyFinancialAdjustment(order, item, refundAmount, isPaidOrder(order));
 
-    const finalStatus = syncFinalOrderStatus(order);
+    const finalStatus = syncOrderStatusFromItems(order);
     if ((finalStatus === 'Returned' || finalStatus === 'Cancelled') && Number(order.totalAmount || 0) <= 0 && isPaidOrder(order)) {
         order.paymentStatus = 'Refunded';
     }

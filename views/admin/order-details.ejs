@@ -97,6 +97,12 @@
                                                             Refunded ₹<%= item.refundAmount.toLocaleString('en-IN') %>
                                                         </span>
                                                     <% } %>
+                                                    <% if (['Pending', 'Shipped', 'Out for delivery'].includes(item.itemStatus)) { %>
+                                                        <button type="button" onclick="openItemStatusModal('<%= order._id %>', '<%= item._id %>', '<%= item.itemStatus %>')" class="inline-flex w-max items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-white/5 text-apple-text-gray border border-white/10 hover:text-white hover:bg-white/10 uppercase tracking-widest transition-all">
+                                                            <i data-lucide="edit-3" class="w-3 h-3"></i>
+                                                            Change Item
+                                                        </button>
+                                                    <% } %>
                                                 </div>
                                                 <% if (item.itemStatus === 'Return Requested' && item.returnRequestStatus === 'Pending') { %>
                                                     <div class="mt-3 flex flex-wrap gap-2">
@@ -317,6 +323,91 @@
                 }
             }
         });
+    }
+
+    async function openItemStatusModal(orderId, itemId, currentStatus) {
+        const statusOrder = {
+            'Pending': 1,
+            'Shipped': 2,
+            'Out for delivery': 3,
+            'Delivered': 4
+        };
+        const allOptions = {
+            'Shipped': 'Shipped',
+            'Out for delivery': 'Out for delivery',
+            'Delivered': 'Delivered',
+            'Cancelled': 'Cancelled'
+        };
+        const currentLevel = statusOrder[currentStatus] || 1;
+        const allowedOptions = {};
+
+        Object.keys(allOptions).forEach((status) => {
+            if (status === 'Cancelled' || statusOrder[status] > currentLevel) {
+                allowedOptions[status] = allOptions[status];
+            }
+        });
+
+        const result = await Swal.fire({
+            title: 'Update Item Status',
+            input: 'select',
+            inputOptions: allowedOptions,
+            inputPlaceholder: 'Select status',
+            showCancelButton: true,
+            background: '#1a231e',
+            color: '#fff',
+            confirmButtonColor: '#E6CFA7',
+            inputValidator: (value) => {
+                if (!value) return 'Select a status.';
+                return null;
+            }
+        });
+
+        if (!result.isConfirmed) return;
+
+        let cancellationReason = '';
+        if (result.value === 'Cancelled') {
+            const reasonResult = await Swal.fire({
+                title: 'Cancellation Reason',
+                input: 'textarea',
+                inputPlaceholder: 'Reason shown in admin history',
+                inputValue: 'Cancelled by Admin',
+                showCancelButton: true,
+                background: '#1a231e',
+                color: '#fff',
+                confirmButtonColor: '#ef4444',
+                inputValidator: (value) => {
+                    if (!value || !value.trim()) return 'Cancellation reason is required.';
+                    return null;
+                }
+            });
+            if (!reasonResult.isConfirmed) return;
+            cancellationReason = reasonResult.value;
+        }
+
+        try {
+            const response = await fetch(`/admin/orders/${orderId}/items/${itemId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status: result.value,
+                    cancellationReason
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Item Updated',
+                    text: data.message,
+                    background: '#1a231e',
+                    color: '#fff'
+                }).then(() => location.reload());
+            } else {
+                Swal.fire({ icon: 'error', title: 'Unable to Update', text: data.message, background: '#1a231e', color: '#fff' });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Could not update the item status.', background: '#1a231e', color: '#fff' });
+        }
     }
 
     async function reviewReturn(orderId, itemId, action) {

@@ -81,8 +81,8 @@
                     <label class="block text-xs font-bold text-apple-text-gray uppercase tracking-widest mb-2">Cover Image</label>
                     <div id="imageUploadArea" class="relative group cursor-pointer aspect-video rounded-2xl border-2 border-dashed border-white/10 hover:border-apple-gold/50 transition-all overflow-hidden bg-white/5 flex flex-col items-center justify-center gap-2">
                         <i data-lucide="upload-cloud" class="w-8 h-8 text-apple-text-gray group-hover:text-apple-gold transition-colors"></i>
-                        <p class="text-xs text-apple-text-gray group-hover:text-apple-gold transition-colors">Click to upload cover</p>
-                        <input type="file" id="coverImageInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                        <p class="text-xs text-apple-text-gray group-hover:text-apple-gold transition-colors">JPG, PNG, or WebP up to 5MB</p>
+                        <input type="file" id="coverImageInput" accept="image/jpeg, image/png, image/webp" class="absolute inset-0 opacity-0 cursor-pointer">
                         <img id="imagePreview" class="absolute inset-0 w-full h-full object-cover hidden">
                     </div>
                     <span id="coverImageError" class="error-msg text-red-500 text-[10px] mt-1 hidden"></span>
@@ -146,10 +146,37 @@
     const cropModal = document.getElementById('cropModal');
     const cropImage = document.getElementById('cropImage');
     const imagePreview = document.getElementById('imagePreview');
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxImageSize = 5 * 1024 * 1024;
+
+    function setCoverImageError(message) {
+        const errorEl = document.getElementById('coverImageError');
+        if (!errorEl) return;
+        errorEl.textContent = message;
+        errorEl.classList.toggle('hidden', !message);
+    }
+
+    function validateCoverImage(file) {
+        if (!allowedImageTypes.includes(file.type)) {
+            return 'Only JPG, PNG, and WebP images are allowed.';
+        }
+        if (file.size > maxImageSize) {
+            return 'Image must be 5MB or smaller.';
+        }
+        return '';
+    }
 
     coverInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
+            const validationError = validateCoverImage(file);
+            if (validationError) {
+                setCoverImageError(validationError);
+                Swal.fire({ icon: 'warning', title: 'Invalid Image', text: validationError, background: '#1e2a22', color: '#E6CFA7' });
+                coverInput.value = '';
+                return;
+            }
+            setCoverImageError('');
             const reader = new FileReader();
             reader.onload = (e) => {
                 cropImage.src = e.target.result;
