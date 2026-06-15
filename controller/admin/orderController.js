@@ -1,4 +1,4 @@
-import { orderDetails, getOrderById, reviewReturnRequestService, updateOrderStatusService } from "../../service/admin/orderService.js";
+import { orderDetails, getOrderById, reviewReturnRequestService, updateOrderItemStatusService, updateOrderStatusService } from "../../service/admin/orderService.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 import { getFriendlyErrorMessage } from "../../utils/friendlyError.js";
 
@@ -84,6 +84,25 @@ export const reviewReturnRequest = async (req, res) => {
         res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
             message: getFriendlyErrorMessage(error, "Could not review the return request.")
+        });
+    }
+};
+
+export const updateOrderItemStatus = async (req, res) => {
+    try {
+        const { orderId, itemId } = req.params;
+        const { status, cancellationReason } = req.body;
+
+        await updateOrderItemStatusService(orderId, itemId, status, cancellationReason);
+
+        res.status(STATUS_CODES.OK).json({
+            success: true,
+            message: `Item status updated to ${status}`
+        });
+    } catch (error) {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+            success: false,
+            message: getFriendlyErrorMessage(error, "Could not update item status.")
         });
     }
 };

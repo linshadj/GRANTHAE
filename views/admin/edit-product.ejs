@@ -120,7 +120,7 @@
         <div class="bg-apple-card border border-white/5 rounded-2xl p-6 shadow-sm">
             <div class="border-b border-white/5 pb-2 mb-4">
                 <h3 class="text-lg font-bold text-apple-dark">4. Images & Cover Image</h3>
-                <p class="text-xs text-apple-text-gray">Manage your product images. Tick the star over an image to mark it as the Main Cover Image.</p>
+                <p class="text-xs text-apple-text-gray">Keep 3 to 10 JPG, PNG, or WebP images. Each image must be 5MB or smaller.</p>
             </div>
             
             <div class="flex gap-4 mb-4">
@@ -204,6 +204,37 @@
     const form = document.getElementById('editProductForm');
     const submitBtn = document.getElementById('submitBtn');
     const productId = document.getElementById('productId').value;
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxImageSize = 5 * 1024 * 1024;
+    const minProductImages = 3;
+    const maxProductImages = 10;
+
+    function showImageError(message) {
+        const errorEl = document.getElementById('imageError');
+        if (!errorEl) return;
+        errorEl.textContent = message;
+        errorEl.classList.remove('hidden');
+    }
+
+    function clearImageError() {
+        const errorEl = document.getElementById('imageError');
+        if (!errorEl) return;
+        errorEl.textContent = '';
+        errorEl.classList.add('hidden');
+    }
+
+    function validateSelectedImage(file, currentImageCount) {
+        if (!allowedImageTypes.includes(file.type)) {
+            return 'Only JPG, PNG, and WebP images are allowed.';
+        }
+        if (file.size > maxImageSize) {
+            return 'Each image must be 5MB or smaller.';
+        }
+        if (currentImageCount >= maxProductImages) {
+            return `You can keep a maximum of ${maxProductImages} images.`;
+        }
+        return '';
+    }
 
     // Variants Handling
     const variantsContainer = document.getElementById('variantsContainer');
@@ -271,6 +302,15 @@
     imageInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if(!file) return;
+        clearImageError();
+
+        const validationError = validateSelectedImage(file, existingImages.length + croppedImagesBlobs.length);
+        if (validationError) {
+            showImageError(validationError);
+            Swal.fire({ icon: 'warning', title: 'Invalid Image', text: validationError, background: '#1e2a22', color: '#E6CFA7' });
+            imageInput.value = '';
+            return;
+        }
 
         const url = URL.createObjectURL(file);
         cropperImage.src = url;
@@ -362,7 +402,7 @@
         if(typeof lucide !== 'undefined') lucide.createIcons();
 
         // Hide error if requirements met
-        if ((existingImages.length + croppedImagesBlobs.length) >= 3) {
+        if ((existingImages.length + croppedImagesBlobs.length) >= minProductImages) {
             const errorEl = document.getElementById('galleryError');
             if (errorEl) errorEl.classList.add('hidden');
         }
@@ -424,6 +464,14 @@
             errors.variants = 'You can only add up to 2 variants.';
         }
 
+        const totalImages = existingImages.length + croppedImagesBlobs.length;
+        if (totalImages < minProductImages) {
+            errors.gallery = `Minimum ${minProductImages} images required.`;
+        }
+        if (totalImages > maxProductImages) {
+            errors.gallery = `Maximum ${maxProductImages} images allowed.`;
+        }
+
         variantRows.forEach((row, i) => {
             const vName = row.querySelector('.var-name');
             const vSku = row.querySelector('.var-sku');
@@ -459,6 +507,20 @@
             const errorEl = document.getElementById('variantsError');
             errorEl.textContent = errors.variants;
             errorEl.classList.remove('hidden');
+        }
+        if (errors.gallery) {
+            const errorEl = document.getElementById('galleryError');
+            errorEl.textContent = errors.gallery;
+            errorEl.classList.remove('hidden');
+        }
+        for (const [key, msg] of Object.entries(errors)) {
+            const errorEl = document.getElementById(key + 'Error');
+            if (errorEl) {
+                errorEl.textContent = msg;
+                errorEl.classList.remove('hidden');
+                const inputEl = document.getElementById(key);
+                if (inputEl) inputEl.classList.add('border-red-500');
+            }
         }
 
         if (Object.keys(errors).length > 0) {
