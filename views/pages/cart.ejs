@@ -95,7 +95,9 @@
                                             <span class="w-8 text-center font-bold text-apple-dark text-base qty-display" id="qty-<%= item.productId %>-<%= item.variant || 'default' %>"><%= item.quantity %></span>
                                             <button class="relative z-30 w-8 h-8 flex items-center justify-center rounded-full bg-apple-card text-apple-dark hover:bg-apple-blue/20 hover:text-apple-blue transition-all duration-300 shadow-sm qty-btn <%= (item.isBlocked || item.isDeleted || item.isCategoryUnavailable || item.quantity >= maxQtyPerCartItem || item.quantity >= item.stock) ? 'opacity-50 cursor-not-allowed' : '' %>" 
                                                     onclick="updateCartQty('<%= item.productId %>', '<%= item.variant || '' %>', 'increment')" 
-                                                    <%= (item.isBlocked || item.isDeleted || item.isCategoryUnavailable || item.quantity >= maxQtyPerCartItem || item.quantity >= item.stock) ? 'disabled' : '' %>
+                                                    data-stock="<%= item.stock %>"
+                                                    aria-disabled="<%= (item.quantity >= maxQtyPerCartItem || item.quantity >= item.stock) ? 'true' : 'false' %>"
+                                                    <%= (item.isBlocked || item.isDeleted || item.isCategoryUnavailable || item.stock < 1) ? 'disabled' : '' %>
                                                     aria-label="Increase quantity"
                                                     id="inc-btn-<%= item.productId %>-<%= item.variant || 'default' %>">
                                                 <i data-lucide="plus" class="w-4 h-4"></i>
@@ -174,6 +176,38 @@
 <script>
     const maxCartQuantity = <%= maxQtyPerCartItem %>;
 
+    function getIncrementLimitMessage(currentQuantity, availableStock) {
+        if (currentQuantity >= maxCartQuantity) {
+            return `Maximum quantity limit of ${maxCartQuantity} reached for this item.`;
+        }
+        if (availableStock !== null && currentQuantity >= availableStock) {
+            return availableStock === 1
+                ? 'Only 1 item is available in stock.'
+                : `Only ${availableStock} items are available in stock.`;
+        }
+        return '';
+    }
+
+    function getAvailableStock(button) {
+        const stock = Number(button?.dataset.stock);
+        return Number.isFinite(stock) ? stock : null;
+    }
+
+    function updateIncrementButtonState(button, quantity) {
+        if (!button) return;
+        const availableStock = getAvailableStock(button);
+        const limitReached = quantity >= maxCartQuantity || (availableStock !== null && quantity >= availableStock);
+
+        button.disabled = false;
+        button.setAttribute('aria-disabled', limitReached ? 'true' : 'false');
+        button.classList.toggle('opacity-50', limitReached);
+        button.classList.toggle('cursor-not-allowed', limitReached);
+    }
+
+    function isQuantityLimitMessage(message) {
+        return /maximum|limit|stock|available/i.test(String(message || ''));
+    }
+
     async function updateCartQty(productId, variant, action) {
         const variantKey = variant || 'default';
         const qtyDisplay = document.getElementById(`qty-${productId}-${variantKey}`);
@@ -181,7 +215,16 @@
         const cartSubtotal = document.getElementById('cart-subtotal');
         const cartGrandTotal = document.getElementById('cart-grand-total');
         const incBtn = document.getElementById(`inc-btn-${productId}-${variantKey}`);
-        let shouldDisableIncrement = false;
+
+        if (action === 'increment') {
+            const currentQuantity = Number(qtyDisplay?.innerText || 0);
+            const availableStock = getAvailableStock(incBtn);
+            const limitMessage = getIncrementLimitMessage(currentQuantity, availableStock);
+            if (limitMessage) {
+                showToast('warning', limitMessage);
+                return;
+            }
+        }
         
         // Disable buttons during request to prevent spam
         const buttons = document.querySelectorAll(`#cart-item-container-${productId}-${variantKey} .qty-btn`);
@@ -207,34 +250,29 @@
                 if (typeof window.updateCartCountBadge === 'function') {
                     window.updateCartCountBadge(data.cartCount);
                 }
+                if (incBtn && data.stock !== undefined) {
+                    incBtn.dataset.stock = data.stock;
+                }
                 
                 // Update button states
-                shouldDisableIncrement = data.quantity >= (data.maxQuantity || maxCartQuantity) || (data.stock && data.quantity >= data.stock);
-                if (shouldDisableIncrement) {
-                    incBtn.disabled = true;
-                    incBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    incBtn.disabled = false;
-                    incBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
+                updateIncrementButtonState(incBtn, Number(data.quantity || 0));
                 
                 // Fade effect on update
                 qtyDisplay.classList.add('animate-pulse');
                 setTimeout(() => qtyDisplay.classList.remove('animate-pulse'), 500);
 
             } else {
-                showToast('error', data.message || 'Could not update cart.');
+                const message = data.message || 'Could not update cart.';
+                showToast(isQuantityLimitMessage(message) ? 'warning' : 'error', message);
             }
         } catch (err) {
             console.error(err);
+            showToast('error', 'Could not update cart.');
         } finally {
             // Re-enable buttons, respecting overall disabling conditions
             buttons.forEach(btn => btn.disabled = false);
             // Re-check inc button specific disabled state
-            if (shouldDisableIncrement || parseInt(qtyDisplay.innerText) >= maxCartQuantity) {
-                incBtn.disabled = true;
-                incBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            }
+            updateIncrementButtonState(incBtn, Number(qtyDisplay?.innerText || 0));
         }
     }
 
