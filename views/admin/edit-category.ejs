@@ -255,6 +255,16 @@
         return isValid;
     };
 
+    function showServerFieldError(fieldId, message) {
+        const inputEl = document.getElementById(fieldId);
+        const errorEl = document.getElementById(fieldId + 'Error');
+        if (inputEl) inputEl.classList.add('border-red-500');
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+        }
+    }
+
     // Submit
     document.getElementById('editCategoryForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -290,10 +300,25 @@
                     confirmButtonColor: '#E6CFA7'
                 }).then(() => window.location.href = data.redirectUrl);
             } else {
+                const message = data.message || 'Could not update category.';
+                const normalizedMessage = message.toLowerCase();
+                let title = 'Update Failed';
+                let icon = 'error';
+
+                if (normalizedMessage.includes('category') && normalizedMessage.includes('name') && normalizedMessage.includes('exists')) {
+                    showServerFieldError('name', message);
+                    title = 'Duplicate Category Name';
+                    icon = 'warning';
+                } else if (normalizedMessage.includes('slug') && normalizedMessage.includes('exists')) {
+                    showServerFieldError('slug', message);
+                    title = 'Duplicate Slug';
+                    icon = 'warning';
+                }
+
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: data.message,
+                    icon,
+                    title,
+                    text: message,
                     background: '#1e2a22',
                     color: '#E6CFA7'
                 });

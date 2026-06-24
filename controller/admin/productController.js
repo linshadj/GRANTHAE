@@ -9,6 +9,34 @@ import {
     validateImageFiles
 } from "../../utils/imageValidation.js";
 
+const normalizeVariantKey = (value) => String(value || "").trim().toLowerCase();
+
+const getDuplicateVariantMessage = (variants) => {
+    const seenNames = new Set();
+    const seenSkus = new Set();
+
+    for (const variant of variants) {
+        const name = normalizeVariantKey(variant?.name);
+        const sku = normalizeVariantKey(variant?.sku);
+
+        if (name) {
+            if (seenNames.has(name)) {
+                return `Duplicate variant "${String(variant.name).trim()}" found. Variant names must be unique.`;
+            }
+            seenNames.add(name);
+        }
+
+        if (sku) {
+            if (seenSkus.has(sku)) {
+                return `Duplicate SKU "${String(variant.sku).trim()}" found. Variant SKUs must be unique.`;
+            }
+            seenSkus.add(sku);
+        }
+    }
+
+    return "";
+};
+
 export const productsPage = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -87,6 +115,12 @@ export const addProduct = async (req, res, next) => {
         let parsedVariants = [];
         if (req.body.variants) {
             try { parsedVariants = JSON.parse(req.body.variants); } catch { parsedVariants = []; }
+        }
+        parsedVariants = Array.isArray(parsedVariants) ? parsedVariants : [];
+
+        const duplicateVariantMessage = getDuplicateVariantMessage(parsedVariants);
+        if (duplicateVariantMessage) {
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: duplicateVariantMessage });
         }
 
         let parsedHighlights = [];
@@ -168,6 +202,12 @@ export const editProduct = async (req, res, next) => {
         let parsedVariants = [];
         if (req.body.variants) {
             try { parsedVariants = JSON.parse(req.body.variants); } catch { parsedVariants = []; }
+        }
+        parsedVariants = Array.isArray(parsedVariants) ? parsedVariants : [];
+
+        const duplicateVariantMessage = getDuplicateVariantMessage(parsedVariants);
+        if (duplicateVariantMessage) {
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: duplicateVariantMessage });
         }
 
         let parsedHighlights = [];

@@ -198,6 +198,19 @@
     const noVariantsMsg = document.getElementById('noVariantsMsg');
     let variantCount = 0;
 
+    function normalizeVariantValue(value) {
+        return String(value || '').trim().toLowerCase();
+    }
+
+    function setVariantFieldError(inputEl, message) {
+        inputEl.classList.add('border-red-500');
+        const errorEl = inputEl.nextElementSibling;
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+        }
+    }
+
     window.addVariantRow = () => {
         variantCount++;
         noVariantsMsg.style.display = 'none';
@@ -387,6 +400,9 @@
             errors.variants = 'You can only add up to 2 variants.';
         }
 
+        const seenVariantNames = new Map();
+        const seenVariantSkus = new Map();
+
         variantRows.forEach((row, i) => {
             const vName = row.querySelector('.var-name');
             const vSku = row.querySelector('.var-sku');
@@ -398,23 +414,37 @@
 
             if (!vName.value.trim()) {
                 errors[`vName${i}`] = true;
-                vName.classList.add('border-red-500');
-                vName.nextElementSibling.classList.remove('hidden');
+                setVariantFieldError(vName, 'Req.');
+            } else {
+                const nameKey = normalizeVariantValue(vName.value);
+                if (seenVariantNames.has(nameKey)) {
+                    errors.variants = errors.variants || 'Duplicate variant names are not allowed.';
+                    setVariantFieldError(vName, 'Duplicate');
+                    setVariantFieldError(seenVariantNames.get(nameKey), 'Duplicate');
+                } else {
+                    seenVariantNames.set(nameKey, vName);
+                }
             }
             if (!vSku.value.trim()) {
                 errors[`vSku${i}`] = true;
-                vSku.classList.add('border-red-500');
-                vSku.nextElementSibling.classList.remove('hidden');
+                setVariantFieldError(vSku, 'Req.');
+            } else {
+                const skuKey = normalizeVariantValue(vSku.value);
+                if (seenVariantSkus.has(skuKey)) {
+                    errors.variants = errors.variants || 'Duplicate variant SKUs are not allowed.';
+                    setVariantFieldError(vSku, 'Duplicate');
+                    setVariantFieldError(seenVariantSkus.get(skuKey), 'Duplicate');
+                } else {
+                    seenVariantSkus.set(skuKey, vSku);
+                }
             }
             if (!vStock.value.trim() || parseInt(vStock.value) < 0) {
                 errors[`vStock${i}`] = true;
-                vStock.classList.add('border-red-500');
-                vStock.nextElementSibling.classList.remove('hidden');
+                setVariantFieldError(vStock, 'Req.');
             }
             if (vPrice.value !== '' && parseFloat(vPrice.value) < 0) {
                 errors[`vPrice${i}`] = true;
-                vPrice.classList.add('border-red-500');
-                vPrice.nextElementSibling.classList.remove('hidden');
+                setVariantFieldError(vPrice, 'Invalid');
             }
         });
 
