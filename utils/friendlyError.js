@@ -1,4 +1,5 @@
 const DEFAULT_MESSAGE = "Something went wrong. Please try again.";
+const MAX_ADMIN_UPLOAD_MB = 5;
 
 const TECHNICAL_MESSAGE_PATTERNS = [
   /buffering timed out/i,
@@ -16,6 +17,9 @@ export const getFriendlyErrorMessage = (error, fallback = DEFAULT_MESSAGE) => {
   if (!error) return fallback;
 
   if (error.userMessage) return error.userMessage;
+  if (error.code === "LIMIT_FILE_SIZE") return `Each image must be ${MAX_ADMIN_UPLOAD_MB}MB or smaller.`;
+  if (error.code === "LIMIT_FILE_COUNT") return "Too many images selected.";
+  if (error.code === "LIMIT_UNEXPECTED_FILE") return "Unexpected image upload field.";
   if (error.code === 11000) return "A record with these details already exists.";
   if (error.name === "ValidationError") {
     return Object.values(error.errors || {})[0]?.message || "Please check the entered details.";

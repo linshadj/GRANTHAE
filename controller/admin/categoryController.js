@@ -2,6 +2,7 @@ import { Category } from "../../models/categoryDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 import { deleteCloudinaryUploads, uploadImageToCloudinary } from "../../utils/cloudinaryUploader.js";
 import { escapeRegex, normalizeSearchTerm, safeContainsRegex } from "../../utils/search.js";
+import { validateImageFiles } from "../../utils/imageValidation.js";
 
 // Categories page
 export const categoriesPage = async (req, res, next) => {
@@ -99,6 +100,7 @@ export const addCategory = async (req, res, next) => {
             return res.status(STATUS_CODES.CONFLICT).json({ success: false, message: "Slug already exists" });
         }
 
+        validateImageFiles(req.file ? [req.file] : [], { maxFiles: 1 });
         uploadedImage = req.file ? await uploadImageToCloudinary(req.file, "categories") : null;
         const coverImage = uploadedImage?.url || "";
 
@@ -173,6 +175,7 @@ export const editCategory = async (req, res, next) => {
         };
 
         if (req.file) {
+            validateImageFiles([req.file], { maxFiles: 1 });
             uploadedImage = await uploadImageToCloudinary(req.file, "categories");
             updateData.coverImage = uploadedImage.url;
         }

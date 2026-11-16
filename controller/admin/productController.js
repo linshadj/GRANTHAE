@@ -3,6 +3,39 @@ import { Category } from "../../models/categoryDb.js";
 import { STATUS_CODES } from "../../utils/statusCodes.js";
 import { deleteCloudinaryUploads, uploadImagesToCloudinary } from "../../utils/cloudinaryUploader.js";
 import { normalizeSearchTerm, safeContainsRegex } from "../../utils/search.js";
+import {
+    MAX_PRODUCT_IMAGE_COUNT,
+    MIN_PRODUCT_IMAGE_COUNT,
+    validateImageFiles
+} from "../../utils/imageValidation.js";
+
+const normalizeVariantKey = (value) => String(value || "").trim().toLowerCase();
+
+const getDuplicateVariantMessage = (variants) => {
+    const seenNames = new Set();
+    const seenSkus = new Set();
+
+    for (const variant of variants) {
+        const name = normalizeVariantKey(variant?.name);
+        const sku = normalizeVariantKey(variant?.sku);
+
+        if (name) {
+            if (seenNames.has(name)) {
+                return `Duplicate variant "${String(variant.name).trim()}" found. Variant names must be unique.`;
+            }
+            seenNames.add(name);
+        }
+
+        if (sku) {
+            if (seenSkus.has(sku)) {
+                return `Duplicate SKU "${String(variant.sku).trim()}" found. Variant SKUs must be unique.`;
+            }
+            seenSkus.add(sku);
+        }
+    }
+
+    return "";
+};
 
 export const productsPage = async (req, res, next) => {
     try {
@@ -83,6 +116,12 @@ export const addProduct = async (req, res, next) => {
         if (req.body.variants) {
             try { parsedVariants = JSON.parse(req.body.variants); } catch { parsedVariants = []; }
         }
+        parsedVariants = Array.isArray(parsedVariants) ? parsedVariants : [];
+
+        const duplicateVariantMessage = getDuplicateVariantMessage(parsedVariants);
+        if (duplicateVariantMessage) {
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: duplicateVariantMessage });
+        }
 
         let parsedHighlights = [];
         if (highlights) {
@@ -93,9 +132,10 @@ export const addProduct = async (req, res, next) => {
             }
         }
 
-        if (!req.files || req.files.length < 3) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: "A minimum of 3 images are required." });
-        }
+        validateImageFiles(req.files || [], {
+            minFiles: MIN_PRODUCT_IMAGE_COUNT,
+            maxFiles: MAX_PRODUCT_IMAGE_COUNT
+        });
 
         uploadedImages = await uploadImagesToCloudinary(req.files, "products");
         const images = uploadedImages.map(image => image.url);
@@ -163,6 +203,12 @@ export const editProduct = async (req, res, next) => {
         if (req.body.variants) {
             try { parsedVariants = JSON.parse(req.body.variants); } catch { parsedVariants = []; }
         }
+        parsedVariants = Array.isArray(parsedVariants) ? parsedVariants : [];
+
+        const duplicateVariantMessage = getDuplicateVariantMessage(parsedVariants);
+        if (duplicateVariantMessage) {
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: duplicateVariantMessage });
+        }
 
         let parsedHighlights = [];
         if (highlights) {
@@ -183,9 +229,13 @@ export const editProduct = async (req, res, next) => {
         const newFiles = req.files || [];
         const totalImageCount = parsedExistingImages.length + newFiles.length;
 
-        if (totalImageCount < 3) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: "A minimum of 3 images are required." });
+        if (totalImageCount < MIN_PRODUCT_IMAGE_COUNT) {
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: `A minimum of ${MIN_PRODUCT_IMAGE_COUNT} images are required.` });
         }
+        if (totalImageCount > MAX_PRODUCT_IMAGE_COUNT) {
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: `You can upload a maximum of ${MAX_PRODUCT_IMAGE_COUNT} images.` });
+        }
+        validateImageFiles(newFiles, { maxFiles: MAX_PRODUCT_IMAGE_COUNT });
 
         uploadedImages = newFiles.length ? await uploadImagesToCloudinary(newFiles, "products") : [];
         const newImages = uploadedImages.map(image => image.url);

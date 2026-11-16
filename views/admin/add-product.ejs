@@ -85,7 +85,7 @@
         <div class="bg-apple-card border border-white/5 rounded-2xl p-6 shadow-sm">
             <div class="border-b border-white/5 pb-2 mb-4">
                 <h3 class="text-lg font-bold text-apple-dark">4. Images & Cover Image</h3>
-                <p class="text-xs text-apple-text-gray">Upload a minimum of 3 images. Tick the star over an image to mark it as the Main Cover Image.</p>
+                <p class="text-xs text-apple-text-gray">Upload 3 to 10 JPG, PNG, or WebP images. Each image must be 5MB or smaller.</p>
             </div>
             
             <div class="flex gap-4 mb-4">
@@ -161,11 +161,55 @@
     const imageGallery = document.getElementById('imageGallery');
     const form = document.getElementById('addProductForm');
     const submitBtn = document.getElementById('submitBtn');
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxImageSize = 5 * 1024 * 1024;
+    const minProductImages = 3;
+    const maxProductImages = 10;
+
+    function showImageError(message) {
+        const errorEl = document.getElementById('imageError');
+        if (!errorEl) return;
+        errorEl.textContent = message;
+        errorEl.classList.remove('hidden');
+    }
+
+    function clearImageError() {
+        const errorEl = document.getElementById('imageError');
+        if (!errorEl) return;
+        errorEl.textContent = '';
+        errorEl.classList.add('hidden');
+    }
+
+    function validateSelectedImage(file, currentImageCount) {
+        if (!allowedImageTypes.includes(file.type)) {
+            return 'Only JPG, PNG, and WebP images are allowed.';
+        }
+        if (file.size > maxImageSize) {
+            return 'Each image must be 5MB or smaller.';
+        }
+        if (currentImageCount >= maxProductImages) {
+            return `You can upload a maximum of ${maxProductImages} images.`;
+        }
+        return '';
+    }
 
     // Variants Handling
     const variantsContainer = document.getElementById('variantsContainer');
     const noVariantsMsg = document.getElementById('noVariantsMsg');
     let variantCount = 0;
+
+    function normalizeVariantValue(value) {
+        return String(value || '').trim().toLowerCase();
+    }
+
+    function setVariantFieldError(inputEl, message) {
+        inputEl.classList.add('border-red-500');
+        const errorEl = inputEl.nextElementSibling;
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+        }
+    }
 
     window.addVariantRow = () => {
         variantCount++;
@@ -230,6 +274,15 @@
     imageInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if(!file) return;
+        clearImageError();
+
+        const validationError = validateSelectedImage(file, croppedImagesBlobs.length);
+        if (validationError) {
+            showImageError(validationError);
+            Swal.fire({ icon: 'warning', title: 'Invalid Image', text: validationError, background: '#1e2a22', color: '#E6CFA7' });
+            imageInput.value = '';
+            return;
+        }
 
         const url = URL.createObjectURL(file);
         cropperImage.src = url;
@@ -294,7 +347,7 @@
         if(typeof lucide !== 'undefined') lucide.createIcons();
         
         // Hide error if requirements met
-        if (croppedImagesBlobs.length >= 3) {
+        if (croppedImagesBlobs.length >= minProductImages) {
             const errorEl = document.getElementById('galleryError');
             if (errorEl) errorEl.classList.add('hidden');
         }
@@ -347,6 +400,9 @@
             errors.variants = 'You can only add up to 2 variants.';
         }
 
+        const seenVariantNames = new Map();
+        const seenVariantSkus = new Map();
+
         variantRows.forEach((row, i) => {
             const vName = row.querySelector('.var-name');
             const vSku = row.querySelector('.var-sku');
@@ -358,29 +414,46 @@
 
             if (!vName.value.trim()) {
                 errors[`vName${i}`] = true;
-                vName.classList.add('border-red-500');
-                vName.nextElementSibling.classList.remove('hidden');
+                setVariantFieldError(vName, 'Req.');
+            } else {
+                const nameKey = normalizeVariantValue(vName.value);
+                if (seenVariantNames.has(nameKey)) {
+                    errors.variants = errors.variants || 'Duplicate variant names are not allowed.';
+                    setVariantFieldError(vName, 'Duplicate');
+                    setVariantFieldError(seenVariantNames.get(nameKey), 'Duplicate');
+                } else {
+                    seenVariantNames.set(nameKey, vName);
+                }
             }
             if (!vSku.value.trim()) {
                 errors[`vSku${i}`] = true;
-                vSku.classList.add('border-red-500');
-                vSku.nextElementSibling.classList.remove('hidden');
+                setVariantFieldError(vSku, 'Req.');
+            } else {
+                const skuKey = normalizeVariantValue(vSku.value);
+                if (seenVariantSkus.has(skuKey)) {
+                    errors.variants = errors.variants || 'Duplicate variant SKUs are not allowed.';
+                    setVariantFieldError(vSku, 'Duplicate');
+                    setVariantFieldError(seenVariantSkus.get(skuKey), 'Duplicate');
+                } else {
+                    seenVariantSkus.set(skuKey, vSku);
+                }
             }
             if (!vStock.value.trim() || parseInt(vStock.value) < 0) {
                 errors[`vStock${i}`] = true;
-                vStock.classList.add('border-red-500');
-                vStock.nextElementSibling.classList.remove('hidden');
+                setVariantFieldError(vStock, 'Req.');
             }
             if (vPrice.value !== '' && parseFloat(vPrice.value) < 0) {
                 errors[`vPrice${i}`] = true;
-                vPrice.classList.add('border-red-500');
-                vPrice.nextElementSibling.classList.remove('hidden');
+                setVariantFieldError(vPrice, 'Invalid');
             }
         });
 
         // Image Validation
-        if (croppedImagesBlobs.length < 3) {
-            errors.gallery = 'Minimum 3 images required.';
+        if (croppedImagesBlobs.length < minProductImages) {
+            errors.gallery = `Minimum ${minProductImages} images required.`;
+        }
+        if (croppedImagesBlobs.length > maxProductImages) {
+            errors.gallery = `Maximum ${maxProductImages} images allowed.`;
         }
 
         // Display errors
@@ -394,7 +467,8 @@
             if (errorEl) {
                 errorEl.textContent = msg;
                 errorEl.classList.remove('hidden');
-                document.getElementById(key).classList.add('border-red-500');
+                const inputEl = document.getElementById(key);
+                if (inputEl) inputEl.classList.add('border-red-500');
             }
         }
 

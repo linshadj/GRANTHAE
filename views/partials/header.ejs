@@ -33,7 +33,7 @@
                         <i data-lucide="shopping-bag" class="w-4 h-4"></i>
                         <span
                             data-cart-count-badge
-                            class="absolute -top-1 -right-1 min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-apple-blue text-white text-[10px] leading-none font-bold border border-apple-card flex items-center justify-center shadow-sm <%= cartBadgeCount > 0 ? '' : 'hidden' %>">
+                            class="cart-count-badge <%= cartBadgeCount > 0 ? '' : 'hidden' %>">
                             <%= cartBadgeCount > 99 ? '99+' : cartBadgeCount %>
                         </span>
                     </a>
